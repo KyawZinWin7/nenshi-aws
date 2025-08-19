@@ -6,6 +6,7 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@tailwindcss/forms": "^0.5.10",
         "@vitejs/plugin-vue": "^5.1.2",
         "autoprefixer": "^10.4.20",
         "axios": "^1.6.4",
@@ -15,7 +16,15 @@
         "vite": "^5.0"
     },
     "dependencies": {
+        "@inertiajs/inertia-vue3": "^0.6.0",
         "@inertiajs/vue3": "^1.2.0",
-        "vue": "^3.4.38"
+        "dayjs": "^1.11.13",
+        "file-saver": "^2.0.5",
+        "flowbite": "^3.1.2",
+        "sweetalert2": "^11.22.2",
+        "vue": "^3.4.38",
+        "vue3-datepicker": "^0.4.0",
+        "xlsx": "^0.18.5",
+        "ziggy-js": "^2.5.3"
     }
 }
