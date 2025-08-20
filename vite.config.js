@@ -29,10 +29,10 @@ export default defineConfig({
       refresh: true,
     }),
   ],
-  server: {
-    host: '192.168.3.120',  
-    port: 3000,
-    strictPort: true,
-  },
+  // server: {
+  //   host: '192.168.3.120',  
+  //   port: 3000,
+  //   strictPort: true,
+  // },
   base: '/',
 });
