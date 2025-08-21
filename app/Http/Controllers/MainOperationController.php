@@ -24,7 +24,7 @@ class MainOperationController extends Controller
     public function index()
         {
             $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
-            ->paginate(3000);
+            ->paginate(1500);
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
             $employees = EmployeeResource::collection(Employee::all());
@@ -150,7 +150,7 @@ public function completelist()
 {
     $machinetypes = MachineTypeResource::collection(MachineType::all());
     $tasks = TaskResource::collection(Task::all());
-    $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])->paginate(3000);
+    $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])->paginate(1500);
     return Inertia::render('Complete/CompleteList', [
                 'mainoperations' => MainOperationResource::collection($mainoperations),
                 'machinetypes' => $machinetypes,
