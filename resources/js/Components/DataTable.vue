@@ -21,7 +21,7 @@ const startDateFilter = ref(null);
 const endDateFilter = ref(null);
 
 const currentPage = ref(1);
-const perPage = ref(20);
+const perPage = ref(100);
 
 const props = defineProps({
   mainoperations: { type: Object, required: true },
