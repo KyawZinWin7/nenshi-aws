@@ -24,7 +24,7 @@ class MainOperationController extends Controller
     public function index()
         {
             $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
-            ->get();
+            ->paginate(3000);
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
             $employees = EmployeeResource::collection(Employee::all());
