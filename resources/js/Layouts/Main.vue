@@ -1,11 +1,7 @@
-<script setup>
-import { switchTheme } from '../theme';
-import NavLink from '../Components/NavLink.vue';
-import { usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
-import Footer from '../Footer.vue';
+<script setup> import { switchTheme } from '../theme'; import NavLink from 
+'../Components/NavLink.vue'; import { usePage } from '@inertiajs/vue3'; 
+import { computed, ref } from 'vue'; import { Link } from '@inertiajs/vue3'; 
+import { route } from 'ziggy-js'; import Footer from '../Footer.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -37,9 +33,9 @@ function closeMenu() {
     <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 relative z-50">
             <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-                <img src="/public/img/matsubun-logo.png" class="h-8" alt="Matsubun" />
-            </a>
+            <img :src="`/img/matsubun-logo.png`" class="h-8" alt="Matsubun" />    
 
+	    </a>
             <!-- Hamburger Button -->
             <button 
                 @click="toggleMenu"
