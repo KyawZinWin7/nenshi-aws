@@ -150,7 +150,7 @@ public function completelist()
 {
     $machinetypes = MachineTypeResource::collection(MachineType::all());
     $tasks = TaskResource::collection(Task::all());
-    $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])->paginate(100);
+    $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])->paginate(5000);
     return Inertia::render('Complete/CompleteList', [
                 'mainoperations' => MainOperationResource::collection($mainoperations),
                 'machinetypes' => $machinetypes,
