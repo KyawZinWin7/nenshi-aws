@@ -159,7 +159,21 @@ public function completelist()
 
 }
 
+public function export()
+{
+   $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
+            ->paginate(1500);
+            $machinetypes = MachineTypeResource::collection(MachineType::all());
+            $tasks = TaskResource::collection(Task::all());
+            $employees = EmployeeResource::collection(Employee::all());
 
+            return Inertia::render('Report/Export', [
+                'mainoperations' => MainOperationResource::collection($mainoperations),
+                'machinetypes' => $machinetypes,
+                'tasks' => $tasks,
+                'employees' => $employees,
+            ]);
+}
 
 
 
