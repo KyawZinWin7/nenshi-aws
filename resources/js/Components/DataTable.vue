@@ -21,7 +21,7 @@ const startDateFilter = ref(null);
 const endDateFilter = ref(null);
 
 const currentPage = ref(1);
-const perPage = ref(100);
+const perPage = ref(50);
 
 const props = defineProps({
   mainoperations: { type: Object, required: true },
@@ -216,7 +216,7 @@ const refreshData = () => {
       </button>
 
       <!-- Date Filter -->
-      <DateFilter @date-range-selected="handleDateRangeSelected" />
+      <!-- <DateFilter @date-range-selected="handleDateRangeSelected" /> -->
 
       <!-- Filters -->
       <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
