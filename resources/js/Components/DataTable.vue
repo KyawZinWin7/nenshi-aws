@@ -120,26 +120,26 @@ const handleDateRangeSelected = (range) => {
   endDateFilter.value = range.end;
 };
 
-const exportToExcel = () => {
-  const data = filteredMainOperations.value.map((op) => ({
-    Date: op.created_at,
-    機台: op.machine_type?.name ?? '未設定',
-    機台の番号: op.machine_number,
-    作業: op.task?.name,
-    開始時間: op.start_time,
-    終了時間: op.end_time,
-    担当者: op.employee?.name,
-    合計時間: op.total_time,
-  }));
+// const exportToExcel = () => {
+//   const data = filteredMainOperations.value.map((op) => ({
+//     Date: op.created_at,
+//     機台: op.machine_type?.name ?? '未設定',
+//     機台の番号: op.machine_number,
+//     作業: op.task?.name,
+//     開始時間: op.start_time,
+//     終了時間: op.end_time,
+//     担当者: op.employee?.name,
+//     合計時間: op.total_time,
+//   }));
 
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'MainOperations');
+//   const worksheet = XLSX.utils.json_to_sheet(data);
+//   const workbook = XLSX.utils.book_new();
+//   XLSX.utils.book_append_sheet(workbook, worksheet, 'MainOperations');
 
-  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  const fileData = new Blob([excelBuffer], { type: 'application/octet-stream' });
-  saveAs(fileData, 'MainOperations.xlsx');
-};
+//   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+//   const fileData = new Blob([excelBuffer], { type: 'application/octet-stream' });
+//   saveAs(fileData, 'MainOperations.xlsx');
+// };
 
 const uncompleteForm = useForm({});
 const uncompleteMO = async (moId) => {
@@ -225,13 +225,13 @@ const refreshData = () => {
       </div>
 
       <!-- Export Button -->
-      <button
+      <!-- <button
         v-if="user"
         @click="exportToExcel"
         class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
       >
         Excel にエクスポート
-      </button>
+      </button> -->
     </div>
 
     <!-- Responsive Table Wrapper -->
