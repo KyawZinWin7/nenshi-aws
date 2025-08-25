@@ -133,7 +133,8 @@ class MainOperationController extends Controller
 
     public function exportStore(Request $request)
         {
-            $filters = $request->all();
+          try{
+              $filters = $request->all();
 
             // Query build
             $query = MainOperation::query();
@@ -169,6 +170,10 @@ class MainOperationController extends Controller
 
             // Data ရှိမှ Excel ထုတ်
             return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
+          } catch (\Exception $e) {
+            \Log::error('Export Error: '.$e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+    }
         }
 
 
