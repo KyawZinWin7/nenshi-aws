@@ -39,7 +39,7 @@ class MainOperationsExport implements FromQuery, WithHeadings, WithMapping, With
         if (!empty($this->filters['task_id'])) {
             $query->where('task_id', $this->filters['task_id']);
         }
-
+        $query->where('status', 1);
         return $query;
     }
 
