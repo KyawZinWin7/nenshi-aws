@@ -27,7 +27,11 @@ class MainOperationController extends Controller
     public function index()
         {
             $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
-            ->paginate(1500);
+                ->where('status', 0)
+                ->orderBy('updated_at', 'desc')
+                ->take(1000)
+                ->get();
+
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
             $employees = EmployeeResource::collection(Employee::all());
@@ -133,6 +137,7 @@ class MainOperationController extends Controller
 
     public function exportStore(Request $request)
         {
+
           try{
               $filters = $request->all();
 
