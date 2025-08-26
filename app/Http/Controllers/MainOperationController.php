@@ -136,50 +136,40 @@ class MainOperationController extends Controller
 
 
     public function exportStore(Request $request)
-        {
+{
+    try {
+        $filters = $request->all();
 
-          try{
-              $filters = $request->all();
+        // အရင် data ရှိမရှိ စစ်ချင်ရင် ->exists() သုံးတာ ပိုသင့်တင့်
+        $exists = MainOperation::query()
+            ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
+            ->when(!empty($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
+            ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
+            ->when(!empty($filters['machine_type_id']), fn($q) => $q->where('machine_type_id', $filters['machine_type_id']))
+            ->when(!empty($filters['machine_number']), fn($q) => $q->where('machine_number', $filters['machine_number']))
+            ->when(!empty($filters['task_id']), fn($q) => $q->where('task_id', $filters['task_id']))
+            ->exists();
 
-            // Query build
-            $query = MainOperation::query();
-
-            if (!empty($filters['date_from'])) {
-                $query->whereDate('created_at', '>=', $filters['date_from']);
-            }
-            if (!empty($filters['date_to'])) {
-                $query->whereDate('created_at', '<=', $filters['date_to']);
-            }
-            if (!empty($filters['employee_id'])) {
-                $query->where('employee_id', $filters['employee_id']);
-            }
-            if (!empty($filters['machine_type_id'])) {
-                $query->where('machine_type_id', $filters['machine_type_id']);
-            }
-            if (!empty($filters['machine_number'])) {
-                $query->where('machine_number', $filters['machine_number']);
-            }
-            if (!empty($filters['task_id'])) {
-                $query->where('task_id', $filters['task_id']);
-            }
-
-            $data = $query->get();
-
-            // ✅ ဒီမှာ စစ်ပြီး JSON message ပြန်ပေးမယ်
-            if ($data->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'エクスポートできるデータがありません。'
-                ], 404);
-            }
-
-            // Data ရှိမှ Excel ထုတ်
-            return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
-          } catch (\Exception $e) {
-            \Log::error('Export Error: '.$e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
-    }
+        if (!$exists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'エクスポートできるデータがありません。'
+            ], 404);
         }
+
+        // ဒီနေရာမှာ get() မလုပ်ဘဲ တိုက်ရိုက် Export class ကိုပေးမယ်
+        return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
+
+    } catch (\Exception $e) {
+        \Log::error('Export Error: ' . $e->getMessage());
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+
+
+
+
 
 
 

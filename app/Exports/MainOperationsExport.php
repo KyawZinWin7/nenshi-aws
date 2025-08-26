@@ -3,11 +3,12 @@
 namespace App\Exports;
 
 use App\Models\MainOperation;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class MainOperationsExport implements FromCollection, WithHeadings, WithMapping
+class MainOperationsExport implements FromQuery, WithHeadings, WithMapping, WithChunkReading
 {
     protected $filters;
 
@@ -16,11 +17,10 @@ class MainOperationsExport implements FromCollection, WithHeadings, WithMapping
         $this->filters = $filters;
     }
 
-    public function collection()
+    public function query()
     {
         $query = MainOperation::query();
 
-        // フィルターがある場合のみクエリに追加
         if (!empty($this->filters['date_from'])) {
             $query->whereDate('created_at', '>=', $this->filters['date_from']);
         }
@@ -40,10 +40,9 @@ class MainOperationsExport implements FromCollection, WithHeadings, WithMapping
             $query->where('task_id', $this->filters['task_id']);
         }
 
-        return $query->get();
+        return $query;
     }
 
-    // Excel ヘッダー
     public function headings(): array
     {
         return [
@@ -51,19 +50,22 @@ class MainOperationsExport implements FromCollection, WithHeadings, WithMapping
         ];
     }
 
-    // 各行の map
-   public function map($mainOperation): array
-{
-    return [
-        $mainOperation->created_at->timezone('Asia/Tokyo')->format('Y-m-d'),  // Date
-        optional($mainOperation->machineType)->name ?? '',                   // 機台
-        $mainOperation->machine_number,                                      // 機台の番号
-        optional($mainOperation->task)->name ?? '',                          // 作業
-        $mainOperation->start_time ? $mainOperation->start_time->timezone('Asia/Tokyo')->format('H:i:s') : '',
-        $mainOperation->end_time ? $mainOperation->end_time->timezone('Asia/Tokyo')->format('H:i:s') : '',
-        optional($mainOperation->employee)->name ?? '',                      // 担当者
-        $mainOperation->total_time ?? '',                                    // 合計時間
-    ];
-}
+    public function map($mainOperation): array
+    {
+        return [
+            $mainOperation->created_at?->timezone('Asia/Tokyo')->format('Y-m-d'),
+            optional($mainOperation->machineType)->name ?? '',
+            $mainOperation->machine_number,
+            optional($mainOperation->task)->name ?? '',
+            $mainOperation->start_time?->timezone('Asia/Tokyo')->format('H:i:s'),
+            $mainOperation->end_time?->timezone('Asia/Tokyo')->format('H:i:s'),
+            optional($mainOperation->employee)->name ?? '',
+            $mainOperation->total_time ?? '',
+        ];
+    }
 
+    public function chunkSize(): int
+    {
+        return 1000; // တစ်ကြိမ် ၁၀၀၀ row စီ query
+    }
 }
