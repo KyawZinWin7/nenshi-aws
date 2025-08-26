@@ -148,7 +148,7 @@ const exportExcel = async () => {
             <label class="block text-xs sm:text-sm font-medium text-gray-700">担当者</label>
             <select v-model="form.employee_id"
               class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
-              <option value="">担当者を選択</option>
+              <option value="">すべて</option>
               <option v-for="employee in employees.data" :key="employee.id" :value="employee.id">
                 {{ employee.name }}
               </option>
@@ -161,7 +161,7 @@ const exportExcel = async () => {
               <label class="block text-xs sm:text-sm font-medium text-gray-700">機台</label>
               <select v-model="form.machine_type_id"
                 class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm">
-                <option value="">機台を選択</option>
+                <option value="">すべて</option>
                 <option v-for="mt in machinetypes.data" :key="mt.id" :value="mt.id">{{ mt.name }}</option>
               </select>
             </div>
@@ -169,7 +169,7 @@ const exportExcel = async () => {
               <label class="block text-xs sm:text-sm font-medium text-gray-700">機台の番号</label>
               <select v-model="form.machine_number"
                 class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm">
-                <option value="">機台の番号</option>
+                <option value="">すべて</option>
                 <option v-for="num in 50" :key="num" :value="num">{{ num }}</option>
               </select>
             </div>
@@ -180,7 +180,7 @@ const exportExcel = async () => {
             <label class="block text-xs sm:text-sm font-medium text-gray-700">作業</label>
             <select v-model="form.task_id"
               class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm">
-              <option value="">作業を選択</option>
+              <option value="">すべて</option>
               <option v-for="task in tasks.data" :key="task.id" :value="task.id">{{ task.name }}</option>
             </select>
           </div>
