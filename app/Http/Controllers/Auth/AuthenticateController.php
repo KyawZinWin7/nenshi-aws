@@ -16,26 +16,23 @@ class AuthenticateController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password'=> 'required'
-        ]);
-
-
-        if(Auth::attempt($credentials,$request->boolean('remember')))
         {
-            $request->session()->regenerate();
+            $credentials = $request->validate([
+                'employee_code' => 'required',
+                'password' => 'required',
+            ]);
 
-            return redirect()->intended();
+            // Auth attempt
+            if (Auth::attempt(['employee_code' => $credentials['employee_code'], 'password' => $credentials['password']], $request->boolean('remember'))) {
+                $request->session()->regenerate();
+                return redirect()->intended();
+            }
+
+            return back()->withErrors([
+                'employee_code' => '社員コードまたはパスワードが正しくありません。',
+            ])->onlyInput('employee_code');
         }
 
-        return back()->withErrors([
-            'email' => 'メールアドレスまたはパスワードが正しくありません。'
-        ])->onlyInput('email');
-
-        
-    }
     public function destory(Request $request)
         {
             Auth::logout();

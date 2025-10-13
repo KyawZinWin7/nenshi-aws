@@ -1,10 +1,11 @@
 <?php
 
 namespace Database\Seeders;
-
+use App\Models\Employee;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,9 +16,12 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        Employee::create([
             'name' => 'Admin',
-            'email' => 'admin@matsubun.com',
+            'employee_code' => 'EMP001',
+            'password' => Hash::make('password123'),
+            'role' => 'admin',
         ]);
+
     }
 }

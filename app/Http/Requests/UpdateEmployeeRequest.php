@@ -22,8 +22,10 @@ class UpdateEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-             'name'=>'required|string|max:255',
-            'employee_code'=>'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'employee_code' => 'required|string|max:255|unique:employees,employee_code,' . $this->employee->id,
+            'password' => 'nullable|string',
+            'role' => 'required|in:admin,user',
         ];
     }
 

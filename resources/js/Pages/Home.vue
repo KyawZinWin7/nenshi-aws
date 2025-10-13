@@ -257,9 +257,9 @@ const filteredMainOperations = computed(() => {
   <Head title="-ホーム " />
 
   <main class="p-4 sm:p-6 mx-auto min-h-screen text-xs sm:text-sm lg:text-base">
-    <div class="flex flex-col lg:flex-row gap-4 lg:gap-x-8">
+    <div class="flex flex-col items-center  gap-4">
       <!-- Left Form -->
-      <div class="w-full lg:w-[30%]">
+      <div class="w-full lg:w-[30%] mb-8">
         <Container>
           <form @submit.prevent="createMainOperation" class="space-y-4 sm:space-y-6 text-xs sm:text-sm">
             
@@ -312,7 +312,7 @@ const filteredMainOperations = computed(() => {
       </div>
 
       <!-- Right Table -->
-      <div class="overflow-x-auto">
+      <div class="w-full">
         <table class="min-w-[700px] sm:min-w-full divide-y divide-gray-300 text-[11px] sm:text-sm">
           <thead class="bg-gray-50 text-left">
             <tr>

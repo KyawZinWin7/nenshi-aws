@@ -1,13 +1,18 @@
-<script setup> import { switchTheme } from '../theme'; import NavLink from 
-'../Components/NavLink.vue'; import { usePage } from '@inertiajs/vue3'; 
-import { computed, ref } from 'vue'; import { Link } from '@inertiajs/vue3'; 
-import { route } from 'ziggy-js'; import Footer from '../Footer.vue';
+<script setup>
+import { switchTheme } from '../theme';
+import NavLink from '../Components/NavLink.vue';
+import { usePage } from '@inertiajs/vue3';
+import { computed, ref, onMounted, onUnmounted,watch } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
+import Footer from '../Footer.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
 const show = ref(false);
 const mobileMenu = ref(false);
+const dropdown = ref(null); // dropdown wrapper reference
 
 function toggleMenu() {
     mobileMenu.value = !mobileMenu.value;
@@ -16,6 +21,31 @@ function toggleMenu() {
 function closeMenu() {
     mobileMenu.value = false;
 }
+
+function toggleDropdown() {
+    show.value = !show.value;
+}
+
+function handleClickOutside(event) {
+    if (dropdown.value && !dropdown.value.contains(event.target)) {
+        show.value = false;
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+
+// Route change မှာ dropdown auto hide
+watch(() => page.url, () => {
+    show.value = false;
+});
+
+
 </script>
 
 <template>
@@ -131,9 +161,9 @@ function closeMenu() {
                         </Link>
                     </li>
 
-                    <li v-if="user">
-                        <div class="relative">
-                            <div @click="show = !show"
+                      <li v-if="user">
+                        <div ref="dropdown" class="relative">
+                            <div @click="toggleDropdown"
                                 class="flex items-center gap-2 px-3 rounded-lg hover:bg-gray-100 cursor-pointer"
                                 :class="{ 'bg-gray-100': show }">
                                 <p class="text-black text-sm md:text-base">{{ user.name }}</p>
@@ -149,21 +179,22 @@ function closeMenu() {
                         </div>
                     </li>
 
-                    <li v-else>
+                    <!-- Login for guest -->
+                    <!-- <li v-else>
                         <div class="flex items-center space-x-6">
                             <Link :href="route('login')" 
                                 class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
                                 @click="closeMenu">
                                 ログイン
                             </Link>
-                             <!-- <Link :href="route('register')" 
+                             <Link :href="route('register')" 
                                 class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
                                 @click="closeMenu">
                                 レジスター
-                            </Link> -->
+                            </Link>
                         </div>
                         
-                    </li>
+                    </li> -->
                     <li v-if="user">
                         <Link 
                             :href="route('mainoperations.export')" 

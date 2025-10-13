@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Employee;
 use App\Http\Resources\EmployeeResource;
 use App\Http\Requests\StoreEmployeeRequest;
@@ -33,8 +34,12 @@ class EmployeeController extends Controller
      public function store(StoreEmployeeRequest $request)
     
     {
-        Employee::create($request->validated());
+        $data = $request->validated();
 
+     
+        $data['password'] = Hash::make($data['password']);
+
+         Employee::create($data);
 
         return redirect()->route('employees.index');
     }
@@ -56,11 +61,18 @@ class EmployeeController extends Controller
 
     {
 
-        $employee->update($request->validated());
+         $data = $request->validated();
 
+            // password ထည့်လျှင်သာ hash ပြန်လုပ်မယ်
+            if (!empty($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']); // မပြောင်းချင်လို့ password ကို skip
+            }
 
+            $employee->update($data);
 
-        return redirect()->route('employees.index');
+            return redirect()->route('employees.index')->with('success', '更新しました');
 
     }
 

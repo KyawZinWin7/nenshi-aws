@@ -14,6 +14,9 @@ let employee = usePage().props.employee.data;
 const form = useForm({
   name: employee.name,
   employee_code: employee.employee_code,
+  password:"",
+  role:employee.role
+
 })
 
 const updateEmployee = () => {
@@ -73,6 +76,29 @@ const updateEmployee = () => {
                 />
                 <div v-if="form.errors.employee_code" class="text-red-500 mt-1">
                   {{ form.errors.employee_code }}
+                </div>
+              </div>
+
+               <div class="col-span-6">
+                <label for="password" class="block text-sm font-medium text-gray-700">パスワード</label>
+                <input v-model="form.password" type="password" id="password"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                <div v-if="form.errors.password" class="text-red-500 mt-1">
+                  {{ form.errors.password }}
+                </div>
+              </div>
+
+
+              <div class="col-span-6">
+                <label for="role" class="block text-sm font-medium text-gray-700">役割</label>
+                <select v-model="form.role" id="role" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3
+                    focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white">
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+
+                <div v-if="form.errors.role" class="text-red-500 mt-1">
+                  {{ form.errors.role }}
                 </div>
               </div>
             </div>

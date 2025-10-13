@@ -22,8 +22,8 @@ Route::middleware('guest')->group(function(){
 
     //----------------Login----------------
 
-    Route::get('/login',[AuthenticateController::class,'create'])->name('login');
-    Route::post('/login',[AuthenticateController::class,'store']);
+    Route::get('/',[AuthenticateController::class,'create'])->name('login');
+    Route::post('/',[AuthenticateController::class,'store']);
 });
 
 Route::middleware('auth')->group(function(){

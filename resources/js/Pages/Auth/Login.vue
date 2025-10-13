@@ -1,63 +1,142 @@
 <script setup>
-import Container from '../../Components/Container.vue';
-import TextLink from '../../Components/TextLink.vue';
-import Title from '../../Components/Title.vue';
-import InputField from '../../Components/InputField.vue';
-import PrimaryBtn from '../../Components/PrimaryBtn.vue';
-import ErrorMessages from '../../Components/ErrorMessages.vue';
-import CheckBox from '../../Components/CheckBox.vue';
-import { useForm } from '@inertiajs/vue3';
-import Footer from '../../Footer.vue';
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { Head, useForm } from "@inertiajs/vue3";
+import Footer from "../../Footer.vue";
 
 const form = useForm({
-    email: "",
-    password: "",
-    remember: null,
+  employee_code: "",
+  password: "",
+  remember: false,
 });
 
 const submit = () => {
-    form.post(route("login"), {
-        onFinish: () => form.reset("password"),
-    });
-}
+  form.post(route("login"), {
+    onFinish: () => form.reset("password"),
+  });
+};
+
+// image slider logic
+const images = [
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1485217988980-11786ced9454?auto=format&fit=crop&w=1400&q=80",
+];
+const currentImage = ref(0);
+let interval = null;
+
+onMounted(() => {
+  interval = setInterval(() => {
+    currentImage.value = (currentImage.value + 1) % images.length;
+  }, 4000);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(interval);
+});
 </script>
 
 <template>
-    <Head title="- ログイン" />
+  <Head title="ログイン" />
+  <div class="bg-gray-100 lg:h-screen flex items-center justify-center p-4">
+    <div
+      class="max-w-6xl bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.3)] p-4 lg:p-5 rounded-md"
+    >
+      <div class="grid md:grid-cols-2 items-center gap-y-8">
+        <!-- ✅ Login Form -->
+        <form
+          @submit.prevent="submit"
+          class="max-w-md mx-auto w-full p-4 md:p-6"
+        >
+          <div class="mb-8 text-center">
+            <h1 class="text-2xl font-semibold text-slate-800">ログイン</h1>
+          </div>
 
-    <main class="mx-auto p-4 sm:p-6 max-w-screen-lg min-h-screen flex items-center justify-center">
-        <!-- responsive width -->
-        <Container class="w-full sm:w-2/3 md:w-1/2">
-            <div class="mb-8 text-center">
-                <!-- responsive font size -->
-                <Title class="text-xl sm:text-2xl md:text-3xl">アカウントにログイン</Title>
+          <div class="space-y-6">
+            <div>
+              <label
+                class="text-slate-900 text-sm font-medium mb-2 block"
+                for="employee_code"
+                >社員コード</label
+              >
+              <div class="relative flex items-center">
+                <input
+                  id="employee_code"
+                  v-model="form.employee_code"
+                  type="text"
+                  required
+                  class="w-full text-sm text-slate-900 bg-slate-100 focus:bg-transparent pl-4 pr-10 py-3 rounded-md border border-slate-100 focus:border-blue-600 outline-none transition-all"
+                  placeholder="社員コードを入力"
+                />
+              </div>
+              <div v-if="form.errors.employee_code" class="text-red-500 text-sm mt-1">
+                {{ form.errors.employee_code }}
+              </div>
             </div>
 
-            <!--Errors messages-->
-            <ErrorMessages :errors="form.errors" />
+            <div>
+              <label
+                class="text-slate-900 text-sm font-medium mb-2 block"
+                for="password"
+                >パスワード</label
+              >
+              <div class="relative flex items-center">
+                <input
+                  id="password"
+                  v-model="form.password"
+                  type="password"
+                  required
+                  class="w-full text-sm text-slate-900 bg-slate-100 focus:bg-transparent pl-4 pr-10 py-3 rounded-md border border-slate-100 focus:border-blue-600 outline-none transition-all"
+                  placeholder="パスワードを入力"
+                />
+              </div>
+              <div v-if="form.errors.password" class="text-red-500 text-sm mt-1">
+                {{ form.errors.password }}
+              </div>
+            </div>
 
-            <form @submit.prevent="submit" class="space-y-6">
-                <!-- Input fields -->
-                <InputField label="メールアドレス" icon="at" v-model="form.email" 
-                    class="text-sm md:text-base" />
-                <InputField label="パスワード" type="password" icon="key" v-model="form.password"
-                    class="text-sm md:text-base" />
+            
+          </div>
 
-                <!-- remember / forgot password (အချိန်မရှိတာကြောင့် comment ထားခဲ့တာ) -->
-                <!--
-                <div class="flex items-center justify-between">
-                    <CheckBox name="remember" v-model="form.remember" class="text-sm md:text-base">
-                        Remember
-                    </CheckBox>
-                    <TextLink routeName="home" label="Forgot Password?" class="text-sm md:text-base"/>
-                </div>
-                -->
+          <div class="mt-10">
+            <button
+              type="submit"
+              :disabled="form.processing"
+              class="w-full py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-md font-medium transition-all shadow-lg"
+            >
+              ログイン
+            </button>
+          </div>
+        </form>
 
-                <PrimaryBtn :disabled="form.processing" class="w-full py-2 text-sm md:text-base">
-                    ログイン
-                </PrimaryBtn>
-            </form>
-        </Container>
-    </main>
-    <Footer/>
+        <!-- ✅ Image Slider Section -->
+        <div class="w-full h-full relative">
+          <div
+            class="aspect-square bg-gray-50 relative rounded-md overflow-hidden w-full h-full"
+          >
+            <img
+              :src="images[currentImage]"
+              class="w-full h-full object-cover transition-opacity duration-1000"
+              alt="login background"
+            />
+            <div
+              class="absolute inset-0 bg-indigo-600/70 flex items-center justify-center text-center px-6"
+            >
+              <div>
+                <h1 class="text-white text-4xl font-semibold mb-4">
+                  ようこそ
+                </h1>
+                <p
+                  class="text-slate-100 text-[15px] font-medium leading-relaxed"
+                >
+                  アカウントにログインして新しい世界を探検しましょう。
+                  <br />あなたの旅はここから始まります。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 </template>
