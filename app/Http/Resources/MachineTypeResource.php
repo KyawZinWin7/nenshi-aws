@@ -14,6 +14,12 @@ class MachineTypeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'name'=> $this->name,
+            'plant_id'=> new PlantResource($this->whenLoaded('plant')),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }

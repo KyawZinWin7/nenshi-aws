@@ -6,7 +6,7 @@ import AdminLayout from '../Components/AdminLayout.vue';
 
 
 defineProps({
-    tasks: {
+    machineNumbers: {
         type: Object,
         required: true,
     },
@@ -51,7 +51,7 @@ const deleteTask = (taskId) => {
                     <div class="sm:flex sm:items-center">
                         <div class="sm:flex-auto">
                             <h1 class="text-xl font-semibold text-gray-900">
-                                作業リスト
+                                機械番号リスト
                             </h1>
                             <!-- <p class="mt-2 text-sm text-gray-700">
                             A list of all .
@@ -78,44 +78,46 @@ const deleteTask = (taskId) => {
                                             <tr>
                                                 <th scope="col"
                                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                                    コード
-                                                </th>
-                                                <th scope="col"
-                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                                    名前
+                                                    ID
                                                 </th>
 
-                                                <th scope="col"
+                                                 <th scope="col"
                                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                                     機台
                                                 </th>
+                                                <th scope="col"
+                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                                    機械番号
+                                                </th>
+
+                                               
 
 
                                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6" />
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 bg-white">
-                                            <tr v-for="task in tasks.data" :key="task.id">
+                                            <tr v-for="machineNumber in machineNumbers.data" :key="machineNumber.id">
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {{ task.id }}
+                                                    {{ machineNumber.id }}
                                                 </td>
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {{ task.name }}
+                                                    {{ machineNumber.number }}
                                                 </td>
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {{ task.machine_type_id.name }}
+                                                    {{ machineNumber.machine_type_id.name }}
                                                 </td>
 
                                                 <td
                                                     class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                                    <Link :href="route('tasks.edit', task.id)"
+                                                    <Link :href="route('machinenumbers.edit', machineNumber.id)"
                                                         class="text-indigo-600 hover:text-indigo-900">
                                                     編集
                                                     </Link>
-                                                    <button @click="deleteTask(task.id)"
+                                                    <button @click="deleteTask(machineNumber.id)"
                                                         class="ml-2 text-red-600 hover:text-red-900">
                                                         削除
                                                     </button>

@@ -2,12 +2,17 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
+import plugin from '@tailwindcss/forms';
 
 
 
 
-defineProps({
+const props = defineProps({
   machinetype: {
+    type: Object,
+    required: true,
+  },
+  plants:{
     type: Object,
     required: true,
   }
@@ -17,6 +22,7 @@ let machinetype = usePage().props.machinetype.data;
 
 const form = useForm({
   name: machinetype.name,
+  plant_id:machinetype.plant_id.id,
 })
 
 
@@ -63,7 +69,7 @@ const updateMachineType = () => {
               <div>
                 <h3 class="text-lg leading-6 font-medium text-gray-900">機械の更新</h3>
               </div>
-
+              <!--Name-->
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-6 sm:col-span-6">
                   <label for="name" class="block text-sm font-medium text-gray-700">名前</label>
@@ -74,6 +80,22 @@ const updateMachineType = () => {
                   </div>
                 </div>
               </div>
+
+              <!--Start Plant-->
+              <div>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700">工場</label>
+                <select v-model="form.plant_id"
+                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
+                  <option value="">担当者を選択</option>
+                  <option v-for="plant in plants.data" :key="plant.id" :value="plant.id">
+                    {{ plant.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!--End Plant-->
+
+
             </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
               <Link :href="route('machinetypes.index')"

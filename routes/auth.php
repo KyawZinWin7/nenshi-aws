@@ -9,6 +9,8 @@ use App\Http\Controllers\MachineTypeController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\PlantController;
+use App\Http\Controllers\MachineNumberController;
+
 
 
 
@@ -35,6 +37,8 @@ Route::middleware('auth')->group(function(){
     Route::resource('employees',EmployeeController::class);
     Route::resource('tasks',TaskController::class);
     Route::resource('plants',PlantController::class);
+    Route::resource('machinenumbers',MachineNumberController::class);
+
 
 
 });

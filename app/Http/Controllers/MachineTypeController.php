@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MachineType;
 use App\Models\MainOperation;
+use App\Models\Plant;
 use App\Http\Resources\MachineTypeResource;
 use App\Http\Requests\StoreMachineTypeRequest;
 use App\Http\Requests\UpdateMachineTypeRequest;
+use App\Http\Resources\PlantResource;
 
 class MachineTypeController extends Controller
 {
@@ -17,8 +19,8 @@ class MachineTypeController extends Controller
     public function index()
     {
 
-        $machinetypes = MachineTypeResource::collection(MachineType::all());
-        // dd($machinetypes);
+        $machinetypes = MachineTypeResource::collection(MachineType::with('plant')->get());
+       
         return inertia('MachineType/Index',[
             'machinetypes'=> $machinetypes,
         ]);
@@ -28,7 +30,11 @@ class MachineTypeController extends Controller
     public function create()
 
     {
-        return inertia('MachineType/Create');
+        $plants = PlantResource::collection(Plant::all());
+        return inertia('MachineType/Create',[
+            'plants'=> $plants
+        ]);
+
     }
 
 
@@ -43,8 +49,10 @@ class MachineTypeController extends Controller
 
     public function edit(MachineType $machinetype)
     {
+        $plants = PlantResource::collection(Plant::all());
         return inertia('MachineType/Edit',[
-            'machinetype'=> MachineTypeResource::make($machinetype)
+            'machinetype'=> new MachineTypeResource($machinetype->load('plant')),
+            'plants' => $plants
         ]);
     }
 

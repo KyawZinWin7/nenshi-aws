@@ -6,8 +6,12 @@ import AdminLayout from '../Components/AdminLayout.vue';
 
 
 
-defineProps({
+const props = defineProps({
   task: {
+    type: Object,
+    required: true,
+  },
+  machineTypes:{
     type: Object,
     required: true,
   }
@@ -17,11 +21,10 @@ let task = usePage().props.task.data;
 
 const form = useForm({
   name: task.name,
+  machine_type_id: task.machine_type_id.id,
 })
 
-// const updateTask = () => {
-//   form.put(route("tasks.update", task.id));
-// };
+
 
 //For Update Task
 const updateTask = () => {
@@ -77,6 +80,21 @@ const updateTask = () => {
                   </div>
                 </div>
               </div>
+
+
+               <!--Start Machine Type-->
+              <div>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700">機台</label>
+                <select v-model="form.machine_type_id"
+                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
+                  <option value="">担当者を選択</option>
+                  <option v-for="machineType in machineTypes.data" :key="machineType.id" :value="machineType.id">
+                    {{ machineType.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!--End Machine Type-->
             </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
               <Link :href="route('tasks.index')"

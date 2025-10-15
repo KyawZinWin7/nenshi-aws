@@ -116,7 +116,27 @@ defineProps({
           </a>
         </li>
         <!--End Task-->
+        
 
+
+         <!--Start　Machine Number -->
+        <li>
+          <a :href="route('machinenumbers.index')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['machinenumbers.index', 'machinenumbers.create', 'machinenumbers.edit'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+
+
+            <span class="ml-3"> 機械番号</span>
+          </a>
+        </li>
+        <!--End Machine Number-->
 
          <!--Start　Export with excel -->
         <li>

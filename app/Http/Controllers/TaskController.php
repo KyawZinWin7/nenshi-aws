@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Task;
+use App\Models\MachineType;
 use App\Http\Resources\TaskResource;
+use App\Http\Resources\MachineTypeResource;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 
@@ -13,8 +15,8 @@ class TaskController extends Controller
 {
       public function index()
     {
-
-        $tasks = TaskResource::collection(Task::all());
+        
+        $tasks = TaskResource::collection(Task::with('machineType')->get());
         return inertia('Task/Index',[
             'tasks'=> $tasks,
         ]);
@@ -23,7 +25,10 @@ class TaskController extends Controller
      public function create()
 
     {
-        return inertia('Task/Create');
+        $machineTypes = MachineTypeResource::collection(MachineType::all());
+        return inertia('Task/Create',[
+            'machineTypes' => $machineTypes
+        ]);
     }
 
 
@@ -39,8 +44,12 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
+
+        $machineTypes = MachineTypeResource::collection(MachineType::all());
+
         return inertia('Task/Edit',[
-            'task'=> TaskResource::make($task)
+            'task'=> new TaskResource($task->load('machineType')),
+            'machineTypes' => $machineTypes
         ]);
     }
 
