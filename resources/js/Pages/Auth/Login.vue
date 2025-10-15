@@ -17,9 +17,9 @@ const submit = () => {
 
 // image slider logic
 const images = [
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1400&q=80",
-  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80",
-  "https://images.unsplash.com/photo-1485217988980-11786ced9454?auto=format&fit=crop&w=1400&q=80",
+  "/img/slide-001-min.png",
+  "/img/slide-002-min.png",
+  "/img/slide-003-min.png",
 ];
 const currentImage = ref(0);
 let interval = null;
@@ -122,14 +122,14 @@ onBeforeUnmount(() => {
               class="absolute inset-0 bg-indigo-600/70 flex items-center justify-center text-center px-6"
             >
               <div>
-                <h1 class="text-white text-4xl font-semibold mb-4">
-                  ようこそ
+                <h1 class="text-white text-sm  mb-4">
+                  技術開発で織物の未来を紡ぐ、<br/>松文産業グループ
                 </h1>
                 <p
-                  class="text-slate-100 text-[15px] font-medium leading-relaxed"
+                  class="text-slate-100 text-xs leading-relaxed"
                 >
-                  アカウントにログインして新しい世界を探検しましょう。
-                  <br />あなたの旅はここから始まります。
+                  130年を超える歴史。多領域に展開する織物の可能性。
+                  <br />加工糸から織物まで手掛ける一貫生産体制が「安定」と「先進」を実現しています。
                 </p>
               </div>
             </div>
