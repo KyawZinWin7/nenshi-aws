@@ -14,11 +14,16 @@ return new class extends Migration
         Schema::create('main_operations', function (Blueprint $table) {
             $table->id();
 
+            $table->unsignedBigInteger('plant_id');
+            $table->foreign('plant_id')->references('id')->on('plants')->onDelete('cascade');
+
             $table->unsignedBigInteger('machine_type_id');
             $table->foreign('machine_type_id')->references('id')->on('machine_types')->onDelete('cascade');
 
+            $table->unsignedBigInteger('machine_number_id');
+            $table->foreign('machine_number_id')->references('id')->on('machine_numbers')->onDelete('cascade');
           
-            $table->string('machine_number');
+            
 
             $table->unsignedBigInteger('task_id');
             $table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');

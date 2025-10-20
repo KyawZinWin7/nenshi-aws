@@ -7,6 +7,8 @@ import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 
 import Main from "./Layouts/Main.vue";
 import { setThemeOnLoad } from "./theme";
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
 
 createInertiaApp({
@@ -22,6 +24,7 @@ createInertiaApp({
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(ElementPlus)
             .component("Head", Head)
             .component("Link", Link)
             .mount(el);

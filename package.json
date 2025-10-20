@@ -19,6 +19,7 @@
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@inertiajs/vue3": "^1.2.0",
         "dayjs": "^1.11.13",
+        "element-plus": "^2.11.4",
         "file-saver": "^2.0.5",
         "flowbite": "^3.1.2",
         "sweetalert2": "^11.22.2",

@@ -3,14 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\MachineTypePlant;
 
 class MachineNumber extends Model
 {
-    protected $fillable = ['machine_type_id','number'];
+    protected $fillable = ['machine_type_plant_id','number'];
 
 
-     public function machineType()
+     public function machineTypePlant()
         {
-            return $this->belongsTo(MachineType::class);
+            return $this->belongsTo(MachineTypePlant::class);
         }
 }

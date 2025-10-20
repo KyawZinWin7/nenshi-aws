@@ -12,17 +12,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  plants:{
-    type: Object,
-    required: true,
-  }
+  
 })
 
 let machinetype = usePage().props.machinetype.data;
 
 const form = useForm({
   name: machinetype.name,
-  plant_id:machinetype.plant_id.id,
+  
 })
 
 
@@ -81,19 +78,7 @@ const updateMachineType = () => {
                 </div>
               </div>
 
-              <!--Start Plant-->
-              <div>
-                <label class="block text-xs sm:text-sm font-medium text-gray-700">工場</label>
-                <select v-model="form.plant_id"
-                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
-                  <option value="">担当者を選択</option>
-                  <option v-for="plant in plants.data" :key="plant.id" :value="plant.id">
-                    {{ plant.name }}
-                  </option>
-                </select>
-              </div>
-
-              <!--End Plant-->
+             
 
 
             </div>

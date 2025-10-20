@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\MachineType;
+use App\Models\MachineTypePlant;
 
 class Plant extends Model
 {
@@ -18,4 +19,10 @@ class Plant extends Model
     {
         return $this->hasMany(MachineType::class);
     }
+
+     public function machineTypePlants()
+    {
+        return $this->hasMany(MachineTypePlant::class);
+    }
+
 }

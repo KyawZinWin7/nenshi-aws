@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Employee;
 use App\Models\Task;
 use App\Models\MachineType;
+use App\Models\MachineNumber;
 
 class MainOperation extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'plant_id',
         'machine_type_id',
-        'machine_number',
+        'machine_number_id',
         'task_id',
         'start_time',
         'end_time',
@@ -35,6 +37,11 @@ class MainOperation extends Model
         return $this->belongsTo(MachineType::class);
     }
 
+     public function machineNumber()
+    {
+        return $this->belongsTo(MachineNumber::class);
+    }
+
     public function task()
     {
         return $this->belongsTo(Task::class);
@@ -43,5 +50,21 @@ class MainOperation extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    
+    public function mainOperations()
+    {
+        return $this->hasMany(MainOperation::class);
+    }
+
+    public function members()
+    {
+        return $this->belongsToMany(
+            Employee::class, 
+            'main_operation_members', // ✅ correct table name
+            'main_operation_id', 
+            'employee_id'
+        )->withTimestamps();
     }
 }

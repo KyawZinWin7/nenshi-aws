@@ -19,7 +19,7 @@ class MachineTypeController extends Controller
     public function index()
     {
 
-        $machinetypes = MachineTypeResource::collection(MachineType::with('plant')->get());
+        $machinetypes = MachineTypeResource::collection(MachineType::all());
        
         return inertia('MachineType/Index',[
             'machinetypes'=> $machinetypes,
@@ -30,10 +30,8 @@ class MachineTypeController extends Controller
     public function create()
 
     {
-        $plants = PlantResource::collection(Plant::all());
-        return inertia('MachineType/Create',[
-            'plants'=> $plants
-        ]);
+        
+        return inertia('MachineType/Create');
 
     }
 
@@ -49,11 +47,13 @@ class MachineTypeController extends Controller
 
     public function edit(MachineType $machinetype)
     {
-        $plants = PlantResource::collection(Plant::all());
+        
         return inertia('MachineType/Edit',[
-            'machinetype'=> new MachineTypeResource($machinetype->load('plant')),
-            'plants' => $plants
+            'machinetype'=>  MachineTypeResource::make($machinetype),
+            
         ]);
+
+         
     }
 
     public function update(UpdateMachineTypeRequest $request, MachineType $machinetype)

@@ -8,12 +8,13 @@ use App\Models\MainOperation;
 use App\Models\Plant;
 use App\Models\Task;
 use App\Models\MachineNumber;
+use App\Models\MachineTypePlant;
 
 class MachineType extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','plant_id'];
+    protected $fillable = ['name'];
 
 
     public function mainOperations()
@@ -30,8 +31,16 @@ class MachineType extends Model
     {
         return $this->hasMany(Task::class);
     }
-     public function plant()
+     public function machineTypePlants()
     {
-        return $this->belongsTo(Plant::class);
+        return $this->hasMany(MachineTypePlant::class);
     }
+
+    public function plants()
+{
+    return $this->belongsToMany(Plant::class, 'machine_type_plants')
+                ->withPivot('start_number', 'end_number')
+                ->withTimestamps();
+}
+
 }

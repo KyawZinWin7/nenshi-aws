@@ -66,6 +66,32 @@ class TaskController extends Controller
 
     }
 
+
+
+   
+
+public function getTasksByMachineType(Request $request)
+{
+    $typeId = $request->machine_type_id;
+
+    \Log::info('Request machine_type_id: ' . $typeId);
+
+    if (!$typeId) {
+        return response()->json([]);
+    }
+
+    try {
+        $tasks = Task::where('machine_type_id', $typeId)->get();
+        \Log::info('Tasks fetched: ' . $tasks->count());
+        return response()->json($tasks);
+    } catch (\Exception $e) {
+        \Log::error("Task fetch error: " . $e->getMessage());
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
+
+
     public function destroy(Task $task)
 
     {

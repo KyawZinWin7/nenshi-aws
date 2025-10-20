@@ -10,6 +10,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\MachineNumberController;
+use App\Http\Controllers\MainOperationController;
 
 
 
@@ -35,9 +36,13 @@ Route::middleware('auth')->group(function(){
     Route::post('/logout',[AuthenticateController::class,'destory'])->name('logout');
     Route::resource('machinetypes',MachineTypeController::class);
     Route::resource('employees',EmployeeController::class);
-    Route::resource('tasks',TaskController::class);
+    // Route::resource('tasks',TaskController::class);
+    Route::resource('tasks', TaskController::class)->except(['show']);
+
     Route::resource('plants',PlantController::class);
     Route::resource('machinenumbers',MachineNumberController::class);
+    Route::get('/admincompletelist', [MainOperationController::class, 'admincompletelist'])->name('mainoperatons.admincompletelist');
+    Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);
 
 
 

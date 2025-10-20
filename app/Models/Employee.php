@@ -22,8 +22,16 @@ class Employee extends Authenticatable
         'remember_token',
     ];
 
+    // public function mainOperations()
+    // {
+    //     return $this->hasMany(MainOperation::class);
+    // }
+
+
     public function mainOperations()
-    {
-        return $this->hasMany(MainOperation::class);
-    }
+{
+    return $this->belongsToMany(MainOperation::class, 'main_operation_member', 'employee_id', 'main_operation_id')
+                ->withTimestamps();
+}
+
 }

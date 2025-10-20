@@ -23,7 +23,7 @@ class StoreMachineTypeRequest extends FormRequest
     {
         return [
             'name'=>'required|string|max:255',
-            'plant_id'=> 'required|exists:plants,id'
+            
 
         ];
     }
@@ -34,8 +34,6 @@ class StoreMachineTypeRequest extends FormRequest
             'name.required' => '名前を入力してください。',
             'name.string' => '名前は文字列である必要があります。',
             'name.max' => '名前は255文字以内で入力してください。',
-            'plant_id.required' => '工場は必須です。',
-            'plant_id.exists' => '選択された工場は無効です。'
         ];
     }
 }

@@ -1,11 +1,12 @@
 <script setup>
 import Container from '../Components/Container.vue';
 import PrimaryBtn from '../Components/PrimaryBtn.vue';
-import { useForm,usePage } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import SearchForm from '../Components/SearchForm.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import dayjs from 'dayjs';
 import Swal from 'sweetalert2';
+import axios from 'axios'
 
 
 
@@ -28,6 +29,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  plants: {
+    type: Object,
+    required: true,
+  },
+  machinenumbers: {
+    type: Object,
+    required: true,
+  },
   machinenumber: {
     // type သတ်မှတ်ပါ
   }
@@ -37,9 +46,12 @@ const props = defineProps({
 
 const form = useForm({
   machine_type_id: "",
-  machine_number: "",
+  machine_number_id: "",
   task_id: "",
   employee_id: "",
+  plant_id: "",
+  team_ids: [],
+
 
 
 });
@@ -105,8 +117,8 @@ const completeMO = async (moId, employeeCode) => {
     showCancelButton: true,
     cancelButtonText: "キャンセル",
     confirmButtonText: "確認",
-    inputAttributes:{
-      autocomplete:"off"
+    inputAttributes: {
+      autocomplete: "off"
     },
     inputValidator: (value) => {
       if (!value) {
@@ -251,9 +263,150 @@ const filteredMainOperations = computed(() => {
 
 
 
+
+
+// For member
+
+
+// login user info
+const page = usePage();
+const loginUserId = page.props.auth.user.id;
+const loginUserName = page.props.auth.user.name;
+
+// main person (login user fixed)
+const selectedMainPerson = ref(loginUserId);
+const teamMembers = ref([]);
+
+// assign login user to form.employee_id
+form.employee_id = loginUserId;
+
+// Load team members (exclude main person)
+function loadTeamMembers(personId) {
+  const all = props.employees.data || [];
+  teamMembers.value = all.filter(e => e.id !== personId);
+  form.team_ids = []; // reset previous selection
+}
+
+// Initial load
+loadTeamMembers(loginUserId);
+
+// Watch in case main person changes (optional, for future flexibility)
+watch(selectedMainPerson, (newVal) => {
+  if (newVal) {
+    loadTeamMembers(newVal);
+    form.employee_id = newVal; 
+  } else {
+    teamMembers.value = [];
+    form.employee_id = '';
+  }
+});
+
+
+
+// For auto select
+
+
+// ✅ Dynamic dropdown data
+const machinetypes = ref([]);
+const machinenumbers = ref([]);
+const tasks = ref([]);
+
+
+//For plant and machinetype
+
+watch(
+  () => form.plant_id,
+  async (newPlantId) => {
+    if (!newPlantId) {
+      machinetypes.value = [];
+      machinenumbers.value = [];
+      form.machine_type_id = "";
+      form.machine_number_id = "";
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(`/machines/by-plant/${newPlantId}`);
+      machinetypes.value = data.machineTypes;
+      machinenumbers.value = data.machineNumbers;
+
+      form.machine_type_id = "";
+      form.machine_number_id = "";
+    } catch (error) {
+      console.error("Error fetching machine data:", error);
+    }
+  }
+);
+
+//machinetype and machine number
+watch(
+  [() => form.plant_id, () => form.machine_type_id],
+  async ([plantId, typeId]) => {
+    if (!plantId || !typeId) {
+      machinenumbers.value = [];
+      form.machine_number_id = "";
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(`/machines/by-type`, {
+        params: { plant_id: plantId, machine_type_id: typeId }
+      });
+      machinenumbers.value = data;
+      form.machine_number_id = "";
+    } catch (error) {
+      console.error("Error fetching machine numbers:", error);
+    }
+  }
+);
+
+
+
+//For machine type and task 
+
+watch(
+  () => form.machine_type_id,
+  async (newTypeId) => {
+    if (!newTypeId) {
+      machinenumbers.value = [];
+      tasks.value = [];
+      form.machine_number_id = "";
+      form.task_id = "";
+      return;
+    }
+
+    try {
+      // 1. Fetch machine numbers for selected plant & type
+      const numbersResponse = await axios.get(`/machines/by-type`, {
+        params: {
+          plant_id: form.plant_id,
+          machine_type_id: newTypeId
+        }
+      });
+      machinenumbers.value = numbersResponse.data;
+      form.machine_number_id = "";
+
+      // 2. Fetch tasks for selected machine type
+      const tasksResponse = await axios.get(`/tasks/by-machine-type`, {
+        params: { machine_type_id: newTypeId }
+      });
+      tasks.value = tasksResponse.data;
+      form.task_id = "";
+      // console.log("Fetching tasks for machine type:", newTypeId);
+
+
+    } catch (error) {
+      console.error("Error fetching machine numbers or tasks:", error);
+    }
+  }
+);
+
+
+
 </script>
 
 <template>
+
   <Head title="-ホーム " />
 
   <main class="p-4 sm:p-6 mx-auto min-h-screen text-xs sm:text-sm lg:text-base">
@@ -262,52 +415,94 @@ const filteredMainOperations = computed(() => {
       <div class="w-full lg:w-[30%] mb-8">
         <Container>
           <form @submit.prevent="createMainOperation" class="space-y-4 sm:space-y-6 text-xs sm:text-sm">
-            
-            <!-- Employee -->
-            <div>
-              <label class="block text-xs sm:text-sm font-medium text-gray-700">担当者</label>
-              <select v-model="form.employee_id"
-                class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
+
+            <!-- 担当者 -->
+            <!-- <div>
+              <label class="form-label">担当者</label>
+              <select v-model="form.employee_id" class="select-uniform">
                 <option value="">担当者を選択</option>
                 <option v-for="employee in employees.data" :key="employee.id" :value="employee.id">
                   {{ employee.name }}
                 </option>
               </select>
-            </div>
+            </div> -->
 
-            <!-- Machine Type & Number -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs sm:text-sm font-medium text-gray-700">機台</label>
-                <select v-model="form.machine_type_id"
-                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm">
-                  <option value="">機台を選択</option>
-                  <option v-for="mt in machinetypes.data" :key="mt.id" :value="mt.id">{{ mt.name }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs sm:text-sm font-medium text-gray-700">機台の番号</label>
-                <select v-model="form.machine_number"
-                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm">
-                  <option value="">機台の番号</option>
-                  <option v-for="num in 50" :key="num" :value="num">{{ num }}</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Task -->
             <div>
-              <label class="block text-xs sm:text-sm font-medium text-gray-700">作業</label>
-              <select v-model="form.task_id"
-                class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm">
-                <option value="">作業を選択</option>
-                <option v-for="task in tasks.data" :key="task.id" :value="task.id">{{ task.name }}</option>
+              <label class="form-label">担当者</label>
+              <select v-model="selectedMainPerson" class="select-uniform" disabled>
+                <option :value="loginUserId">
+                  <!-- 担当者を選択 -->
+                   {{ loginUserName }}
+                </option>
+                <!-- <option v-for="employee in employees.data" :key="employee.id" :value="employee.id">
+                  {{ employee.name }}
+                </option> -->
               </select>
             </div>
+
+            <!-- 工場 & 機台 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">工場</label>
+                <select v-model="form.plant_id" class="select-uniform">
+                  <option value="">工場を選択</option>
+                  <option v-for="plant in plants.data" :key="plant.id" :value="plant.id">
+                    {{ plant.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">機台</label>
+                <select v-model="form.machine_type_id" class="select-uniform">
+                  <option value="">機台を選択</option>
+                  <option v-for="mt in machinetypes" :key="mt.id" :value="mt.id">
+                    {{ mt.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+
+            <!-- 機台番号 & 作業 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">機台番号</label>
+                <select v-model="form.machine_number_id" class="select-uniform">
+                  <option value="">機台番号</option>
+                  <option v-for="mn in machinenumbers" :key="mn.id" :value="mn.id">
+                    {{ mn.number }}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">作業</label>
+                <select v-model="form.task_id" class="select-uniform">
+                  <option value="">作業を選択</option>
+                  <option v-for="t in tasks" :key="t.id" :value="t.id">
+                    {{ t.name }}
+                  </option>
+                </select>
+              </div>
+
+            </div>
+
+
+            <!-- 一緒に作業する人 -->
+            <div>
+              <label class="form-label">一緒に作業する人</label>
+              <el-select v-model="form.team_ids" multiple placeholder="メンバーを選択" class="select-uniform !p-0"
+                popper-class="custom-select-dropdown">
+                <el-option v-for="member in teamMembers" :key="member.id" :label="member.name" :value="member.id" />
+              </el-select>
+            </div>
+
 
             <!-- Submit -->
             <PrimaryBtn class="w-full py-2 sm:py-2.5 text-xs sm:text-sm">スタート</PrimaryBtn>
           </form>
+
         </Container>
       </div>
 
@@ -342,7 +537,7 @@ const filteredMainOperations = computed(() => {
                   class="px-2 sm:px-3 py-1 bg-green-600 text-white rounded text-[11px] sm:text-sm hover:bg-green-700">
                   完了
                 </button>
-                <button @click="deleteMO(mo.id,mo.employee.employee_code)"
+                <button @click="deleteMO(mo.id, mo.employee.employee_code)"
                   class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[11px] sm:text-sm hover:bg-red-700">
                   削除
                 </button>
@@ -356,3 +551,17 @@ const filteredMainOperations = computed(() => {
   </main>
 </template>
 
+<style scoped>
+.select-uniform {
+  @apply mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 text-xs sm:text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none bg-white;
+}
+
+.form-label {
+  @apply block text-xs sm:text-sm font-medium text-gray-700;
+}
+
+/* Element Plus dropdown padding fix */
+.custom-select-dropdown {
+  @apply text-xs sm:text-sm;
+}
+</style>

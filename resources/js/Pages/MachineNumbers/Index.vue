@@ -16,9 +16,9 @@ defineProps({
 //For Delete Task
 const deleteForm = useForm({});
 
-const deleteTask = (taskId) => {
+const deleteMachineNumber = (machinenumberId) => {
     Swal.fire({
-        title: "この作業を削除してもよろしいですか？",
+        title: "この機械番号を削除してもよろしいですか？",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "はい",
@@ -26,7 +26,7 @@ const deleteTask = (taskId) => {
         reverseButtons: true,
     }).then((result) => {
         if (result.isConfirmed) {
-            deleteForm.delete(route("tasks.destroy", taskId));
+            deleteForm.delete(route("machinenumbers.destroy", machinenumberId));
         }
     });
 };
@@ -43,7 +43,7 @@ const deleteTask = (taskId) => {
 
 <template>
     <AdminLayout>
-
+       
         <Head title=" - 作業" />
         <div class="bg-gray-100 py-10 min-h-screen">
             <div class="mx-auto max-w-7xl">
@@ -59,7 +59,7 @@ const deleteTask = (taskId) => {
                         </div>
 
                         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                            <Link :href="route('tasks.create')"
+                            <Link :href="route('machinenumbers.create')"
                                 class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                             追加
                             </Link>
@@ -83,9 +83,17 @@ const deleteTask = (taskId) => {
 
                                                  <th scope="col"
                                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                                    工場
+                                                </th>
+
+                                               
+                                                 <th scope="col"
+                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                                     機台
                                                 </th>
-                                                <th scope="col"
+                                                
+
+                                                 <th scope="col"
                                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                                     機械番号
                                                 </th>
@@ -102,13 +110,19 @@ const deleteTask = (taskId) => {
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                                     {{ machineNumber.id }}
                                                 </td>
+                                                
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {{ machineNumber.number }}
+                                                    {{ machineNumber.machine_type_plant_id.plant_id.name }}
                                                 </td>
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {{ machineNumber.machine_type_id.name }}
+                                                    {{ machineNumber.machine_type_plant_id.machine_type_id.name }}
+                                                </td>
+
+                                                <td
+                                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                                    {{ machineNumber.number }}
                                                 </td>
 
                                                 <td
@@ -117,7 +131,7 @@ const deleteTask = (taskId) => {
                                                         class="text-indigo-600 hover:text-indigo-900">
                                                     編集
                                                     </Link>
-                                                    <button @click="deleteTask(machineNumber.id)"
+                                                    <button @click="deleteMachineNumber(machineNumber.id)"
                                                         class="ml-2 text-red-600 hover:text-red-900">
                                                         削除
                                                     </button>

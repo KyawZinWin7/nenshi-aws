@@ -8,9 +8,13 @@ use App\Http\Resources\MainOperationResource;
 use App\Http\Resources\MachineTypeResource;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\EmployeeResource;
+use App\Http\Resources\PlantResource;
+use App\Http\Resources\MachineNumberResource;
 use App\Models\Employee;
 use App\Models\Task;
+use App\Models\Plant;
 use App\Models\MachineType;
+use App\Models\MachineNumber;
 use Inertia\Inertia;
 use App\Http\Requests\StoreMainOperationRequest;
 use App\Http\Requests\UpdateMainOperationRequest;
@@ -35,26 +39,29 @@ class MainOperationController extends Controller
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
             $employees = EmployeeResource::collection(Employee::all());
+            $plants = PlantResource::collection(Plant::all());
+            $machinenumbers = MachineNumberResource::collection(MachineNumber::all());
 
             return Inertia::render('Home', [
                 'mainoperations' => MainOperationResource::collection($mainoperations),
                 'machinetypes' => $machinetypes,
                 'tasks' => $tasks,
                 'employees' => $employees,
+                'plants' => $plants,
+                'machinenumbers' => $machinenumbers,
             ]);
         }
 
 
-    
     public function store(StoreMainOperationRequest $request)
         {
             $modata = $request->validated();
 
-            // 既に未完了の同じ作業が存在するか確認（重複チェック）
+            // 重複チェック
             $exists = MainOperation::where('machine_type_id', $modata['machine_type_id'])
-                ->where('machine_number', $modata['machine_number'])
+                ->where('machine_number_id', $modata['machine_number_id'])
                 ->where('task_id', $modata['task_id'])
-                ->where('status', 0) // 未完了のみを対象
+                ->where('status', 0)
                 ->exists();
 
             if ($exists) {
@@ -63,15 +70,19 @@ class MainOperationController extends Controller
                     ->withInput();
             }
 
-            // データを追加
+            // Main Operation 作成
             $modata['start_time'] = now();
-            $modata['status'] = 0; // 初期状態は未完了として保存
+            $modata['status'] = 0;
 
-            MainOperation::create($modata);
+            $mainOperation = MainOperation::create($modata);
+
+            // ここでチームメンバーを attach
+            if (!empty($modata['team_ids'])) {
+                $mainOperation->members()->attach($modata['team_ids']);
+            }
 
             return redirect()->route('home')->with('success', '作業が登録されました。');
-        }    
-
+        }
 
 
 
@@ -97,6 +108,10 @@ class MainOperationController extends Controller
 
             return redirect()->back()->with('success', '作業を完了しました。');
         }
+
+
+        
+
 
     public function uncomplete($id)
         {
@@ -191,7 +206,87 @@ class MainOperationController extends Controller
         }
 
 
- public function destroy($id)
+
+         public function admincompletelist()
+
+        {
+
+            $user = auth()->user();
+
+            if ($user->role !== 'admin') {
+                abort(403, 'アクセス権限がありません'); // 403 Forbidden
+            }
+
+            $machinetypes = MachineTypeResource::collection(MachineType::all());
+            $tasks = TaskResource::collection(Task::all());
+            $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
+            ->latest('updated_at')
+            ->take(1000)
+            ->get();
+            return Inertia::render('Complete/AdminCompleteList', [
+                        'mainoperations' => MainOperationResource::collection($mainoperations),
+                        'machinetypes' => $machinetypes,
+                        'tasks' => $tasks,
+                    ]);
+        
+        }
+
+
+
+    public function getMachinesByPlant($plantId)
+        {
+            $machineTypes = MachineType::whereHas('plants', function ($q) use ($plantId) {
+                $q->where('plants.id', $plantId);
+            })->get();
+
+            // related machine numbers
+            $machineNumbers = MachineNumber::whereHas('machineTypePlant', function ($q) use ($plantId) {
+                $q->where('plant_id', $plantId);
+            })->get();
+
+            return response()->json([
+                'machineTypes' => $machineTypes,
+                'machineNumbers' => $machineNumbers,
+            ]);
+        }
+
+
+    public function getMachineNumbersByType(Request $request)
+{
+    $plantId = $request->plant_id;
+    $typeId  = $request->machine_type_id;
+
+    if (!$plantId || !$typeId) {
+        return response()->json([]);
+    }
+
+    $machineNumbers = MachineNumber::whereHas('machineTypePlant', function ($q) use ($plantId, $typeId) {
+        $q->where('plant_id', $plantId)
+          ->where('machine_type_id', $typeId);
+    })->get();
+
+    return response()->json($machineNumbers);
+}
+
+
+// public function getTasksByMachineType(Request $request)
+// {
+//     $typeId = $request->machine_type_id;
+
+//     if (!$typeId) {
+//         return response()->json([], 400);
+//     }
+
+//     $tasks = Task::where('machine_type_id', $typeId)->get();
+
+//     return response()->json($tasks);
+// }
+
+ 
+
+
+
+    public function destroy($id)
         {
             $operation = MainOperation::findOrFail($id);
             $operation->delete();

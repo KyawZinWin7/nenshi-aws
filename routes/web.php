@@ -15,6 +15,17 @@ Route::get('/completelist', [MainOperationController::class, 'completelist'])->n
 Route::get('/export', [MainOperationController::class, 'export'])->name('mainoperations.export');
 Route::post('/{id}/uncomplete', [MainOperationController::class, 'uncomplete'])->name('mainoperations.uncomplete');
 Route::get('/exportstore', [MainOperationController::class, 'exportstore'])->name('mainoperations.exportstore');
+Route::get('/machines/by-plant/{plant}', [MainOperationController::class, 'getMachinesByPlant']);
+Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
+// Route::get('/tasks/by-machine-type', [MainOperationController::class, 'getTasksByMachineType']);
+// routes/web.php
+
+
+
+
+
+
+
 
 Route::delete('/{id}', [MainOperationController::class, 'destroy'])->name('mainoperations.destroy');
 
