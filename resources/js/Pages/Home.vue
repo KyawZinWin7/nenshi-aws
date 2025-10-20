@@ -10,6 +10,8 @@ import axios from 'axios'
 
 
 
+const page = usePage();
+const user = computed(() => page.props.auth.user);
 
 
 const props = defineProps({
@@ -38,8 +40,10 @@ const props = defineProps({
     required: true,
   },
   machinenumber: {
-    // type သတ်မှတ်ပါ
-  }
+    type: Object,
+    required: true,
+  },
+  
 });
 
 
@@ -97,7 +101,7 @@ const createMainOperation = () => {
 //for complete
 
 const completeForm = useForm({});
-const completeMO = async (moId, employeeCode) => {
+const completeMO = async (moId) => {
   // Step 1: Confirm Dialog
   const confirmResult = await Swal.fire({
     title: "この作業を完了してもよろしいですか？",
@@ -109,54 +113,26 @@ const completeMO = async (moId, employeeCode) => {
 
   if (!confirmResult.isConfirmed) return;
 
-  // Step 2: Prompt for employee code
-  const { value: userInput } = await Swal.fire({
-    title: "担当者コードを入力してください：",
-    input: "text",
-    inputPlaceholder: "担当者コード",
-    showCancelButton: true,
-    cancelButtonText: "キャンセル",
-    confirmButtonText: "確認",
-    inputAttributes: {
-      autocomplete: "off"
+  // Step 2: Complete operation directly
+  completeForm.post(route("mainoperations.complete", moId), {
+    onSuccess: () => {
+      Swal.fire({
+        icon: "success",
+        title: "作業を完了しました！",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     },
-    inputValidator: (value) => {
-      if (!value) {
-        return "コードを入力してください。";
-      }
-    },
+    onError: () => {
+      Swal.fire({
+        icon: "error",
+        title: "完了に失敗しました",
+        text: "もう一度お試しください。",
+      });
+    }
   });
-
-  if (userInput === undefined) return;
-
-  // Step 3: Code check
-  if (userInput.trim() === employeeCode) {
-    completeForm.post(route("mainoperations.complete", moId), {
-      onSuccess: () => {
-        Swal.fire({
-          icon: "success",
-          title: "作業を完了しました！",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      },
-      onError: () => {
-        Swal.fire({
-          icon: "error",
-          title: "完了に失敗しました",
-          text: "もう一度お試しください。",
-        });
-      }
-    });
-  } else {
-    // Step 4: Error if code mismatch
-    Swal.fire({
-      icon: "error",
-      title: "コードが一致しません",
-      text: "作業を完了できません。",
-    });
-  }
 };
+
 
 //end
 
@@ -166,7 +142,7 @@ const completeMO = async (moId, employeeCode) => {
 
 //For Detlete Complete
 const deleteForm = useForm({});
-const deleteMO = async (moId, employeeCode) => {
+const deleteMO = async (moId) => {
   // Step 1: Confirm Dialog
   const confirmResult = await Swal.fire({
     title: "この作業を削除してもよろしいですか？",
@@ -178,51 +154,27 @@ const deleteMO = async (moId, employeeCode) => {
 
   if (!confirmResult.isConfirmed) return;
 
-  // Step 2: Prompt Dialog for code input
-  const { value: userInput } = await Swal.fire({
-    title: "担当者コードを入力してください：",
-    input: "text",
-    inputPlaceholder: "担当者コード",
-    inputValidator: (value) => {
-      if (!value) {
-        return "コードを入力してください。";
-      }
+  // Step 2: Delete operation directly
+  deleteForm.delete(route("mainoperations.destroy", moId), {
+    onSuccess: () => {
+      Swal.fire({
+        icon: "success",
+        title: "削除されました！",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     },
-    showCancelButton: true,
-    cancelButtonText: "キャンセル",
-    confirmButtonText: "確認",
+    onError: () => {
+      Swal.fire({
+        icon: "error",
+        title: "削除に失敗しました",
+        text: "もう一度お試しください。",
+      });
+    }
   });
-
-  if (userInput === undefined) return; // user pressed cancel
-
-  // Step 3: Check code
-  if (userInput.trim() === employeeCode) {
-    deleteForm.delete(route("mainoperations.destroy", moId), {
-      onSuccess: () => {
-        Swal.fire({
-          icon: "success",
-          title: "削除されました！",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      },
-      onError: () => {
-        Swal.fire({
-          icon: "error",
-          title: "削除に失敗しました",
-          text: "もう一度お試しください。",
-        });
-      }
-    });
-  } else {
-    // Step 4: Error Message
-    Swal.fire({
-      icon: "error",
-      title: "コードが一致しません",
-      text: "作業を削除できません。",
-    });
-  }
 };
+
+
 
 //end
 
@@ -269,7 +221,7 @@ const filteredMainOperations = computed(() => {
 
 
 // login user info
-const page = usePage();
+
 const loginUserId = page.props.auth.user.id;
 const loginUserName = page.props.auth.user.name;
 
@@ -512,6 +464,7 @@ watch(
           <thead class="bg-gray-50 text-left">
             <tr>
               <th class="px-2 sm:px-4 py-2">Date</th>
+               <th class="px-2 sm:px-4 py-2">工場</th>
               <th class="px-2 sm:px-4 py-2">機台</th>
               <th class="px-2 sm:px-4 py-2">機台の番号</th>
               <th class="px-2 sm:px-4 py-2">作業</th>
@@ -519,25 +472,36 @@ watch(
               <th class="px-2 sm:px-4 py-2">終了時間</th>
               <th class="px-2 sm:px-4 py-2">担当者</th>
               <th class="px-2 sm:px-4 py-2">合計時間</th>
+              <th class="px-2 sm:px-4 py-2">メンバー</th>
               <th class="px-2 sm:px-4 py-2">操作</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" v-for="mo in filteredMainOperations" :key="mo.id">
             <tr>
               <td class="px-2 sm:px-4 py-2">{{ mo.created_at || 'No Date' }}</td>
+              <td class="px-2 sm:px-4 py-2">
+              {{ mo.plant?.name ?? '未設定' }}
+            </td>
               <td class="px-2 sm:px-4 py-2">{{ mo.machine_type.name }}</td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.machine_number }}</td>
+              <td class="px-2 sm:px-4 py-2">{{ mo.machine_number?.number ?? '未設定' }}</td>
               <td class="px-2 sm:px-4 py-2">{{ mo.task.name }}</td>
               <td class="px-2 sm:px-4 py-2">{{ mo.start_time }}</td>
               <td class="px-2 sm:px-4 py-2">{{ mo.end_time }}</td>
               <td class="px-2 sm:px-4 py-2">{{ mo.employee.name }}</td>
               <td class="px-2 sm:px-4 py-2">{{ mo.total_time }}</td>
-              <td class="px-2 sm:px-4 py-2 flex gap-1 sm:gap-2">
-                <button @click="completeMO(mo.id, mo.employee.employee_code)"
+              <td class="px-2 sm:px-4 py-2">
+              <div class="flex flex-col gap-1">
+                <span v-for="member in mo.members" :key="member.id" class="sm:text-xs">
+                  {{ member.name }}
+                </span>
+              </div>
+            </td>
+              <td class="px-2 sm:px-4 py-2 flex gap-1 sm:gap-2" >
+                <button @click="completeMO(mo.id, mo.employee.employee_code)" v-if="(user.id === mo.employee.id)"
                   class="px-2 sm:px-3 py-1 bg-green-600 text-white rounded text-[11px] sm:text-sm hover:bg-green-700">
                   完了
                 </button>
-                <button @click="deleteMO(mo.id, mo.employee.employee_code)"
+                <button @click="deleteMO(mo.id, mo.employee.employee_code)"  v-if="(user.id === mo.employee.id)"
                   class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[11px] sm:text-sm hover:bg-red-700">
                   削除
                 </button>

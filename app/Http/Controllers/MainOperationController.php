@@ -30,7 +30,13 @@ class MainOperationController extends Controller
     
     public function index()
         {
-            $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
+            // $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
+            //     ->where('status', 0)
+            //     ->orderBy('updated_at', 'desc')
+            //     ->take(1000)
+            //     ->get();
+
+            $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
                 ->where('status', 0)
                 ->orderBy('updated_at', 'desc')
                 ->take(1000)
