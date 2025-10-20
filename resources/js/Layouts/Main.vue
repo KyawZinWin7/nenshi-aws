@@ -150,21 +150,21 @@ watch(() => page.url, () => {
                     </li>
 
                     <!-- Login for guest -->
-                    <!-- <li v-else>
+                    <li v-else>
                         <div class="flex items-center space-x-6">
                             <Link :href="route('login')" 
                                 class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
                                 @click="closeMenu">
                                 ログイン
                             </Link>
-                             <Link :href="route('register')" 
+                             <!-- <Link :href="route('register')" 
                                 class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
                                 @click="closeMenu">
                                 レジスター
-                            </Link>
+                            </Link> -->
                         </div>
                         
-                    </li> -->
+                    </li>
                     <li v-if="employee && employee.role === 'admin'">
                         <Link :href="route('mainoperations.admincompletelist')"
                             class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
