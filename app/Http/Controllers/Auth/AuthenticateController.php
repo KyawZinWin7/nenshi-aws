@@ -25,7 +25,17 @@ class AuthenticateController extends Controller
             // Auth attempt
             if (Auth::attempt(['employee_code' => $credentials['employee_code'], 'password' => $credentials['password']], $request->boolean('remember'))) {
                 $request->session()->regenerate();
-                return redirect()->intended();
+                // return redirect()->intended();
+
+
+                
+                // Role-based redirect
+                    $user = auth()->user();
+                    if ($user->role === 'admin') {
+                        return redirect()->route('mainoperations.admincompletelist'); // admin dashboard route
+                    } else {
+                        return redirect()->route('home'); // normal user home page route
+                    }
             }
 
             return back()->withErrors([

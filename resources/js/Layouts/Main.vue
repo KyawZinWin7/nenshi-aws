@@ -8,7 +8,8 @@ import { route } from 'ziggy-js';
 import Footer from '../Footer.vue';
 
 const page = usePage();
-const user = computed(() => page.props.auth.user);
+const employee = computed(() => page.props.auth.user);
+// console.log(employee.value);
 
 const show = ref(false);
 const mobileMenu = ref(false);
@@ -120,7 +121,7 @@ watch(() => page.url, () => {
                         </Link>
                     </li> -->
 
-                    <li>
+                    <li v-if="employee">
                         <Link :href="route('mainoperatons.completelist')"
                             class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
                                 'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperatons.completelist'),
@@ -130,12 +131,12 @@ watch(() => page.url, () => {
                         </Link>
                     </li>
 
-                    <li v-if="user">
+                    <li v-if="employee">
                         <div ref="dropdown" class="relative">
                             <div @click="toggleDropdown"
                                 class="flex items-center gap-2 px-3 rounded-lg hover:bg-gray-100 cursor-pointer"
                                 :class="{ 'bg-gray-100': show }">
-                                <p class="text-black text-sm md:text-base">{{ user.name }}</p>
+                                <p class="text-black text-sm md:text-base">{{ employee.name }}</p>
                                 <i class="fa-solid fa-angle-down text-black"></i>
                             </div>
                             <div v-show="show" class="absolute z-50 top-14 right-0 bg-white text-black 
@@ -164,7 +165,7 @@ watch(() => page.url, () => {
                         </div>
                         
                     </li> -->
-                    <li v-if="user">
+                    <li v-if="employee && employee.role === 'admin'">
                         <Link :href="route('mainoperations.admincompletelist')"
                             class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
                                 'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperations.admincompletelist'),
