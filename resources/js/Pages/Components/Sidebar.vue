@@ -20,7 +20,7 @@ defineProps({
 
 
 
-         <!--Start Mainoperation Complete-->
+        <!--Start Mainoperation Complete-->
         <li>
           <a :href="route('mainoperations.admincompletelist')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -28,10 +28,12 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12l2 2 4-4M7 7h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
+
 
 
             <span class="ml-3">完了</span>
@@ -46,10 +48,12 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-8l4 4 4-4v8h10V10l-4-4-4 4V3H3v18z" />
             </svg>
+
+
 
 
             <span class="ml-3">工場</span>
@@ -67,8 +71,10 @@ defineProps({
           ]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
             </svg>
+
 
 
             <span class="ml-3"> 従業員</span>
@@ -78,7 +84,7 @@ defineProps({
 
 
 
-         <!--Start　MachineType -->
+        <!--Start　MachineType -->
         <li>
           <a :href="route('machinetypes.index')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -86,10 +92,13 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M11.983 1.688a1 1 0 011.034 0l1.518.877a1 1 0 00.531.152l1.808.106a1 1 0 01.826.582l.95 1.647a1 1 0 00.386.386l1.647.95a1 1 0 01.582.826l.106 1.808a1 1 0 00.152.531l.877 1.518a1 1 0 010 1.034l-.877 1.518a1 1 0 00-.152.531l-.106 1.808a1 1 0 01-.582.826l-1.647.95a1 1 0 00-.386.386l-.95 1.647a1 1 0 01-.826.582l-1.808.106a1 1 0 00-.531.152l-1.518.877a1 1 0 01-1.034 0l-1.518-.877a1 1 0 00-.531-.152l-1.808-.106a1 1 0 01-.826-.582l-.95-1.647a1 1 0 00-.386-.386l-1.647-.95a1 1 0 01-.582-.826l-.106-1.808a1 1 0 00-.152-.531l-.877-1.518a1 1 0 010-1.034l.877-1.518a1 1 0 00.152-.531l.106-1.808a1 1 0 01.582-.826l1.647-.95a1 1 0 00.386-.386l.95-1.647a1 1 0 01.826-.582l1.808-.106a1 1 0 00.531-.152l1.518-.877z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
+
 
 
             <span class="ml-3"> 機台</span>
@@ -98,7 +107,7 @@ defineProps({
         <!--End MachineType-->
 
 
-         <!--Start　Task -->
+        <!--Start　Task -->
         <li>
           <a :href="route('tasks.index')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -106,9 +115,9 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 3l7 7-1 1-7-7 1-1zM4 21l7-7-1-1-7 7 1 1z" />
             </svg>
 
 
@@ -116,10 +125,10 @@ defineProps({
           </a>
         </li>
         <!--End Task-->
-        
 
 
-         <!--Start　Machine Number -->
+
+        <!--Start　Machine Number -->
         <li>
           <a :href="route('machinenumbers.index')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -127,10 +136,11 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 4h10M7 20h10M9 4v16M15 4v16" />
             </svg>
+
 
 
             <span class="ml-3"> 機械番号</span>
@@ -138,7 +148,7 @@ defineProps({
         </li>
         <!--End Machine Number-->
 
-         <!--Start　Export with excel -->
+        <!--Start　Export with excel -->
         <li>
           <a :href="route('mainoperations.export')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -146,30 +156,33 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="2" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8M8 12l4-4 4 4" />
             </svg>
+
+
 
 
             <span class="ml-3"> エクスポート</span>
           </a>
         </li>
         <!--End Export with excel-->
-       
+
 
 
 
 
         <li v-if="user">
-                        <Link :href="route('mainoperations.export')"
-                            class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
-                                'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperations.export'),
-                                'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('mainoperations.export')
-                            }" @click="closeMenu">
-                        エクスポート
-                        </Link>
-                    </li>
+          <Link :href="route('mainoperations.export')" class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
+            :class="{
+              'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperations.export'),
+              'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('mainoperations.export')
+            }" @click="closeMenu">
+          エクスポート
+          </Link>
+        </li>
 
 
 
