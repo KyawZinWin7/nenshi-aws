@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
 
         Employee::create([
             'name' => 'Admin',
-            'employee_code' => 'EMP001',
-            'password' => Hash::make('password123'),
+            'employee_code' => '56789',
+            'password' => Hash::make('56789'),
             'role' => 'admin',
         ]);
 
