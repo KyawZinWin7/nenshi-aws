@@ -22,9 +22,9 @@ defineProps({
 
          <!--Start Mainoperation Complete-->
         <li>
-          <a :href="route('mainoperatons.completelist')" :class="[
+          <a :href="route('mainoperations.admincompletelist')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
-            route().current('mainoperatons.completelist')
+            route().current('mainoperations.admincompletelist')
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">

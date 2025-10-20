@@ -58,6 +58,11 @@ class MainOperation extends Model
         return $this->hasMany(MainOperation::class);
     }
 
+    public function plant()
+    {
+        return $this->belongsTo(Plant::class);
+    }
+
     public function members()
     {
         return $this->belongsToMany(

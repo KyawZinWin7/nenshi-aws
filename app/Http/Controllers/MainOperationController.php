@@ -189,25 +189,58 @@ class MainOperationController extends Controller
 
 
 
+    // public function completelist()
+    //     {
+    //         $machinetypes = MachineTypeResource::collection(MachineType::all());
+    //         $tasks = TaskResource::collection(Task::all());
+    //         $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
+    //         ->where('employee_id', auth()->id())
+    //         ->latest('updated_at')
+    //         ->take(1000)
+    //         ->get();
+    //         return Inertia::render('Complete/CompleteList', [
+    //                     'mainoperations' => MainOperationResource::collection($mainoperations),
+    //                     'machinetypes' => $machinetypes,
+    //                     'tasks' => $tasks,
+    //                 ]);
+        
+    //     }
+
+
+
+
     public function completelist()
         {
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
-            $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
-            ->latest('updated_at')
-            ->take(1000)
-            ->get();
+
+            $mainoperations = MainOperation::with([
+                    'machineType', 
+                    'task', 
+                    'employee', 
+                    'machineNumber', 
+                    'plant', 
+                    'members'
+                ])
+                ->where('employee_id', auth()->id()) // owner
+                ->orWhereHas('members', function ($query) {
+                    $query->where('employee_id', auth()->id()); // member
+                })
+                ->latest('updated_at')
+                ->take(1000)
+                ->get();
+
             return Inertia::render('Complete/CompleteList', [
-                        'mainoperations' => MainOperationResource::collection($mainoperations),
-                        'machinetypes' => $machinetypes,
-                        'tasks' => $tasks,
-                    ]);
-        
+                'mainoperations' => MainOperationResource::collection($mainoperations),
+                'machinetypes' => $machinetypes,
+                'tasks' => $tasks,
+            ]);
         }
 
 
 
-         public function admincompletelist()
+
+    public function admincompletelist()
 
         {
 
@@ -219,7 +252,7 @@ class MainOperationController extends Controller
 
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
-            $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
+            $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
             ->latest('updated_at')
             ->take(1000)
             ->get();

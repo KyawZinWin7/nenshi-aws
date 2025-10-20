@@ -25,4 +25,9 @@ class Plant extends Model
         return $this->hasMany(MachineTypePlant::class);
     }
 
+    public function mainOperations()
+    {
+        return $this->hasMany(MainOperation::class);
+    }
+
 }

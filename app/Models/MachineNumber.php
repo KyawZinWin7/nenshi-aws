@@ -14,4 +14,9 @@ class MachineNumber extends Model
         {
             return $this->belongsTo(MachineTypePlant::class);
         }
+
+    public function mainOperations()
+    {
+        return $this->hasMany(MainOperation::class);
+    }
 }

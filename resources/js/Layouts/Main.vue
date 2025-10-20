@@ -165,10 +165,10 @@ watch(() => page.url, () => {
                         
                     </li> -->
                     <li v-if="user">
-                        <Link :href="route('plants.index')"
+                        <Link :href="route('mainoperations.admincompletelist')"
                             class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
-                                'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('plants.index'),
-                                'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('mainoperations.export')
+                                'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperations.admincompletelist'),
+                                'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('mainoperations.admincompletelist')
                             }" @click="closeMenu">
                         ダッシュボード
                         </Link>

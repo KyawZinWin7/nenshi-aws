@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function(){
 
     Route::resource('plants',PlantController::class);
     Route::resource('machinenumbers',MachineNumberController::class);
-    Route::get('/admincompletelist', [MainOperationController::class, 'admincompletelist'])->name('mainoperatons.admincompletelist');
+    Route::get('/admincompletelist', [MainOperationController::class, 'admincompletelist'])->name('mainoperations.admincompletelist');
     Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);
 
 

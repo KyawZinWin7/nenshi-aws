@@ -10,6 +10,7 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { id } from 'element-plus/es/locales.mjs';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -202,13 +203,11 @@ const refreshData = () => {
       <!-- Search -->
       <SearchForm @search="handleSearch" />
 
-      <button
-        @click="refreshData"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-1"
-      >
+      <button @click="refreshData"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-1">
         <!-- Lucide RefreshCcw Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          stroke-width="2">
           <path d="M3 2v6h6"></path>
           <path d="M21 12a9 9 0 1 0-3 6.7L21 22M21 16v6h-6"></path>
         </svg>
@@ -236,14 +235,11 @@ const refreshData = () => {
 
     <!-- Responsive Table Wrapper -->
     <div class="overflow-x-auto">
-      <table
-        class="min-w-[800px] sm:min-w-full text-[11px] sm:text-sm text-left text-gray-500"
-      >
-        <thead
-          class="text-[10px] sm:text-xs text-gray-700 uppercase bg-gray-50"
-        >
+      <table class="min-w-[800px] sm:min-w-full text-[11px] sm:text-sm text-left text-gray-500">
+        <thead class="text-[10px] sm:text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
             <th class="px-2 sm:px-4 py-2">Date</th>
+            <th class="px-2 sm:px-4 py-2">工場</th>
             <th class="px-2 sm:px-4 py-2">機台</th>
             <th class="px-2 sm:px-4 py-2">機台の番号</th>
             <th class="px-2 sm:px-4 py-2">作業</th>
@@ -251,37 +247,41 @@ const refreshData = () => {
             <th class="px-2 sm:px-4 py-2">終了時間</th>
             <th class="px-2 sm:px-4 py-2">担当者</th>
             <th class="px-2 sm:px-4 py-2">合計時間</th>
+            <th class="px-2 sm:px-4 py-2">メンバー</th>
             <th class="px-2 sm:px-4 py-2">操作</th>
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="mainoperation in paginatedMainOperations"
-            :key="mainoperation.id"
-            class="border-b"
-          >
+          <tr v-for="mainoperation in paginatedMainOperations" :key="mainoperation.id" class="border-b">
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.created_at }}</td>
+            <td class="px-2 sm:px-4 py-2">
+              {{ mainoperation.plant?.name ?? '未設定' }}
+            </td>
             <td class="px-2 sm:px-4 py-2">
               {{ mainoperation.machine_type?.name ?? '未設定' }}
             </td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.machine_number }}</td>
+            <td class="px-2 sm:px-4 py-2">{{ mainoperation.machine_number?.number ?? '未設定' }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.task?.name }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.start_time }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.end_time }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.employee?.name }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.total_time }}</td>
+            <td class="px-2 sm:px-4 py-2">
+              <div class="flex flex-col gap-1">
+                <span v-for="member in mainoperation.members" :key="member.id" class="sm:text-xs">
+                  {{ member.name }}
+                </span>
+              </div>
+            </td>
+
             <td class="px-2 sm:px-4 py-2" v-if="user">
               <div class="flex items-center justify-center gap-1 sm:gap-2">
-                <button
-                  @click="uncompleteMO(mainoperation.id)"
-                  class="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded text-[10px] sm:text-sm hover:bg-blue-700"
-                >
+                <button @click="uncompleteMO(mainoperation.id)"
+                  class="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded text-[10px] sm:text-sm hover:bg-blue-700">
                   未完了
                 </button>
-                <button
-                  @click="deleteMO(mainoperation.id)"
-                  class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[10px] sm:text-sm hover:bg-red-700"
-                >
+                <button @click="deleteMO(mainoperation.id)"
+                  class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[10px] sm:text-sm hover:bg-red-700">
                   削除
                 </button>
               </div>
@@ -292,11 +292,6 @@ const refreshData = () => {
     </div>
 
     <!-- Pagination -->
-    <Pagination
-      :total="filteredMainOperations.length"
-      :per-page="perPage"
-      v-model:current-page="currentPage"
-    />
+    <Pagination :total="filteredMainOperations.length" :per-page="perPage" v-model:current-page="currentPage" />
   </div>
 </template>
-

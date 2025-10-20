@@ -19,12 +19,14 @@ class MainOperationResource extends JsonResource
             'id' => $this->id,
 
             // relations
+            'plant' => new PlantResource($this->whenLoaded('plant')),
             'machine_type' => new MachineTypeResource($this->whenLoaded('machineType')),
             'task' => new TaskResource($this->whenLoaded('task')),
             'employee' => new EmployeeResource($this->whenLoaded('employee')),
+            'members' => EmployeeResource::collection($this->whenLoaded('members')), // ✅ add this line
 
             // direct fields
-            'machine_number' => $this->machine_number,
+            'machine_number' => $this->machineNumber ? new MachineNumberResource($this->whenLoaded('machineNumber')) : null,
             // 'start_time' => $this->start_time,
         
             // 'end_time' => $this->end_time,

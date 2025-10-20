@@ -18,6 +18,9 @@ const props = defineProps({
   },
 });
 
+console.log(props.mainoperations);
+console.log(props.machinetypes);
+console.log(props.tasks);
 
 </script>
 
