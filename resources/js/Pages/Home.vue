@@ -62,22 +62,31 @@ const form = useForm({
 
 
 //For Main Operation Create
-
 const createMainOperation = () => {
   form.post(route("mainoperations.store"), {
     onSuccess: () => {
-      form.reset();
       Swal.fire({
         position: "top-end",
         icon: "success",
         title: "登録が成功しました！",
         showConfirmButton: false,
-        timer: 1500
+        timer: 1500,
+      }).then(() => {
+        form.reset(); // 🧹 ← 登録後、フォームリセット
+        window.location.href = route("home"); // 🔁 一覧へ移動
       });
     },
     onError: (errors) => {
-      // Laravel validation error messages are available in form.errors
-      if (form.hasErrors) {
+      if (errors.error === "duplicate") {
+        Swal.fire({
+          icon: "warning",
+          title: "未完了の作業が存在します！",
+          html: `
+            <p>${errors.message}</p>
+            <p><b>担当者：</b>${errors.tanto}</p>
+          `,
+        });
+      } else if (form.hasErrors) {
         Swal.fire({
           icon: "error",
           title: "入力内容にエラーがあります",
@@ -92,9 +101,11 @@ const createMainOperation = () => {
           text: "もう一度お試しください。",
         });
       }
-    }
+    },
   });
 };
+
+
 
 //end
 

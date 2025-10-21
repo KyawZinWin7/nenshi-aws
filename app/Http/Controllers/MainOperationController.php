@@ -59,36 +59,74 @@ class MainOperationController extends Controller
         }
 
 
-    public function store(StoreMainOperationRequest $request)
-        {
-            $modata = $request->validated();
+    // public function store(StoreMainOperationRequest $request)
+    //     {
+    //         $modata = $request->validated();
 
-            // 重複チェック
-            $exists = MainOperation::where('machine_type_id', $modata['machine_type_id'])
-                ->where('machine_number_id', $modata['machine_number_id'])
-                ->where('task_id', $modata['task_id'])
-                ->where('status', 0)
-                ->exists();
+    //         // 重複チェック
+    //         $exists = MainOperation::where('machine_type_id', $modata['machine_type_id'])
+    //             ->where('machine_number_id', $modata['machine_number_id'])
+    //             ->where('task_id', $modata['task_id'])
+    //             ->where('status', 0)
+    //             ->exists();
 
-            if ($exists) {
-                return redirect()->back()
-                    ->withErrors(['duplicate' => '同じ機台・番号・作業の未完了レコードが既に存在します。'])
-                    ->withInput();
-            }
+    //         if ($exists) {
+    //             return redirect()->back()
+    //                 ->withErrors(['duplicate' => '同じ機台・番号・作業の未完了レコードが既に存在します。'])
+    //                 ->withInput();
+    //         }
 
-            // Main Operation 作成
-            $modata['start_time'] = now();
-            $modata['status'] = 0;
+    //         // Main Operation 作成
+    //         $modata['start_time'] = now();
+    //         $modata['status'] = 0;
 
-            $mainOperation = MainOperation::create($modata);
+    //         $mainOperation = MainOperation::create($modata);
 
-            // ここでチームメンバーを attach
-            if (!empty($modata['team_ids'])) {
-                $mainOperation->members()->attach($modata['team_ids']);
-            }
+    //         // ここでチームメンバーを attach
+    //         if (!empty($modata['team_ids'])) {
+    //             $mainOperation->members()->attach($modata['team_ids']);
+    //         }
 
-            return redirect()->route('home')->with('success', '作業が登録されました。');
-        }
+    //         return redirect()->route('home')->with('success', '作業が登録されました。');
+    //     }
+
+
+   public function store(StoreMainOperationRequest $request)
+{
+    $modata = $request->validated();
+
+    // 🔍 Duplicate Check
+    $existing = MainOperation::where('plant_id', $modata['plant_id'])
+        ->where('machine_type_id', $modata['machine_type_id'])
+        ->where('machine_number_id', $modata['machine_number_id'])
+        ->where('task_id', $modata['task_id'])
+        ->where('status', 0)
+        ->with('employee')
+        ->first();
+
+    if ($existing) {
+        return back()->withErrors([
+            'duplicate' => '同じ工場・機台・番号・作業の未完了レコードが既に存在します。（担当者：' . ($existing->employee->name ?? '不明') . '）'
+        ])->withInput();
+    }
+
+    // 🆕 新規登録
+    $modata['start_time'] = now();
+    $modata['status'] = 0;
+
+    $mainOperation = MainOperation::create($modata);
+
+    if (!empty($modata['team_ids'])) {
+        $mainOperation->members()->attach($modata['team_ids']);
+    }
+
+    // ✅ 一覧ページへリダイレクト
+    return redirect()->route('home')
+        ->with('success', '作業が登録されました。');
+}
+
+
+
 
 
 
