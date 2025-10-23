@@ -76,19 +76,18 @@ const deleteTask = (taskId) => {
                                     <table class="min-w-full divide-y divide-gray-300">
                                         <thead class="bg-gray-50">
                                             <tr>
-                                                <th scope="col"
+
+                                                 <th scope="col"
                                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                                    コード
+                                                    機台
                                                 </th>
+                                                
                                                 <th scope="col"
                                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                                     名前
                                                 </th>
 
-                                                <th scope="col"
-                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                                    機台
-                                                </th>
+                                               
 
 
                                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6" />
@@ -96,18 +95,17 @@ const deleteTask = (taskId) => {
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 bg-white">
                                             <tr v-for="task in tasks.data" :key="task.id">
+                                                
+
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {{ task.id }}
+                                                    {{ task.machine_type_id.name }}
                                                 </td>
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                                     {{ task.name }}
                                                 </td>
-                                                <td
-                                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                    {{ task.machine_type_id.name }}
-                                                </td>
+                                                
 
                                                 <td
                                                     class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

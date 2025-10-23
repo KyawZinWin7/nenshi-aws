@@ -51,9 +51,7 @@ const deletePlant = (plantId) => {
                     <table class="min-w-full divide-y divide-gray-300">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th
-                                    class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">
-                                    コード</th>
+                                
                                 <th
                                     class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">
                                     名前</th>
@@ -65,8 +63,7 @@ const deletePlant = (plantId) => {
                         </thead>
                         <tbody class="divide-y divide-gray-200 text-sm">
                             <tr v-for="plant in plants.data" :key="plant.id">
-                                <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ plant.id }}
-                                </td>
+                                
                                 <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ plant.name }}
                                 </td>
                                
