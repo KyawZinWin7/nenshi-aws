@@ -57,6 +57,7 @@ const deleteEmployee = (employeeId) => {
                 </th>
                 <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">
                   社員コード</th>
+                <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">役割</th>
                 <th
                   class="relative whitespace-nowrap py-3.5 pl-3 pr-4 text-right text-xs font-semibold text-gray-900 sm:pr-6">
                   操作</th>
@@ -67,6 +68,9 @@ const deleteEmployee = (employeeId) => {
                 <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ employee.id }}</td>
                 <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ employee.name }}</td>
                 <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ employee.employee_code }}</td>
+                <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">
+                  {{ employee.role === 'admin' ? '管理者' : '従業員' }}
+                </td>
                 <td class="relative whitespace-nowrap py-3 pl-3 pr-4 text-right sm:pr-6">
                   <Link :href="route('employees.edit', employee.id)"
                     class="inline-block text-indigo-600 hover:text-indigo-900 text-xs sm:text-sm">
