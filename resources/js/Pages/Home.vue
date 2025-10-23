@@ -379,16 +379,7 @@ watch(
         <Container>
           <form @submit.prevent="createMainOperation" class="space-y-4 sm:space-y-6 text-xs sm:text-sm">
 
-            <!-- 担当者 -->
-            <!-- <div>
-              <label class="form-label">担当者</label>
-              <select v-model="form.employee_id" class="select-uniform">
-                <option value="">担当者を選択</option>
-                <option v-for="employee in employees.data" :key="employee.id" :value="employee.id">
-                  {{ employee.name }}
-                </option>
-              </select>
-            </div> -->
+         
 
             <div>
               <label class="form-label">担当者</label>
