@@ -8,6 +8,10 @@ defineProps({
     type: Boolean,
     required: true,
   },
+  user: {
+    type: Object,
+    required: false,
+  },
 });
 </script>
 

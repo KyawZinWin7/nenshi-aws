@@ -95,7 +95,7 @@ class MainOperationController extends Controller
 {
     $modata = $request->validated();
 
-    // 🔍 Duplicate Check
+    // Duplicate Check
     $existing = MainOperation::where('plant_id', $modata['plant_id'])
         ->where('machine_type_id', $modata['machine_type_id'])
         ->where('machine_number_id', $modata['machine_number_id'])
@@ -110,7 +110,7 @@ class MainOperationController extends Controller
         ])->withInput();
     }
 
-    // 🆕 新規登録
+    //  新規登録
     $modata['start_time'] = now();
     $modata['status'] = 0;
 
@@ -120,7 +120,7 @@ class MainOperationController extends Controller
         $mainOperation->members()->attach($modata['team_ids']);
     }
 
-    // ✅ 一覧ページへリダイレクト
+    
     return redirect()->route('home')
         ->with('success', '作業が登録されました。');
 }
@@ -176,17 +176,19 @@ class MainOperationController extends Controller
 
     public function export()
         {
-        $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
+        $mainoperations = MainOperation::with(['machineType', 'task', 'employee','plant'])
                     ->paginate(1500);
                     $machinetypes = MachineTypeResource::collection(MachineType::all());
                     $tasks = TaskResource::collection(Task::all());
                     $employees = EmployeeResource::collection(Employee::all());
+                    $plants = PlantResource::collection(Plant::all());
 
                     return Inertia::render('Report/Export', [
                         'mainoperations' => MainOperationResource::collection($mainoperations),
                         'machinetypes' => $machinetypes,
                         'tasks' => $tasks,
                         'employees' => $employees,
+                        'plants' => $plants,
                     ]);
         }
 
@@ -199,15 +201,20 @@ class MainOperationController extends Controller
             try {
                 $filters = $request->all();
 
-                // အရင် data ရှိမရှိ စစ်ချင်ရင် ->exists() သုံးတာ ပိုသင့်တင့်
                 $exists = MainOperation::query()
                     ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
                     ->when(!empty($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
                     ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
                     ->when(!empty($filters['machine_type_id']), fn($q) => $q->where('machine_type_id', $filters['machine_type_id']))
-                    ->when(!empty($filters['machine_number']), fn($q) => $q->where('machine_number', $filters['machine_number']))
+                    ->when(!empty($filters['machine_number_id']), fn($q) => $q->where('machine_number_id', $filters['machine_number_id']))
                     ->when(!empty($filters['task_id']), fn($q) => $q->where('task_id', $filters['task_id']))
-                    ->exists();
+                    ->when(!empty($filters['plant_id']), fn($q) => $q->where('plant_id', $filters['plant_id']))
+                    ->when(!empty($filters['machine_number']), function($q) use ($filters) {
+                        $q->whereHas('machineNumber', function($q) use ($filters) {
+                            $q->where('number', $filters['machine_number']);
+                        });
+                    })
+                    ->exists(); // ✅ အရေးကြီးတဲ့အချက်
 
                 if (!$exists) {
                     return response()->json([
@@ -216,7 +223,7 @@ class MainOperationController extends Controller
                     ], 404);
                 }
 
-                // ဒီနေရာမှာ get() မလုပ်ဘဲ တိုက်ရိုက် Export class ကိုပေးမယ်
+                // ✅ Data ရှိတာသိပြီးမှ export
                 return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
 
             } catch (\Exception $e) {
@@ -224,6 +231,7 @@ class MainOperationController extends Controller
                 return response()->json(['error' => $e->getMessage()], 500);
             }
         }
+
 
 
 

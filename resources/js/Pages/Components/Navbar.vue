@@ -77,10 +77,14 @@ const logout = () => {
   Inertia.post('/logout')
 }
 
+const closeMenu = () => {
+  dropdownOpen.value = false;
+}
+
 // Outside click handler
 const handleClickOutside = (event) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
-    dropdownOpen.value = false;
+    closeMenu();
   }
 }
 

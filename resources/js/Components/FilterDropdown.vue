@@ -10,6 +10,7 @@ const props = defineProps({
     required: true,
   },
 });
+// console.log(props.tasks);
 
 const emit = defineEmits(['filter']);
 

@@ -37,10 +37,17 @@ class MainOperation extends Model
         return $this->belongsTo(MachineType::class);
     }
 
+    //  public function machineNumber()
+    // {
+    //     return $this->belongsTo(MachineNumber::class);
+    // }
+
+
      public function machineNumber()
     {
-        return $this->belongsTo(MachineNumber::class);
+        return $this->belongsTo(MachineNumber::class, 'machine_number_id');
     }
+
 
     public function task()
     {
@@ -53,10 +60,10 @@ class MainOperation extends Model
     }
 
     
-    public function mainOperations()
-    {
-        return $this->hasMany(MainOperation::class);
-    }
+    // public function mainOperations()
+    // {
+    //     return $this->hasMany(MainOperation::class);
+    // }
 
     public function plant()
     {
@@ -72,4 +79,6 @@ class MainOperation extends Model
             'employee_id'
         )->withTimestamps();
     }
+
+    
 }
