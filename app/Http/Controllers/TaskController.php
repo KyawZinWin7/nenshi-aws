@@ -13,14 +13,21 @@ use App\Http\Requests\UpdateTaskRequest;
 
 class TaskController extends Controller
 {
-      public function index()
+
+    public function index()
     {
-        
-        $tasks = TaskResource::collection(Task::with('machineType')->get());
-        return inertia('Task/Index',[
-            'tasks'=> $tasks,
+        $tasks = Task::with('machineType')
+            ->join('machine_types', 'tasks.machine_type_id', '=', 'machine_types.id')
+            ->select('tasks.*')
+            ->orderBy('machine_types.name') // machine_types table မှာ name column (ဥပမာ DT-302) ကို sort
+            ->orderBy('tasks.name')         // task name (ဥပမာ 糸下ろし, パーン変える)
+            ->get();
+
+        return inertia('Task/Index', [
+            'tasks' => TaskResource::collection($tasks),
         ]);
     }
+
 
      public function create()
 
