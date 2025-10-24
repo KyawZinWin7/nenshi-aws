@@ -18,6 +18,7 @@ use App\Models\MachineNumber;
 use Inertia\Inertia;
 use App\Http\Requests\StoreMainOperationRequest;
 use App\Http\Requests\UpdateMainOperationRequest;
+use App\Http\Requests\ExportMainOperationRequest;
 use App\Exports\MainOperationsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\SimpleExcel\SimpleExcelWriter;
@@ -30,11 +31,7 @@ class MainOperationController extends Controller
     
     public function index()
         {
-            // $mainoperations = MainOperation::with(['machineType', 'task', 'employee'])
-            //     ->where('status', 0)
-            //     ->orderBy('updated_at', 'desc')
-            //     ->take(1000)
-            //     ->get();
+           
 
             $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
                 ->where('status', 0)
@@ -58,37 +55,6 @@ class MainOperationController extends Controller
             ]);
         }
 
-
-    // public function store(StoreMainOperationRequest $request)
-    //     {
-    //         $modata = $request->validated();
-
-    //         // 重複チェック
-    //         $exists = MainOperation::where('machine_type_id', $modata['machine_type_id'])
-    //             ->where('machine_number_id', $modata['machine_number_id'])
-    //             ->where('task_id', $modata['task_id'])
-    //             ->where('status', 0)
-    //             ->exists();
-
-    //         if ($exists) {
-    //             return redirect()->back()
-    //                 ->withErrors(['duplicate' => '同じ機台・番号・作業の未完了レコードが既に存在します。'])
-    //                 ->withInput();
-    //         }
-
-    //         // Main Operation 作成
-    //         $modata['start_time'] = now();
-    //         $modata['status'] = 0;
-
-    //         $mainOperation = MainOperation::create($modata);
-
-    //         // ここでチームメンバーを attach
-    //         if (!empty($modata['team_ids'])) {
-    //             $mainOperation->members()->attach($modata['team_ids']);
-    //         }
-
-    //         return redirect()->route('home')->with('success', '作業が登録されました。');
-    //     }
 
 
    public function store(StoreMainOperationRequest $request)
@@ -196,41 +162,40 @@ class MainOperationController extends Controller
 
 
 
-    public function exportStore(Request $request)
-        {
-            try {
-                $filters = $request->all();
+    public function exportStore(ExportMainOperationRequest $request)
+{
+    try {
+        $filters = $request->validated();
 
-                $exists = MainOperation::query()
-                    ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
-                    ->when(!empty($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
-                    ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
-                    ->when(!empty($filters['machine_type_id']), fn($q) => $q->where('machine_type_id', $filters['machine_type_id']))
-                    ->when(!empty($filters['machine_number_id']), fn($q) => $q->where('machine_number_id', $filters['machine_number_id']))
-                    ->when(!empty($filters['task_id']), fn($q) => $q->where('task_id', $filters['task_id']))
-                    ->when(!empty($filters['plant_id']), fn($q) => $q->where('plant_id', $filters['plant_id']))
-                    ->when(!empty($filters['machine_number']), function($q) use ($filters) {
-                        $q->whereHas('machineNumber', function($q) use ($filters) {
-                            $q->where('number', $filters['machine_number']);
-                        });
-                    })
-                    ->exists(); // ✅ အရေးကြီးတဲ့အချက်
+        $exists = MainOperation::query()
+            ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
+            ->when(!empty($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
+            ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
+            ->when(!empty($filters['machine_type_id']), fn($q) => $q->where('machine_type_id', $filters['machine_type_id']))
+            ->when(!empty($filters['task_id']), fn($q) => $q->where('task_id', $filters['task_id']))
+            ->when(!empty($filters['plant_id']), fn($q) => $q->where('plant_id', $filters['plant_id']))
+            ->when(!empty($filters['machine_number']), function ($q) use ($filters) {
+                $q->whereHas('machineNumber', function ($q) use ($filters) {
+                    $q->where('number', $filters['machine_number']);
+                });
+            })
+            ->exists();
 
-                if (!$exists) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'エクスポートできるデータがありません。'
-                    ], 404);
-                }
-
-                // ✅ Data ရှိတာသိပြီးမှ export
-                return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
-
-            } catch (\Exception $e) {
-                \Log::error('Export Error: ' . $e->getMessage());
-                return response()->json(['error' => $e->getMessage()], 500);
-            }
+        if (!$exists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'エクスポートできるデータがありません。',
+            ], 404);
         }
+
+        return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
+    } catch (\Exception $e) {
+        \Log::error('Export Error: ' . $e->getMessage());
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+
 
     public function completelist()
         {

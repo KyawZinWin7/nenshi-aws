@@ -47,21 +47,19 @@ const taskNames = computed(() => {
 
 
 const exportExcel = async () => {
-  const params = {
+  const data = {
     date_from: form.value.date_from,
     date_to: form.value.date_to,
     employee_id: form.value.employee_id,
     machine_type_id: form.value.machine_type_id,
-    // machine_number_id: form.value.machine_number,
     machine_number: form.value.machine_number,
     task_id: form.value.task_id,
     plant_id: form.value.plant_id,
   };
 
   try {
-    const response = await axios.get('/exportstore', {
-      params,
-      responseType: 'blob'
+    const response = await axios.post('/exportstore', data, {
+      responseType: 'blob',
     });
 
     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -71,36 +69,66 @@ const exportExcel = async () => {
     document.body.appendChild(link);
     link.click();
 
-    // 成功メッセージ
     Swal.fire({
       icon: 'success',
       title: '成功',
       text: 'Excelが正常にダウンロードされました！',
       timer: 2000,
-      showConfirmButton: false
+      showConfirmButton: false,
     });
 
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      const reader = new FileReader();
-      reader.onload = () => {
+  // ✅ Validation Error (422)
+  if (error.response && error.response.status === 422) {
+    // blob data ကို text ပြန်ဖတ်
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
         const errData = JSON.parse(reader.result);
+        const errors = errData.errors;
+        const firstError = Object.values(errors)[0][0];
+        Swal.fire({
+          icon: 'warning',
+          title: '入力エラー',
+          text: firstError,
+        });
+      } catch (e) {
         Swal.fire({
           icon: 'error',
           title: 'エラー',
-          text: errData.message, // backend のメッセージがそのまま出る
+          text: '不明なエラーが発生しました。',
         });
-      };
-      reader.readAsText(error.response.data);
-    } else {
+      }
+    };
+    reader.readAsText(error.response.data);
+    return;
+  }
+
+  // ✅ No data found (404)
+  if (error.response && error.response.status === 404) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const errData = JSON.parse(reader.result);
       Swal.fire({
         icon: 'error',
         title: 'エラー',
-        text: 'Excelのダウンロードに失敗しました！',
+        text: errData.message,
       });
-    }
+    };
+    reader.readAsText(error.response.data);
+    return;
   }
+
+  // ✅ Other errors
+  Swal.fire({
+    icon: 'error',
+    title: 'エラー',
+    text: 'Excelのダウンロードに失敗しました！',
+  });
+}
+
 };
+
 
 
 

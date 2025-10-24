@@ -39,7 +39,13 @@ Route::middleware('auth')->group(function(){
     Route::post('/{id}/complete', [MainOperationController::class, 'complete'])->name('mainoperations.complete');
     Route::get('/completelist', [MainOperationController::class, 'completelist'])->name('mainoperations.completelist');
     Route::post('/{id}/uncomplete', [MainOperationController::class, 'uncomplete'])->name('mainoperations.uncomplete');
-    Route::get('/exportstore', [MainOperationController::class, 'exportstore'])->name('mainoperations.exportstore');
+    // Route::get('/exportstore', [MainOperationController::class, 'exportstore'])->name('mainoperations.exportstore');
+
+
+    Route::post('/exportstore', [MainOperationController::class, 'exportStore'])->name('mainoperations.exportstore');
+
+
+    
     Route::get('/machines/by-plant/{plant}', [MainOperationController::class, 'getMachinesByPlant']);
     Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
     Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);

@@ -223,14 +223,8 @@ const refreshData = () => {
         <FilterDropdown :tasks="tasks" @filter="handleCheckboxFilter" />
       </div>
 
-      <!-- Export Button -->
-      <!-- <button
-        v-if="user"
-        @click="exportToExcel"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-      >
-        Excel にエクスポート
-      </button> -->
+     
+    
     </div>
 
     <!-- Responsive Table Wrapper -->
