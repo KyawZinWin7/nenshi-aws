@@ -43,7 +43,7 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  
+
 });
 
 
@@ -257,7 +257,7 @@ loadTeamMembers(loginUserId);
 watch(selectedMainPerson, (newVal) => {
   if (newVal) {
     loadTeamMembers(newVal);
-    form.employee_id = newVal; 
+    form.employee_id = newVal;
   } else {
     teamMembers.value = [];
     form.employee_id = '';
@@ -379,14 +379,14 @@ watch(
         <Container>
           <form @submit.prevent="createMainOperation" class="space-y-4 sm:space-y-6 text-xs sm:text-sm">
 
-         
+
 
             <div>
               <label class="form-label">担当者</label>
               <select v-model="selectedMainPerson" class="select-uniform" disabled>
                 <option :value="loginUserId">
                   <!-- 担当者を選択 -->
-                   {{ loginUserName }}
+                  {{ loginUserName }}
                 </option>
                 <!-- <option v-for="employee in employees.data" :key="employee.id" :value="employee.id">
                   {{ employee.name }}
@@ -461,12 +461,13 @@ watch(
       </div>
 
       <!-- Right Table -->
-      <div class="w-full">
+      <!-- Right Table -->
+      <div class="w-full overflow-x-auto">
         <table class="min-w-[700px] sm:min-w-full divide-y divide-gray-300 text-[11px] sm:text-sm">
           <thead class="bg-gray-50 text-left">
             <tr>
               <th class="px-2 sm:px-4 py-2">Date</th>
-               <th class="px-2 sm:px-4 py-2">工場</th>
+              <th class="px-2 sm:px-4 py-2">工場</th>
               <th class="px-2 sm:px-4 py-2">機台</th>
               <th class="px-2 sm:px-4 py-2">機台の番号</th>
               <th class="px-2 sm:px-4 py-2">作業</th>
@@ -478,32 +479,31 @@ watch(
               <th class="px-2 sm:px-4 py-2">操作</th>
             </tr>
           </thead>
+
           <tbody class="bg-white divide-y divide-gray-200" v-for="mo in filteredMainOperations" :key="mo.id">
             <tr>
-              <td class="px-2 sm:px-4 py-2">{{ mo.created_at || 'No Date' }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.created_at || 'No Date' }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.plant?.name ?? '未設定' }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.machine_type.name }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.machine_number?.number ?? '未設定' }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.task.name }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.start_time }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.end_time }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.employee.name }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.total_time }}</td>
               <td class="px-2 sm:px-4 py-2">
-              {{ mo.plant?.name ?? '未設定' }}
-            </td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.machine_type.name }}</td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.machine_number?.number ?? '未設定' }}</td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.task.name }}</td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.start_time }}</td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.end_time }}</td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.employee.name }}</td>
-              <td class="px-2 sm:px-4 py-2">{{ mo.total_time }}</td>
-              <td class="px-2 sm:px-4 py-2">
-              <div class="flex flex-col gap-1">
-                <span v-for="member in mo.members" :key="member.id" class="sm:text-xs">
-                  {{ member.name }}
-                </span>
-              </div>
-            </td>
-              <td class="px-2 sm:px-4 py-2 flex gap-1 sm:gap-2" >
-                <button @click="completeMO(mo.id, mo.employee.employee_code)" v-if="(user.id === mo.employee.id)"
+                <div class="flex flex-col gap-1">
+                  <span v-for="member in mo.members" :key="member.id" class="sm:text-xs whitespace-nowrap">
+                    {{ member.name }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-2 sm:px-4 py-2 flex gap-1 sm:gap-2 whitespace-nowrap">
+                <button @click="completeMO(mo.id)" v-if="user.id === mo.employee.id"
                   class="px-2 sm:px-3 py-1 bg-green-600 text-white rounded text-[11px] sm:text-sm hover:bg-green-700">
                   完了
                 </button>
-                <button @click="deleteMO(mo.id, mo.employee.employee_code)"  v-if="(user.id === mo.employee.id)"
+                <button @click="deleteMO(mo.id)" v-if="user.id === mo.employee.id"
                   class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[11px] sm:text-sm hover:bg-red-700">
                   削除
                 </button>
@@ -512,6 +512,7 @@ watch(
           </tbody>
         </table>
       </div>
+
 
     </div>
   </main>
