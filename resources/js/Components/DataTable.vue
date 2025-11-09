@@ -235,10 +235,10 @@ const refreshData = () => {
             <th class="px-2 sm:px-4 py-2">Date</th>
             <th class="px-2 sm:px-4 py-2">工場</th>
             <th class="px-2 sm:px-4 py-2">機台</th>
-            <th class="px-2 sm:px-4 py-2">機台の番号</th>
+            <th class="px-2 sm:px-4 py-2">機号</th>
             <th class="px-2 sm:px-4 py-2">作業</th>
-            <th class="px-2 sm:px-4 py-2">開始時間</th>
-            <th class="px-2 sm:px-4 py-2">終了時間</th>
+            <th class="px-2 sm:px-4 py-2">開始</th>
+            <th class="px-2 sm:px-4 py-2">終了</th>
             <th class="px-2 sm:px-4 py-2">担当者</th>
             <th class="px-2 sm:px-4 py-2">合計時間</th>
             <th class="px-2 sm:px-4 py-2">メンバー</th>

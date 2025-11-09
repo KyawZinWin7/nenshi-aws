@@ -30,7 +30,7 @@ class MainOperationResource extends JsonResource
             // 'start_time' => $this->start_time,
         
             // 'end_time' => $this->end_time,
-            'start_time' => $this->start_time ? $this->start_time->timezone('Asia/Tokyo')->format('Y-m-d H:i:s') : null,
+            'start_time' => $this->start_time ? $this->start_time->timezone('Asia/Tokyo')->format('H:i:s') : null,
             'end_time' => $this->end_time ? $this->end_time->timezone('Asia/Tokyo')->format('Y-m-d H:i:s') : null,
 
             'total_time' => $this->total_time,
