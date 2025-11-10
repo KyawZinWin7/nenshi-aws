@@ -273,37 +273,24 @@ class MainOperationController extends Controller
 
 
     public function getMachineNumbersByType(Request $request)
-{
-    $plantId = $request->plant_id;
-    $typeId  = $request->machine_type_id;
+    {
+        $plantId = $request->plant_id;
+        $typeId  = $request->machine_type_id;
 
-    if (!$plantId || !$typeId) {
-        return response()->json([]);
+        if (!$plantId || !$typeId) {
+            return response()->json([]);
+        }
+
+        $machineNumbers = MachineNumber::whereHas('machineTypePlant', function ($q) use ($plantId, $typeId) {
+            $q->where('plant_id', $plantId)
+            ->where('machine_type_id', $typeId);
+        })->get();
+
+        return response()->json($machineNumbers);
     }
 
-    $machineNumbers = MachineNumber::whereHas('machineTypePlant', function ($q) use ($plantId, $typeId) {
-        $q->where('plant_id', $plantId)
-          ->where('machine_type_id', $typeId);
-    })->get();
-
-    return response()->json($machineNumbers);
-}
 
 
-// public function getTasksByMachineType(Request $request)
-// {
-//     $typeId = $request->machine_type_id;
-
-//     if (!$typeId) {
-//         return response()->json([], 400);
-//     }
-
-//     $tasks = Task::where('machine_type_id', $typeId)->get();
-
-//     return response()->json($tasks);
-// }
-
- 
 
 
 

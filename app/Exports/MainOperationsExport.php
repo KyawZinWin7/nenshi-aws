@@ -36,8 +36,16 @@ class MainOperationsExport implements FromQuery, WithHeadings, WithMapping, With
         }
 
         if (!empty($this->filters['employee_id'])) {
-            $query->where('employee_id', $this->filters['employee_id']);
+        $employeeId = $this->filters['employee_id'];
+
+        $query->where(function ($q) use ($employeeId) {
+            $q->where('employee_id', $employeeId)
+              ->orWhereHas('members', function ($memberQuery) use ($employeeId) {
+                  $memberQuery->where('employee_id', $employeeId);
+              });
+        });
         }
+
 
         if (!empty($this->filters['machine_type_id'])) {
             $query->where('machine_type_id', $this->filters['machine_type_id']);
