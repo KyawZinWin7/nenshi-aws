@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable; 
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles; 
 use App\Models\MainOperation;
 
 class Employee extends Authenticatable 
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable,HasRoles;
 
     protected $fillable = [
         'name',
@@ -22,6 +23,8 @@ class Employee extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    protected $guard_name = 'web';
 
     // public function mainOperations()
     // {

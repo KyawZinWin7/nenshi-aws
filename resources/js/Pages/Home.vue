@@ -499,15 +499,19 @@ watch(
                 </div>
               </td>
               <td class="px-2 sm:px-4 py-2 flex gap-1 sm:gap-2 whitespace-nowrap">
-                <button @click="completeMO(mo.id)" v-if="user.id === mo.employee.id"
+                <button @click="completeMO(mo.id)"
+                  v-if="user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
                   class="px-2 sm:px-3 py-1 bg-green-600 text-white rounded text-[11px] sm:text-sm hover:bg-green-700">
                   完了
                 </button>
-                <button @click="deleteMO(mo.id)" v-if="user.id === mo.employee.id"
+
+                <button @click="deleteMO(mo.id)"
+                  v-if="user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
                   class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[11px] sm:text-sm hover:bg-red-700">
                   削除
                 </button>
               </td>
+
             </tr>
           </tbody>
         </table>

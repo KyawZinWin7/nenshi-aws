@@ -41,6 +41,14 @@ return new class extends Migration
             $table->string('status')->default('0');
 
 
+
+            $table->unsignedBigInteger('completed_by')->nullable();
+            $table->foreign('completed_by')->references('id')->on('employees')->onDelete('set null');
+
+
+            $table->unsignedBigInteger('uncompleted_by')->nullable();
+            $table->foreign('uncompleted_by')->references('id')->on('employees')->onDelete('set null');
+
             $table->timestamps();
         });
     }

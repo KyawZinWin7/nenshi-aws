@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\MainOperation;
 use App\Http\Resources\MainOperationResource;
 use App\Http\Resources\MachineTypeResource;
@@ -32,12 +33,46 @@ class MainOperationController extends Controller
     public function index()
         {
            
-
-            $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
+            
+            if (auth()->user()->role === 'admin') {
+                // Admin: 
+                $mainoperations = MainOperation::with([
+                    'machineType',
+                    'task',
+                    'employee',
+                    'machineNumber',
+                    'plant',
+                    'members'
+                ])
                 ->where('status', 0)
                 ->orderBy('updated_at', 'desc')
-                ->take(1000)
+                ->take(200)
                 ->get();
+
+
+            } else {
+                // User:
+                $mainoperations = MainOperation::with([
+                    'machineType',
+                    'task',
+                    'employee',
+                    'machineNumber',
+                    'plant',
+                    'members'
+                ])
+                ->where('status', 0)
+                ->where('employee_id', Auth::id())
+                ->orWhereHas('members', function ($query) {
+                    $query->where('employee_id', Auth::id());
+                })
+                ->latest('updated_at')
+                ->take(200)
+                ->get();
+            }
+
+            
+
+          
 
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
@@ -114,6 +149,8 @@ class MainOperationController extends Controller
             $operation->total_time = sprintf('%02d:%02d:%02d', $diff->h + ($diff->d * 24), $diff->i, $diff->s);
 
             $operation->status = 1;
+            $operation->completed_by = auth()->id();
+            $operation->uncompleted_by = null;
             $operation->save();
 
             return redirect()->back()->with('success', '作業を完了しました。');
@@ -130,6 +167,8 @@ class MainOperationController extends Controller
         
             $operation->total_time = '00:00:00';
             $operation->status = 0;
+            $operation->uncompleted_by = auth()->id();
+            $operation->completed_by = null; 
             $operation->save();
 
             return redirect()->back()->with('success', '作業を未完了にしました。');
@@ -163,37 +202,37 @@ class MainOperationController extends Controller
 
 
     public function exportStore(ExportMainOperationRequest $request)
-{
-    try {
-        $filters = $request->validated();
+    {
+        try {
+            $filters = $request->validated();
 
-        $exists = MainOperation::query()
-            ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
-            ->when(!empty($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
-            ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
-            ->when(!empty($filters['machine_type_id']), fn($q) => $q->where('machine_type_id', $filters['machine_type_id']))
-            ->when(!empty($filters['task_id']), fn($q) => $q->where('task_id', $filters['task_id']))
-            ->when(!empty($filters['plant_id']), fn($q) => $q->where('plant_id', $filters['plant_id']))
-            ->when(!empty($filters['machine_number']), function ($q) use ($filters) {
-                $q->whereHas('machineNumber', function ($q) use ($filters) {
-                    $q->where('number', $filters['machine_number']);
-                });
-            })
-            ->exists();
+            $exists = MainOperation::query()
+                ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
+                ->when(!empty($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
+                ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
+                ->when(!empty($filters['machine_type_id']), fn($q) => $q->where('machine_type_id', $filters['machine_type_id']))
+                ->when(!empty($filters['task_id']), fn($q) => $q->where('task_id', $filters['task_id']))
+                ->when(!empty($filters['plant_id']), fn($q) => $q->where('plant_id', $filters['plant_id']))
+                ->when(!empty($filters['machine_number']), function ($q) use ($filters) {
+                    $q->whereHas('machineNumber', function ($q) use ($filters) {
+                        $q->where('number', $filters['machine_number']);
+                    });
+                })
+                ->exists();
 
-        if (!$exists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'エクスポートできるデータがありません。',
-            ], 404);
+            if (!$exists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'エクスポートできるデータがありません。',
+                ], 404);
+            }
+
+            return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
+        } catch (\Exception $e) {
+            \Log::error('Export Error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return Excel::download(new MainOperationsExport($filters), 'mainoperations.xlsx');
-    } catch (\Exception $e) {
-        \Log::error('Export Error: ' . $e->getMessage());
-        return response()->json(['error' => $e->getMessage()], 500);
     }
-}
 
 
 
@@ -215,7 +254,7 @@ class MainOperationController extends Controller
                     $query->where('employee_id', auth()->id()); // member
                 })
                 ->latest('updated_at')
-                ->take(1000)
+                ->take(500)
                 ->get();
 
             return Inertia::render('Complete/CompleteList', [
@@ -242,7 +281,7 @@ class MainOperationController extends Controller
             $tasks = TaskResource::collection(Task::all());
             $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
             ->latest('updated_at')
-            ->take(1000)
+            ->take(500)
             ->get();
             return Inertia::render('Complete/AdminCompleteList', [
                         'mainoperations' => MainOperationResource::collection($mainoperations),
