@@ -9,13 +9,13 @@ use App\Models\Plant;
 use App\Models\Task;
 use App\Models\MachineNumber;
 use App\Models\MachineTypePlant;
+use App\Models\Department;
 
 class MachineType extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
-
+    protected $fillable = ['name','department_id'];
 
     public function mainOperations()
     {
@@ -37,10 +37,16 @@ class MachineType extends Model
     }
 
     public function plants()
-{
-    return $this->belongsToMany(Plant::class, 'machine_type_plants')
-                ->withPivot('start_number', 'end_number')
-                ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(Plant::class, 'machine_type_plants')
+                    ->withPivot('start_number', 'end_number')
+                    ->withTimestamps();
+    }
+
+
+     public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
 }

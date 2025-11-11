@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('employee_code');
             $table->string('password');
-            $table->enum('role', ['admin', 'user'])->default('user');
+            $table->foreignId('department_id')->constrained()->cascadeOnDelete();
+            $table->enum('role', ['superadmin','admin', 'user'])->default('user');
             // 
             // $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();

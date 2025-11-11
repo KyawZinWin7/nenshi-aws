@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\MachineNumberController;
 use App\Http\Controllers\MainOperationController;
+use App\Http\Controllers\DepartmentController;
 
 
 
@@ -55,6 +56,7 @@ Route::middleware('auth')->group(function(){
     //----------------Admin Routes----------------
     Route::middleware('admin')->group(function(){
         Route::resource('plants',PlantController::class);
+        Route::resource('departments',DepartmentController::class);
         Route::resource('employees',EmployeeController::class);
         Route::resource('machinetypes',MachineTypeController::class);
         Route::resource('tasks', TaskController::class)->except(['show']);

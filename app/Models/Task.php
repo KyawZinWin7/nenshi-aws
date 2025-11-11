@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\MainOperation;
 use App\Models\MachineType;
+use App\Models\Department;
 
 class Task extends Model
 {
     use HasFactory;
 
 
-    protected $fillable = ['name','machine_type_id'];
+    protected $fillable = ['name','machine_type_id','department_id'];
 
 
     public function mainOperations()
@@ -21,8 +22,13 @@ class Task extends Model
     }
 
 
-public function machineType()
+    public function machineType()
     {
         return $this->belongsTo(MachineType::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

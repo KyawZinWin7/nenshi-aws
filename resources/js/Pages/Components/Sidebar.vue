@@ -65,6 +65,29 @@ defineProps({
         </li>
         <!--End Plants-->
 
+
+        <!--Start Department-->
+        <li>
+          <a :href="route('departments.index')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            route().current('departments.index')
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              stroke-width="1.8"　width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16M6 20V10h5v10m0 0V6h7v14" />
+            </svg>
+
+
+
+
+
+            <span class="ml-3">部門</span>
+          </a>
+        </li>
+        <!--End Department-->
+
         <!--Start Employee-->
         <li>
           <a :href="route('employees.index')" :class="[

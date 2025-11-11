@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles; 
 use App\Models\MainOperation;
+use App\Models\Department;
 
 class Employee extends Authenticatable 
 {
@@ -16,6 +17,7 @@ class Employee extends Authenticatable
         'name',
         'employee_code',
         'password',
+        'department_id',
         'role',
     ];
 
@@ -33,9 +35,15 @@ class Employee extends Authenticatable
 
 
     public function mainOperations()
-{
-    return $this->belongsToMany(MainOperation::class, 'main_operation_member', 'employee_id', 'main_operation_id')
-                ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(MainOperation::class, 'main_operation_member', 'employee_id', 'main_operation_id')
+                    ->withTimestamps();
+    }
+
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
 }
