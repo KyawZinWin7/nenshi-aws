@@ -24,6 +24,7 @@ class UpdateEmployeeRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'employee_code' => 'required|string|max:255|unique:employees,employee_code,' . $this->employee->id,
+            'department_id' => 'required|integer|exists:departments,id',
             'password' => 'nullable|string',
             'role' => 'required|in:admin,user',
         ];
@@ -37,6 +38,7 @@ class UpdateEmployeeRequest extends FormRequest
             'name.required' => '名前を入力してください。',
             'name.string' => '名前は文字列である必要があります。',
             'name.max' => '名前は255文字以内で入力してください。',
+            'department_id.required' => '部門を入力してください。',
         ];
     }
 }

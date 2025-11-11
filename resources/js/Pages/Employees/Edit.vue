@@ -7,6 +7,11 @@ defineProps({
   employee: {
     type: Object,
     required: true,
+  },
+
+  departments:{
+    type:Object,
+    required:true
   }
 })
 
@@ -15,6 +20,7 @@ let employee = usePage().props.employee.data;
 const form = useForm({
   name: employee.name,
   employee_code: employee.employee_code,
+  department_id: employee.department_id.id,
   password: "",
   role: employee.role
 
@@ -55,7 +61,7 @@ const updateEmployee = () => {
                 <h3 class="text-lg leading-6 font-medium text-gray-900">機械の更新</h3>
               </div>
 
-              <div class="grid grid-cols-6 gap-6">
+              <div class="">
                 <div class="col-span-6">
                   <label for="name" class="block text-sm font-medium text-gray-700">名前</label>
                   <input v-model="form.name" type="text" id="name"
@@ -64,17 +70,35 @@ const updateEmployee = () => {
                     {{ form.errors.name }}
                   </div>
                 </div>
+                <!--社員コード & 部門 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-2">
+                  <!-- 社員コード -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">社員コード</label>
+                    <input v-model="form.employee_code" type="text"
+                      class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div v-if="form.errors.employee_code" class="text-red-500 text-sm mt-1">{{ form.errors.employee_code
+                    }}</div>
+                  </div>
 
-                <div class="col-span-6">
-                  <label for="employee_code" class="block text-sm font-medium text-gray-700">社員コード</label>
-                  <input v-model="form.employee_code" type="text" id="employee_code"
-                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                  <div v-if="form.errors.employee_code" class="text-red-500 mt-1">
-                    {{ form.errors.employee_code }}
+
+                  <!-- 部門 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">部門</label>
+                    <select v-model="form.department_id"
+                      class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <option value="">部門を選択</option>
+                      <option v-for="department in departments.data" :key="department.id" :value="department.id">
+                        {{ department.name }}
+                      </option>
+                    </select>
+                    <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
+                    }}</div>
                   </div>
                 </div>
 
-                <div class="col-span-6">
+
+                <div class="col-span-6 mt-2">
                   <label for="password" class="block text-sm font-medium text-gray-700">パスワード</label>
                   <input v-model="form.password" type="password" id="password"
                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />

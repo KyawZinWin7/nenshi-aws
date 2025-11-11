@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Employee;
+use App\Models\Department;
 use App\Http\Resources\EmployeeResource;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 
@@ -14,20 +16,27 @@ use App\Models\MainOperation;
 class EmployeeController extends Controller
 {
     
-     public function index()
-    {
+   public function index()
+   {
+        $employees = Employee::with('department')->get(); // <- get() လုပ်ရမယ်
 
-        $employees = EmployeeResource::collection(Employee::all());
-        // dd($machinetypes);
-        return inertia('Employees/Index',[
-            'employees'=> $employees,
+        return inertia('Employees/Index', [
+            'employees' => EmployeeResource::collection($employees),
         ]);
-    }
+   }
+
+
+     
 
     public function create()
 
     {
-        return inertia('Employees/Create');
+        $departments = DepartmentResource::collection(Department::all());
+        return inertia('Employees/Create',[
+            'departments' => $departments
+        ]);
+
+       
     }
 
 
@@ -48,8 +57,12 @@ class EmployeeController extends Controller
 
      public function edit(Employee $employee)
     {
+         $departments = DepartmentResource::collection(Department::all());
+        
+        
         return inertia('Employees/Edit',[
-            'employee'=> EmployeeResource::make($employee)
+            'employee'=> new EmployeeResource($employee->load('department')),
+            'departments' => $departments,
         ]);
     }
 
