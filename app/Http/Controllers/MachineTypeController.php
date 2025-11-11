@@ -7,6 +7,8 @@ use App\Models\MachineType;
 use App\Models\MainOperation;
 use App\Models\Plant;
 use App\Http\Resources\MachineTypeResource;
+use App\Models\Department;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreMachineTypeRequest;
 use App\Http\Requests\UpdateMachineTypeRequest;
 use App\Http\Resources\PlantResource;
@@ -18,11 +20,11 @@ class MachineTypeController extends Controller
 
     public function index()
     {
-
-        $machinetypes = MachineTypeResource::collection(MachineType::all());
+        $machinetypes = MachineType::with('department')->get();
+        
        
         return inertia('MachineType/Index',[
-            'machinetypes'=> $machinetypes,
+            'machinetypes' => MachineTypeResource::collection($machinetypes),
         ]);
     }
 
@@ -30,8 +32,11 @@ class MachineTypeController extends Controller
     public function create()
 
     {
+        $departments = DepartmentResource::collection(Department::all());
         
-        return inertia('MachineType/Create');
+        return inertia('MachineType/Create',[
+            'departments' => $departments,
+        ]);
 
     }
 
@@ -47,14 +52,18 @@ class MachineTypeController extends Controller
 
     public function edit(MachineType $machinetype)
     {
+        $departments = DepartmentResource::collection(Department::all());
         
         return inertia('MachineType/Edit',[
-            'machinetype'=>  MachineTypeResource::make($machinetype),
+            'machinetype'=> new MachineTypeResource($machinetype->load('department')),
+            'departments' => $departments
             
         ]);
 
          
     }
+
+    
 
     public function update(UpdateMachineTypeRequest $request, MachineType $machinetype)
 

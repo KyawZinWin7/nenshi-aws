@@ -4,14 +4,18 @@ import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
 
 
-// const props = defineProps(
-//   {
-//     plants: Object,
-//   }
-// )
+defineProps({
+  
+
+  departments:{
+    type:Object,
+    required:true
+  }
+})
+
 const form = useForm({
   name: "",
-  plant_id:"",
+  department_id: "",
 })
 
 
@@ -69,7 +73,29 @@ const createMachineType = () => {
               </div>
 
               <!--End Name-->
-            
+
+
+              <!-- Start Department-->
+
+
+              <div class="grid grid-cols-6 gap-6">
+                <div class="col-span-6 sm:col-span-6">
+                <label class="block text-sm font-medium text-gray-700">部門</label>
+                <select v-model="form.department_id"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                  <option value="">部門を選択</option>
+                  <option v-for="department in departments.data" :key="department.id" :value="department.id">
+                    {{ department.name }}
+                  </option>
+                </select>
+                <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
+                }}</div>
+              </div>
+              </div>
+              
+
+              <!--End Department-->
+
             </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
               <Link :href="route('machinetypes.index')"

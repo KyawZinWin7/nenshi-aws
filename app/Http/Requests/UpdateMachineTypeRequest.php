@@ -23,6 +23,7 @@ class UpdateMachineTypeRequest extends FormRequest
     {
         return [
             'name'=>'required|string|max:255',
+            'department_id' => 'required|integer|exists:departments,id',
         ];
     }
 
@@ -33,6 +34,7 @@ class UpdateMachineTypeRequest extends FormRequest
             'name.required' => '名前を入力してください。',
             'name.string' => '名前は文字列である必要があります。',
             'name.max' => '名前は255文字以内で入力してください。',
+            'department_id.required' => '部門を入力してください。',
         ];
     }
 }
