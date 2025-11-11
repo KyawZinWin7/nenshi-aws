@@ -18,6 +18,7 @@ class TaskResource extends JsonResource
             'id' => $this->id,
             'name'=> $this->name,
             'machine_type_id' => new MachineTypeResource($this->whenLoaded('machineType')),
+            'department_id' => new DepartmentResource($this->whenLoaded('department')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

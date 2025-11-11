@@ -24,6 +24,7 @@ class UpdateTaskRequest extends FormRequest
         return [
             'name'=>'required|string|max:255',
             'machine_type_id' => 'required|exists:machine_types,id',
+            'department_id' => 'required|exists:departments,id'
         ];
     }
 
@@ -36,6 +37,7 @@ class UpdateTaskRequest extends FormRequest
             'name.max' => '名前は255文字以内で入力してください。',
             'machine_type_id.required' => '機台は必須です。',
             'machine_type_id.exists' => '選択された機台は無効です。',
+            'department_id.required' => '部門を入力してください。',
         ];
     }
 }

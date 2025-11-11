@@ -87,6 +87,11 @@ const deleteTask = (taskId) => {
                                                     名前
                                                 </th>
 
+                                                <th scope="col"
+                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                                    部門
+                                                </th>
+
                                                
 
 
@@ -104,6 +109,12 @@ const deleteTask = (taskId) => {
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                                     {{ task.name }}
+                                                </td>
+
+
+                                                <td
+                                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                                    {{ task.department_id.name }}
                                                 </td>
                                                 
 

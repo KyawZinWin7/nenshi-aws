@@ -6,11 +6,13 @@ import AdminLayout from '../Components/AdminLayout.vue';
 
 const props = defineProps({
   machineTypes: Object,
+  departments: Object,
 })
 
 const form = useForm({
   name: "",
-  machine_type_id:"",
+  machine_type_id: "",
+  department_id: "",
 })
 
 
@@ -70,17 +72,45 @@ const createTask = () => {
 
               <!--Start Machine Type-->
               <div>
-                <label class="block text-xs sm:text-sm font-medium text-gray-700">機台</label>
-                <select v-model="form.machine_type_id"
-                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
-                  <option value="">担当者を選択</option>
-                  <option v-for="machineType in machineTypes.data" :key="machineType.id" :value="machineType.id">
-                    {{ machineType.name }}
-                  </option>
-                </select>
+
               </div>
 
               <!--End Machine Type-->
+
+
+              <!-- Department & Machine Type -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Department -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">部門</label>
+                  <select v-model="form.department_id"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="">部門を選択</option>
+                    <option v-for="department in departments.data" :key="department.id" :value="department.id">
+                      {{ department.name }}
+                    </option>
+                  </select>
+                  <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
+                  }}</div>
+                </div>
+
+
+                <!-- Machine Type -->
+                <div>
+                  <label class="block text-xs sm:text-sm font-medium text-gray-700">機台</label>
+                  <select v-model="form.machine_type_id"
+                    class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
+                    <option value="">担当者を選択</option>
+                    <option v-for="machineType in machineTypes.data" :key="machineType.id" :value="machineType.id">
+                      {{ machineType.name }}
+                    </option>
+                  </select>
+                  <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
+                  }}</div>
+                </div>
+              </div>
+
+
             </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
               <Link :href="route('tasks.index')"

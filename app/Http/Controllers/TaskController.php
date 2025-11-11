@@ -8,6 +8,8 @@ use App\Models\Task;
 use App\Models\MachineType;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\MachineTypeResource;
+use App\Http\Resources\DepartmentResource;
+use App\Models\Department;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 
@@ -16,7 +18,7 @@ class TaskController extends Controller
 
     public function index()
     {
-        $tasks = Task::with('machineType')
+        $tasks = Task::with('machineType','department')
             ->join('machine_types', 'tasks.machine_type_id', '=', 'machine_types.id')
             ->select('tasks.*')
             ->orderBy('machine_types.name') // machine_types table မှာ name column (ဥပမာ DT-302) ကို sort
@@ -32,9 +34,11 @@ class TaskController extends Controller
      public function create()
 
     {
+        $departments = DepartmentResource::collection(Department::all());
         $machineTypes = MachineTypeResource::collection(MachineType::all());
         return inertia('Task/Create',[
-            'machineTypes' => $machineTypes
+            'machineTypes' => $machineTypes,
+            'departments' => $departments
         ]);
     }
 
@@ -53,10 +57,12 @@ class TaskController extends Controller
     {
 
         $machineTypes = MachineTypeResource::collection(MachineType::all());
+        $departments = DepartmentResource::collection(Department::all());
 
         return inertia('Task/Edit',[
-            'task'=> new TaskResource($task->load('machineType')),
-            'machineTypes' => $machineTypes
+            'task'=> new TaskResource($task->load('machineType','department')),
+            'machineTypes' => $machineTypes,
+            'departments' => $departments
         ]);
     }
 
