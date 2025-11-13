@@ -17,12 +17,14 @@ class MainOperationResource extends JsonResource
             
         return [
             'id' => $this->id,
+            'small_task'=> $this->small_task,
 
             // relations
             'plant' => new PlantResource($this->whenLoaded('plant')),
             'machine_type' => new MachineTypeResource($this->whenLoaded('machineType')),
             'task' => new TaskResource($this->whenLoaded('task')),
             'employee' => new EmployeeResource($this->whenLoaded('employee')),
+            'department' => new DepartmentResource($this->whenLoaded('department')),
             'members' => EmployeeResource::collection($this->whenLoaded('members')), // ✅ add this line
 
             // direct fields

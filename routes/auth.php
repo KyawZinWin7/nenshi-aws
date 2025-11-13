@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function(){
     Route::post('/logout',[AuthenticateController::class,'destory'])->name('logout');
     Route::get('/mainoperations', [MainOperationController::class, 'index'])->name('home');
     Route::post('/mainoperations', [MainOperationController::class, 'store'])->name('mainoperations.store');
+    Route::put('/mainoperations/{mainoperation}', [MainOperationController::class, 'update'])->name('mainoperations.update');
     Route::post('/{id}/complete', [MainOperationController::class, 'complete'])->name('mainoperations.complete');
     Route::get('/completelist', [MainOperationController::class, 'completelist'])->name('mainoperations.completelist');
     Route::post('/{id}/uncomplete', [MainOperationController::class, 'uncomplete'])->name('mainoperations.uncomplete');

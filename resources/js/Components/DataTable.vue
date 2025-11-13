@@ -268,7 +268,7 @@ const refreshData = () => {
               </div>
             </td>
 
-            <td class="px-2 sm:px-4 py-2" v-if="(user.id === mainoperation.employee.id ) || (user.role === 'admin')">
+            <td class="px-2 sm:px-4 py-2" v-if="(user.id === mainoperation.employee.id ) || (user.role === 'admin') || (user.role === 'superadmin') ">
               <div class="flex items-center justify-center gap-1 sm:gap-2">
                 <button @click="uncompleteMO(mainoperation.id)"
                   class="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded text-[10px] sm:text-sm hover:bg-blue-700">

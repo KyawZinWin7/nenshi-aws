@@ -143,8 +143,7 @@ watch(() => page.url, () => {
                             </Link> -->
                         </div>
                         
-                    </li>
-                    <li v-if="employee && employee.role === 'admin'">
+                    </li><li v-if="employee && ['admin','superadmin'].includes(employee.role)">
                         <Link :href="route('mainoperations.admincompletelist')"
                             class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
                                 'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperations.admincompletelist'),
@@ -153,6 +152,7 @@ watch(() => page.url, () => {
                         ダッシュボード
                         </Link>
                     </li>
+                    
 
                 </ul>
             </div>

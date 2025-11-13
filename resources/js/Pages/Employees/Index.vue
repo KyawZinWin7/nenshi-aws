@@ -77,7 +77,7 @@ const deleteEmployee = (employeeId) => {
                   <Link :href="route('employees.edit', employee.id)"
                     class="inline-block text-indigo-600 hover:text-indigo-900 text-xs sm:text-sm">
                   編集
-                  </Link>
+                </Link>
                   <button @click="deleteEmployee(employee.id)"
                     class="inline-block ml-2 text-red-600 hover:text-red-800 text-xs sm:text-sm">
                     削除

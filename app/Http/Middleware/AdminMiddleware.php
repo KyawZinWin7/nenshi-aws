@@ -13,10 +13,10 @@ class AdminMiddleware
         $user = auth()->user();
 
         // role မရှိတာ သို့မဟုတ် admin မဟုတ်တာဆိုရင်
-        if (!$user || $user->role !== 'admin') {
-            // 👇 redirect ပြုလုပ်
-            return redirect()->route('home')->with('error', 'アクセス権限がありません。');
+        if (!$user || !in_array($user->role, ['admin', 'superadmin'])) {
+            return redirect()->route('home')->with('error', 'アクセス権限がありません。ss');
         }
+
 
         return $next($request);
     }

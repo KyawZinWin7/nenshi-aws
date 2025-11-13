@@ -11,7 +11,7 @@ class StoreMainOperationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return auth()->check();
     }
 
     /**
@@ -29,6 +29,8 @@ class StoreMainOperationRequest extends FormRequest
             'employee_id' => 'required|integer|exists:employees,id',
             'team_ids' => 'nullable|array',
             'team_ids.*' => 'integer|exists:employees,id',
+            'small_task'=>'nullable|string|max:255',
+
         ];
     }
 

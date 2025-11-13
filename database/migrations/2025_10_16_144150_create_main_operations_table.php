@@ -38,6 +38,14 @@ return new class extends Migration
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
 
+
+            $table->unsignedBigInteger('department_id');
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
+
+            $table->string('small_task')->nullable();
+
+            $table->string('description')->nullable();
+
             $table->string('status')->default('0');
 
 

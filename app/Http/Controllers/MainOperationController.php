@@ -17,6 +17,8 @@ use App\Models\Plant;
 use App\Models\MachineType;
 use App\Models\MachineNumber;
 use Inertia\Inertia;
+use App\Models\Department;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreMainOperationRequest;
 use App\Http\Requests\UpdateMainOperationRequest;
 use App\Http\Requests\ExportMainOperationRequest;
@@ -34,8 +36,8 @@ class MainOperationController extends Controller
         {
            
             
-            if (auth()->user()->role === 'admin') {
-                // Admin: 
+            if (auth()->user()->role === 'superadmin') {
+                // Super Admin: 
                 $mainoperations = MainOperation::with([
                     'machineType',
                     'task',
@@ -51,7 +53,7 @@ class MainOperationController extends Controller
 
 
             } else {
-                // User:
+                // User and Admin
                 $mainoperations = MainOperation::with([
                     'machineType',
                     'task',
@@ -61,10 +63,11 @@ class MainOperationController extends Controller
                     'members'
                 ])
                 ->where('status', 0)
-                ->where('employee_id', Auth::id())
-                ->orWhereHas('members', function ($query) {
-                    $query->where('employee_id', Auth::id());
-                })
+                // ->where('employee_id', Auth::id())
+                // ->orWhereHas('members', function ($query) {
+                //     $query->where('employee_id', Auth::id());
+                // })
+                ->where('department_id',Auth::user()->department_id)
                 ->latest('updated_at')
                 ->take(200)
                 ->get();
@@ -92,16 +95,72 @@ class MainOperationController extends Controller
 
 
 
-   public function store(StoreMainOperationRequest $request)
+    public function store(StoreMainOperationRequest $request)
+    {
+        $modata = $request->validated();
+
+        // Duplicate Check
+        $existing = MainOperation::where('plant_id', $modata['plant_id'])
+            ->where('machine_type_id', $modata['machine_type_id'])
+            ->where('machine_number_id', $modata['machine_number_id'])
+            ->where('task_id', $modata['task_id'])
+            ->where('status', 0)
+            ->with('employee')
+            ->first();
+
+        if ($existing) {
+            return back()->withErrors([
+                'duplicate' => '同じ工場・機台・番号・作業の未完了レコードが既に存在します。（担当者：' . ($existing->employee->name ?? '不明') . '）'
+            ])->withInput();
+        }
+
+        //  新規登録
+        $modata['start_time'] = now();
+        $modata['status'] = 0;
+        $modata['department_id'] = Auth::user()->department_id;
+
+        $mainOperation = MainOperation::create($modata);
+
+        if (!empty($modata['team_ids'])) {
+            $mainOperation->members()->attach($modata['team_ids']);
+        }
+
+        
+        return redirect()->route('home')
+            ->with('success', '作業が登録されました。');
+    }
+
+
+
+
+
+    public function edit(MainOperation $mainoperation)
+    {
+        return Inertia::render('Home', [
+            'mainoperation' => new MainOperationResource($mainoperation->load('machineType')),
+        ]);
+    }
+
+
+
+
+
+   public function update(UpdateMainOperationRequest $request, MainOperation $mainoperation)
 {
+    \Log::info('Update reached', [
+        'user_id' => auth()->id(),
+        'mainOperation_id' => $mainoperation->id,
+        'request' => $request->all()
+    ]);
+
     $modata = $request->validated();
 
-    // Duplicate Check
     $existing = MainOperation::where('plant_id', $modata['plant_id'])
         ->where('machine_type_id', $modata['machine_type_id'])
         ->where('machine_number_id', $modata['machine_number_id'])
         ->where('task_id', $modata['task_id'])
         ->where('status', 0)
+        ->where('id', '!=', $mainoperation->id)
         ->with('employee')
         ->first();
 
@@ -111,24 +170,17 @@ class MainOperationController extends Controller
         ])->withInput();
     }
 
-    //  新規登録
-    $modata['start_time'] = now();
-    $modata['status'] = 0;
-
-    $mainOperation = MainOperation::create($modata);
+    $mainoperation->update($modata);
 
     if (!empty($modata['team_ids'])) {
-        $mainOperation->members()->attach($modata['team_ids']);
+        $mainoperation->members()->sync($modata['team_ids']);
+    } else {
+        $mainoperation->members()->detach();
     }
 
-    
     return redirect()->route('home')
-        ->with('success', '作業が登録されました。');
+        ->with('success', '作業が更新されました。');
 }
-
-
-
-
 
 
 
@@ -273,21 +325,42 @@ class MainOperationController extends Controller
 
             $user = auth()->user();
 
-            if ($user->role !== 'admin') {
+           
+
+            if (!in_array($user->role, ['superadmin', 'admin'])) {
                 abort(403, 'アクセス権限がありません'); // 403 Forbidden
             }
 
-            $machinetypes = MachineTypeResource::collection(MachineType::all());
-            $tasks = TaskResource::collection(Task::all());
-            $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
-            ->latest('updated_at')
-            ->take(500)
-            ->get();
-            return Inertia::render('Complete/AdminCompleteList', [
-                        'mainoperations' => MainOperationResource::collection($mainoperations),
-                        'machinetypes' => $machinetypes,
-                        'tasks' => $tasks,
-                    ]);
+            if(auth()->user()->role === 'superadmin'){
+
+
+                $machinetypes = MachineTypeResource::collection(MachineType::all());
+                $tasks = TaskResource::collection(Task::all());
+                $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
+                ->latest('updated_at')
+                ->take(500)
+                ->get();
+                return Inertia::render('Complete/AdminCompleteList', [
+                            'mainoperations' => MainOperationResource::collection($mainoperations),
+                            'machinetypes' => $machinetypes,
+                            'tasks' => $tasks,
+                        ]);
+            }else{
+                
+                $machinetypes = MachineTypeResource::collection(MachineType::all());
+                $tasks = TaskResource::collection(Task::all());
+                $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
+                ->where('department_id',Auth::user()->department_id)
+                ->latest('updated_at')
+                ->take(500)
+                ->get();
+                return Inertia::render('Complete/AdminCompleteList', [
+                            'mainoperations' => MainOperationResource::collection($mainoperations),
+                            'machinetypes' => $machinetypes,
+                            'tasks' => $tasks,
+                ]);
+            }
+           
         
         }
 

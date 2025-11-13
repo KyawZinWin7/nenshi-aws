@@ -3,48 +3,40 @@ import Container from '../Components/Container.vue';
 import PrimaryBtn from '../Components/PrimaryBtn.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import SearchForm from '../Components/SearchForm.vue';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import Swal from 'sweetalert2';
 import axios from 'axios'
+import { initFlowbite } from 'flowbite'
+// import { route } from 'ziggy-js';
 
+
+
+
+onMounted(() => {
+  initFlowbite();
+})
 
 
 const page = usePage();
+console.log("Login user id:", page.props.auth.user.id);
 const user = computed(() => page.props.auth.user);
 
 
 const props = defineProps({
-  mainoperations: {
-    type: Object,
-    required: true,
-  },
-  machinetypes: {
-    type: Object,
-    required: true,
-  },
-  tasks: {
-    type: Object,
-    required: true,
-  },
-  employees: {
-    type: Object,
-    required: true,
-  },
-  plants: {
-    type: Object,
-    required: true,
-  },
-  machinenumbers: {
-    type: Object,
-    required: true,
-  },
-  machinenumber: {
-    type: Object,
-    required: true,
-  },
-
+  mainoperations: { type: Object, required: true },
+  mainoperation: { type: Object, required: false, default: () => ({}) },
+  machinetypes: { type: Object, required: true },
+  tasks: { type: Object, required: true },
+  employees: { type: Object, required: true },
+  plants: { type: Object, required: true },
+  machinenumbers: { type: Object, required: true },
+  machinenumber: { type: Object, required: false, default: () => ({}) },
 });
+
+
+
+const mainoperation = usePage().props.mainoperation?.data;
 
 
 
@@ -55,10 +47,21 @@ const form = useForm({
   employee_id: "",
   plant_id: "",
   team_ids: [],
+  small_task: "",
+
 
 
 
 });
+
+
+const submitForm = () => {
+  if (isEditing.value) {
+    updateMO();
+  } else {
+    createMainOperation();
+  }
+};
 
 
 //For Main Operation Create
@@ -108,6 +111,53 @@ const createMainOperation = () => {
 
 
 //end
+
+
+//For Main Operation Edit
+const isEditing = ref(false);
+const editingId = ref(null);
+
+
+
+const editMO = (mo) => {
+  isEditing.value = true;
+  editingId.value = mo.id;
+
+  form.machine_type_id = mo.machine_type?.id || '';
+  form.machine_number_id = mo.machine_number_id || mo.machine_number?.id || '';
+  form.task_id = mo.task_id || mo.task?.id || '';
+  form.employee_id = mo.employee_id || mo.employee?.id || '';
+  form.plant_id = mo.plant_id || mo.plant?.id || '';
+  form.small_task = mo.small_task || '';
+  form.team_ids = mo.team_ids || mo.members?.map(m => m.id) || [];
+};
+
+
+
+const updateMO = () => {
+  form.put(route("mainoperations.update", editingId.value), {
+    onSuccess: () => {
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "更新が成功しました！",
+        showConfirmButton: false,
+        timer: 1500
+      });
+      isEditing.value = false;
+      editingId.value = null;
+      form.reset();
+    },
+    onError: () => {
+      Swal.fire({
+        icon: "error",
+        title: "更新に失敗しました",
+        text: "もう一度お試しください。",
+      });
+    }
+  });
+};
+
 
 //for complete
 
@@ -293,21 +343,23 @@ watch(
       machinetypes.value = data.machineTypes;
       machinenumbers.value = data.machineNumbers;
 
-      form.machine_type_id = "";
-      form.machine_number_id = "";
+      // 🔹 Edit mode မှာ reset မလုပ်ဘူး
+      if (!isEditing.value) {
+        form.machine_type_id = "";
+        form.machine_number_id = "";
+      }
     } catch (error) {
       console.error("Error fetching machine data:", error);
     }
   }
 );
 
-//machinetype and machine number
 watch(
   [() => form.plant_id, () => form.machine_type_id],
   async ([plantId, typeId]) => {
     if (!plantId || !typeId) {
       machinenumbers.value = [];
-      form.machine_number_id = "";
+      if (!isEditing.value) form.machine_number_id = "";
       return;
     }
 
@@ -316,16 +368,13 @@ watch(
         params: { plant_id: plantId, machine_type_id: typeId }
       });
       machinenumbers.value = data;
-      form.machine_number_id = "";
+
+      if (!isEditing.value) form.machine_number_id = "";
     } catch (error) {
       console.error("Error fetching machine numbers:", error);
     }
   }
 );
-
-
-
-//For machine type and task 
 
 watch(
   () => form.machine_type_id,
@@ -333,13 +382,14 @@ watch(
     if (!newTypeId) {
       machinenumbers.value = [];
       tasks.value = [];
-      form.machine_number_id = "";
-      form.task_id = "";
+      if (!isEditing.value) {
+        form.machine_number_id = "";
+        form.task_id = "";
+      }
       return;
     }
 
     try {
-      // 1. Fetch machine numbers for selected plant & type
       const numbersResponse = await axios.get(`/machines/by-type`, {
         params: {
           plant_id: form.plant_id,
@@ -347,22 +397,26 @@ watch(
         }
       });
       machinenumbers.value = numbersResponse.data;
-      form.machine_number_id = "";
+      if (!isEditing.value) form.machine_number_id = "";
 
-      // 2. Fetch tasks for selected machine type
       const tasksResponse = await axios.get(`/tasks/by-machine-type`, {
         params: { machine_type_id: newTypeId }
       });
       tasks.value = tasksResponse.data;
-      form.task_id = "";
-      // console.log("Fetching tasks for machine type:", newTypeId);
-
-
+      if (!isEditing.value) form.task_id = "";
     } catch (error) {
       console.error("Error fetching machine numbers or tasks:", error);
     }
   }
 );
+
+
+const cancelEdit = () => {
+  isEditing.value = false;
+  editingId.value = null;
+  form.reset(); // form fields reset
+};
+
 
 
 
@@ -375,9 +429,10 @@ watch(
   <main class="p-4 sm:p-6 mx-auto min-h-screen text-xs sm:text-sm lg:text-base">
     <div class="flex flex-col items-center  gap-4">
       <!-- Left Form -->
+      {{ mainoperation }}
       <div class="w-full lg:w-[30%] mb-8">
         <Container>
-          <form @submit.prevent="createMainOperation" class="space-y-4 sm:space-y-6 text-xs sm:text-sm">
+          <form @submit.prevent="submitForm" class="space-y-4 sm:space-y-6 text-xs sm:text-sm">
 
 
 
@@ -443,6 +498,27 @@ watch(
             </div>
 
 
+            <div>
+              <label class="form-label"> 小作業 </label>
+              <select v-model="form.small_task" class="select-uniform">
+                <option value="">選択</option>
+                <option value="upper">
+                  上
+                </option>
+                <option value="lower">
+                  下
+                </option>
+                <!-- <option value="upper_half">
+                  上半
+                </option>
+                <option value="lower_half">
+                  下半
+                </option> -->
+
+              </select>
+            </div>
+
+
             <!-- 一緒に作業する人 -->
             <div>
               <label class="form-label">一緒に作業する人</label>
@@ -453,8 +529,23 @@ watch(
             </div>
 
 
+
             <!-- Submit -->
-            <PrimaryBtn class="w-full py-2 sm:py-2.5 text-xs sm:text-sm">スタート</PrimaryBtn>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <!-- Submit button -->
+              <PrimaryBtn class="w-full sm:flex-1 py-2 sm:py-2.5 text-xs sm:text-sm">
+                {{ isEditing ? '更新' : 'スタート' }}
+              </PrimaryBtn>
+
+              <!-- Cancel button (only in edit mode) -->
+              <button v-if="isEditing" type="button" @click="cancelEdit"
+                class="w-full sm:flex-1 py-2 sm:py-2.5 text-xs sm:text-sm bg-gray-400 text-white rounded hover:bg-gray-500">
+                キャンセル
+              </button>
+            </div>
+
+
+
           </form>
 
         </Container>
@@ -500,13 +591,20 @@ watch(
               </td>
               <td class="px-2 sm:px-4 py-2 flex gap-1 sm:gap-2 whitespace-nowrap">
                 <button @click="completeMO(mo.id)"
-                  v-if="user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
+                   v-if="['admin', 'superadmin'].includes(user.role) || user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
                   class="px-2 sm:px-3 py-1 bg-green-600 text-white rounded text-[11px] sm:text-sm hover:bg-green-700">
                   完了
                 </button>
 
+                <button @click="editMO(mo)"
+                  v-if="['admin', 'superadmin'].includes(user.role) || user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
+                  class="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded text-[11px] sm:text-sm hover:bg-blue-700">
+                  編集
+                </button>
+
+
                 <button @click="deleteMO(mo.id)"
-                  v-if="user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
+                   v-if="['admin', 'superadmin'].includes(user.role) || user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
                   class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[11px] sm:text-sm hover:bg-red-700">
                   削除
                 </button>

@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\Task;
 use App\Models\MachineType;
 use App\Models\MachineNumber;
+use App\Models\Department;
 
 class MainOperation extends Model
 {
@@ -22,6 +23,8 @@ class MainOperation extends Model
         'end_time',
         'total_time',
         'employee_id',
+        'department_id',
+        'small_task',
         'status',
     ];
 
@@ -57,6 +60,11 @@ class MainOperation extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+     public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 
     
