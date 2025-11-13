@@ -347,8 +347,13 @@ class MainOperationController extends Controller
                         ]);
             }else{
                 
-                $machinetypes = MachineTypeResource::collection(MachineType::all());
-                $tasks = TaskResource::collection(Task::all());
+                $machinetypes = MachineTypeResource::collection(
+                    MachineType::where('department_id', Auth::user()->department_id)->get()
+                );
+
+                $tasks = TaskResource::collection(
+                    Task::where('department_id', Auth::user()->department_id)->get()
+                );
                 $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
                 ->where('department_id',Auth::user()->department_id)
                 ->latest('updated_at')
