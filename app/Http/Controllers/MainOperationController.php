@@ -51,7 +51,7 @@ class MainOperationController extends Controller
                 ->take(200)
                 ->get();
 
-
+                $employees = EmployeeResource::collection(Employee::all());
             } else {
                 // User and Admin
                 $mainoperations = MainOperation::with([
@@ -71,6 +71,9 @@ class MainOperationController extends Controller
                 ->latest('updated_at')
                 ->take(200)
                 ->get();
+
+
+                 $employees = EmployeeResource::collection(Employee::where('department_id',Auth::user()->department_id)->get());
             }
 
             
@@ -79,7 +82,7 @@ class MainOperationController extends Controller
 
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
-            $employees = EmployeeResource::collection(Employee::all());
+           
             $plants = PlantResource::collection(Plant::all());
             $machinenumbers = MachineNumberResource::collection(MachineNumber::all());
 
@@ -323,7 +326,7 @@ class MainOperationController extends Controller
 
         {
 
-            
+            $user = Auth::user();
 
            
 

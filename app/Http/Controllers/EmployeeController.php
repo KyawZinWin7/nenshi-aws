@@ -44,7 +44,7 @@ class EmployeeController extends Controller
     public function create()
 
     {
-        $departments = DepartmentResource::collection(Department::where('department'));
+        $departments = DepartmentResource::collection(Department::all());
         return inertia('Employees/Create',[
             'departments' => $departments
         ]);

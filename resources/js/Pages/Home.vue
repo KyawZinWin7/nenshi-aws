@@ -19,7 +19,7 @@ onMounted(() => {
 
 
 const page = usePage();
-console.log("Login user id:", page.props.auth.user.id);
+
 const user = computed(() => page.props.auth.user);
 
 

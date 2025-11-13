@@ -1,7 +1,9 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm,usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
+import {  computed } from 'vue';
+
 
 
 const props = defineProps({
@@ -9,7 +11,7 @@ const props = defineProps({
   auth: Object,
   departments: Object,
 })
-
+const user = computed(() => usePage().props.auth.user);
 const form = useForm({
   name: "",
   employee_code: "",
@@ -108,6 +110,8 @@ const createEmployee = () => {
                     focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white">
                     <option value="user">ユーザー</option>
                     <option value="admin">管理者</option>
+                     <!-- superadmin のみ表示 -->
+                    <option v-if="user.role === 'superadmin'" value="superadmin">スーパー管理者</option>
                   </select>
 
                   <div v-if="form.errors.role" class="text-red-500 mt-1">

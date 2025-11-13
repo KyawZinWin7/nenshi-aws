@@ -2,6 +2,10 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
+import {  computed } from 'vue';
+
+
+
 
 defineProps({
   employee: {
@@ -9,13 +13,15 @@ defineProps({
     required: true,
   },
 
-  departments:{
-    type:Object,
-    required:true
+  departments: {
+    type: Object,
+    required: true
   }
 })
 
 let employee = usePage().props.employee.data;
+
+const user = computed(() => usePage().props.auth.user);
 
 const form = useForm({
   name: employee.name,
@@ -78,7 +84,7 @@ const updateEmployee = () => {
                     <input v-model="form.employee_code" type="text"
                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div v-if="form.errors.employee_code" class="text-red-500 text-sm mt-1">{{ form.errors.employee_code
-                    }}</div>
+                      }}</div>
                   </div>
 
 
@@ -93,7 +99,7 @@ const updateEmployee = () => {
                       </option>
                     </select>
                     <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
-                    }}</div>
+                      }}</div>
                   </div>
                 </div>
 
@@ -112,14 +118,20 @@ const updateEmployee = () => {
                   <label for="role" class="block text-sm font-medium text-gray-700">役割</label>
                   <select v-model="form.role" id="role" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3
                     focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+
+                    <option value="user">ユーザー</option>
+                    <option value="admin">管理者</option>
+
+                    <!-- superadmin のみ表示 -->
+                    <option v-if="user.role === 'superadmin'" value="superadmin">スーパー管理者</option>
+
                   </select>
 
                   <div v-if="form.errors.role" class="text-red-500 mt-1">
                     {{ form.errors.role }}
                   </div>
                 </div>
+
               </div>
             </div>
 
