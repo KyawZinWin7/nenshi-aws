@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Employee;
 use App\Models\Department;
 use App\Http\Resources\EmployeeResource;
@@ -17,8 +18,20 @@ class EmployeeController extends Controller
 {
     
    public function index()
+   
    {
-        $employees = Employee::with('department')->get(); // <- get() လုပ်ရမယ်
+       
+        if (auth()->user()->role === 'superadmin') {
+            // superadmin ဆိုရင် စာရင်းအကုန်ယူ
+            $employees = Employee::with('department')->get();
+            } else {
+            // superadmin မဟုတ်ရင် သူ့ department ပဲယူ
+            $employees = Employee::with('department')
+                ->where('department_id', Auth::user()->department_id)
+                ->get();
+        }
+
+       
 
         return inertia('Employees/Index', [
             'employees' => EmployeeResource::collection($employees),
@@ -31,7 +44,7 @@ class EmployeeController extends Controller
     public function create()
 
     {
-        $departments = DepartmentResource::collection(Department::all());
+        $departments = DepartmentResource::collection(Department::where('department'));
         return inertia('Employees/Create',[
             'departments' => $departments
         ]);

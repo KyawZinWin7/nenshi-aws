@@ -323,7 +323,7 @@ class MainOperationController extends Controller
 
         {
 
-            $user = auth()->user();
+            
 
            
 
