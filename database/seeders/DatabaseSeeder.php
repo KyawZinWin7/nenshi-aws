@@ -19,14 +19,11 @@ class DatabaseSeeder extends Seeder
          $this->call([
         DepartmentSeeder::class,
         ]);
-
-        Employee::create([
-            'name' => 'Admin',
-            'employee_code' => '56789',
-            'password' => Hash::make('56789'),
-            'department_id' => 1, // ★ MUST HAVE
-            'role' => 'superadmin',
+         $this->call([
+        EmployeeSeeder::class,
         ]);
+
+        
 
     }
 }

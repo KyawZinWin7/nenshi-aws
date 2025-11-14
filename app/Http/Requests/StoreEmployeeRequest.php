@@ -26,7 +26,7 @@ class StoreEmployeeRequest extends FormRequest
             'employee_code' => 'required|string|max:255|unique:employees,employee_code',
             'department_id' => 'required|integer|exists:departments,id',
             'password' => 'required',
-            'role' => 'required|in:admin,user', // role validation
+            'role' => 'required|in:superadmin,admin,user', // role validation
 
         ];
     }

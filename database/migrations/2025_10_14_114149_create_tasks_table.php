@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('machine_type_id')->constrained()->cascadeOnDelete();
-             $table->foreignId('department_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('machine_type_id')->constrained()->restrictOnDelete();
+            $table->foreignId('department_id')
+                  ->constrained()
+                  ->restrictOnDelete();
+
             $table->timestamps();
         });
     }

@@ -13,9 +13,25 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-         Department::create([
-            'name' => '管理本部　総務部/人事労務部',
-            'department_code' => '191020',
-        ]);
+         $departments = [
+            // [
+            //     'name' => '管理本部　総務部/人事労務部',
+            //     'department_code' => '191020',
+            // ],
+            [
+                'name' => '撚糸課',
+                'department_code' => '114010',
+            ],
+            [
+                'name' => '準備課',
+                'department_code' => '113010',
+            ],
+            
+            
+        ];
+
+        foreach ($departments as $dept) {
+            Department::create($dept);
+        }
     }
 }

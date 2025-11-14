@@ -26,7 +26,7 @@ class UpdateEmployeeRequest extends FormRequest
             'employee_code' => 'required|string|max:255|unique:employees,employee_code,' . $this->employee->id,
             'department_id' => 'required|integer|exists:departments,id',
             'password' => 'nullable|string',
-            'role' => 'required|in:admin,user',
+            'role' => 'required|in:superadmin,admin,user',
         ];
     }
 
