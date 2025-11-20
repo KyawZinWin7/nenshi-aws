@@ -562,10 +562,11 @@ const cancelEdit = () => {
               <th class="px-2 sm:px-4 py-2">機台</th>
               <th class="px-2 sm:px-4 py-2">機号</th>
               <th class="px-2 sm:px-4 py-2">作業</th>
+              <th class="px-2 sm:px-4 py-2">小作業</th>
               <th class="px-2 sm:px-4 py-2">開始</th>
-              <th class="px-2 sm:px-4 py-2">終了</th>
+              <!-- <th class="px-2 sm:px-4 py-2">終了</th> -->
               <th class="px-2 sm:px-4 py-2">担当者</th>
-              <th class="px-2 sm:px-4 py-2">合計時間</th>
+              <!-- <th class="px-2 sm:px-4 py-2">合計時間</th> -->
               <th class="px-2 sm:px-4 py-2">メンバー</th>
               <th class="px-2 sm:px-4 py-2">操作</th>
             </tr>
@@ -578,10 +579,12 @@ const cancelEdit = () => {
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.machine_type.name }}</td>
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.machine_number?.number ?? '未設定' }}</td>
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.task.name }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.small_task }}</td>
+
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.start_time }}</td>
-              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.end_time }}</td>
+              <!-- <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.end_time }}</td> -->
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.employee.name }}</td>
-              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.total_time }}</td>
+              <!-- <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.total_time }}</td> -->
               <td class="px-2 sm:px-4 py-2">
                 <div class="flex flex-col gap-1">
                   <span v-for="member in mo.members" :key="member.id" class="sm:text-xs whitespace-nowrap">
