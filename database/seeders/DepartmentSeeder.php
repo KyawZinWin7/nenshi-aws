@@ -19,10 +19,12 @@ class DepartmentSeeder extends Seeder
             //     'department_code' => '191020',
             // ],
             [
+                'id'   => 1,
                 'name' => '撚糸課',
                 'department_code' => '114010',
             ],
             [
+                'id'   => 2,
                 'name' => '準備課',
                 'department_code' => '113010',
             ],

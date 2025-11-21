@@ -12,6 +12,7 @@ use App\Http\Controllers\PlantController;
 use App\Http\Controllers\MachineNumberController;
 use App\Http\Controllers\MainOperationController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\SmallTaskController;
 
 
 
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function(){
         Route::resource('employees',EmployeeController::class);
         Route::resource('machinetypes',MachineTypeController::class);
         Route::resource('tasks', TaskController::class)->except(['show']);
+        Route::resource('smalltasks',SmallTaskController::class);
         Route::resource('machinenumbers',MachineNumberController::class);
         Route::get('/export', [MainOperationController::class, 'export'])->name('mainoperations.export');
         Route::get('/admincompletelist', [MainOperationController::class, 'admincompletelist'])->name('mainoperations.admincompletelist');

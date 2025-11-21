@@ -57,8 +57,15 @@ return new class extends Migration
                 ->references('id')->on('departments')
                 ->onDelete('restrict');
 
+              // Small Task
+            $table->unsignedBigInteger('small_task_id')->nullable();
+            $table->foreign('small_task_id')
+                ->references('id')->on('small_tasks')
+                ->onDelete('set null');  
+
+
+
             // Others
-            $table->string('small_task')->nullable();
             $table->string('description')->nullable();
             $table->string('status')->default('0');
 

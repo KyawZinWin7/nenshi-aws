@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\MainOperation;
 use App\Models\MachineType;
 use App\Models\Department;
+use App\Models\SmallTask;
 
 class Task extends Model
 {
@@ -31,4 +32,6 @@ class Task extends Model
     {
         return $this->belongsTo(Department::class);
     }
+
+    
 }

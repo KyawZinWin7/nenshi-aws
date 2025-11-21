@@ -154,6 +154,26 @@ defineProps({
         <!--End Task-->
 
 
+        <!--Start Small Task -->
+        <li>
+          <a :href="route('smalltasks.index')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['smalltasks.index', 'smalltasks.create', 'smalltasks.edit'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 3l7 7-1 1-7-7 1-1zM4 21l7-7-1-1-7 7 1 1z" />
+            </svg>
+
+
+            <span class="ml-3"> 小作業</span>
+          </a>
+        </li>
+        <!--End Task-->
+
+
 
         <!--Start　Machine Number -->
         <li>
