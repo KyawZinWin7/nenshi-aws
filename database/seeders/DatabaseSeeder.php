@@ -19,23 +19,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
        
-        // $this->call([
-        // DepartmentSeeder::class,
-        // ]);
-        // $this->call([
-        // EmployeeSeeder::class,
-        // ]);
-        //  $this->call([
-        // PlantSeeder::class,
-        // ]); 
+        $this->call([
+        DepartmentSeeder::class,
+        ]);
+        $this->call([
+        EmployeeSeeder::class,
+        ]);
+         $this->call([
+        PlantSeeder::class,
+        ]); 
 
-        // $this->call([
-        // MachineTypeSeeder::class,
-        // ]);
+        $this->call([
+        MachineTypeSeeder::class,
+        ]);
 
-        // $this->call([
-        // TaskSeeder::class,
-        // ]); 
+        $this->call([
+        TaskSeeder::class,
+        ]); 
 
 
 
