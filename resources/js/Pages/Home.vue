@@ -28,6 +28,7 @@ const props = defineProps({
   mainoperation: { type: Object, required: false, default: () => ({}) },
   machinetypes: { type: Object, required: true },
   tasks: { type: Object, required: true },
+  smalltasks: { type: Object, required: true },
   employees: { type: Object, required: true },
   plants: { type: Object, required: true },
   machinenumbers: { type: Object, required: true },
@@ -44,6 +45,7 @@ const form = useForm({
   machine_type_id: "",
   machine_number_id: "",
   task_id: "",
+  small_task_id: "",
   employee_id: "",
   plant_id: "",
   team_ids: [],
@@ -126,6 +128,7 @@ const editMO = (mo) => {
   form.machine_type_id = mo.machine_type?.id || '';
   form.machine_number_id = mo.machine_number_id || mo.machine_number?.id || '';
   form.task_id = mo.task_id || mo.task?.id || '';
+  form.small_task_id = mo.small_task?.id || '';
   form.employee_id = mo.employee_id || mo.employee?.id || '';
   form.plant_id = mo.plant_id || mo.plant?.id || '';
   form.small_task = mo.small_task || '';
@@ -323,6 +326,7 @@ watch(selectedMainPerson, (newVal) => {
 const machinetypes = ref([]);
 const machinenumbers = ref([]);
 const tasks = ref([]);
+const smalltasks = ref([]);
 
 
 //For plant and machinetype
@@ -406,6 +410,28 @@ watch(
       if (!isEditing.value) form.task_id = "";
     } catch (error) {
       console.error("Error fetching machine numbers or tasks:", error);
+    }
+  }
+);
+
+watch(
+  () => form.machine_type_id,
+  async (newTypeId) => {
+    if (!newTypeId) {
+      smalltasks.value = [];
+      if (!isEditing.value) form.small_task_id = "";
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/smalltasks/by-machine-type`, {
+        params: { machine_type_id: newTypeId }
+      });
+      smalltasks.value = response.data;
+
+      if (!isEditing.value) form.small_task_id = "";
+    } catch (error) {
+      console.error("Error fetching small tasks:", error);
     }
   }
 );
@@ -499,24 +525,15 @@ const cancelEdit = () => {
 
 
             <div>
-              <label class="form-label"> 小作業 </label>
-              <select v-model="form.small_task" class="select-uniform">
-                <option value="">選択</option>
-                <option value="upper">
-                  上
+              <label class="form-label">小作業（必要な場合のみ）</label>
+              <select v-model="form.small_task_id" class="select-uniform">
+                <option :value="null">（未選択）</option>
+                <option v-for="st in smalltasks" :key="st.id" :value="st.id">
+                  {{ st.name }}
                 </option>
-                <option value="lower">
-                  下
-                </option>
-                <!-- <option value="upper_half">
-                  上半
-                </option>
-                <option value="lower_half">
-                  下半
-                </option> -->
-
               </select>
             </div>
+
 
 
             <!-- 一緒に作業する人 -->
@@ -579,7 +596,7 @@ const cancelEdit = () => {
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.machine_type.name }}</td>
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.machine_number?.number ?? '未設定' }}</td>
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.task.name }}</td>
-              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.small_task }}</td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.small_task?.name ?? '未設定' }}</td>
 
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.start_time }}</td>
               <!-- <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.end_time }}</td> -->
@@ -594,7 +611,7 @@ const cancelEdit = () => {
               </td>
               <td class="px-2 sm:px-4 py-2 flex gap-1 sm:gap-2 whitespace-nowrap">
                 <button @click="completeMO(mo.id)"
-                   v-if="['admin', 'superadmin'].includes(user.role) || user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
+                  v-if="['admin', 'superadmin'].includes(user.role) || user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
                   class="px-2 sm:px-3 py-1 bg-green-600 text-white rounded text-[11px] sm:text-sm hover:bg-green-700">
                   完了
                 </button>
@@ -607,7 +624,7 @@ const cancelEdit = () => {
 
 
                 <button @click="deleteMO(mo.id)"
-                   v-if="['admin', 'superadmin'].includes(user.role) || user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
+                  v-if="['admin', 'superadmin'].includes(user.role) || user.id === mo.employee.id || mo.members.some(m => m.id === user.id)"
                   class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[11px] sm:text-sm hover:bg-red-700">
                   削除
                 </button>

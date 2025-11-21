@@ -11,11 +11,13 @@ use App\Http\Resources\TaskResource;
 use App\Http\Resources\EmployeeResource;
 use App\Http\Resources\PlantResource;
 use App\Http\Resources\MachineNumberResource;
+use App\Http\Resources\SmallTaskResource;
 use App\Models\Employee;
 use App\Models\Task;
 use App\Models\Plant;
 use App\Models\MachineType;
 use App\Models\MachineNumber;
+use App\Models\SmallTask;
 use Inertia\Inertia;
 use App\Models\Department;
 use App\Http\Resources\DepartmentResource;
@@ -41,6 +43,7 @@ class MainOperationController extends Controller
                 $mainoperations = MainOperation::with([
                     'machineType',
                     'task',
+                    'smallTask',
                     'employee',
                     'machineNumber',
                     'plant',
@@ -57,6 +60,7 @@ class MainOperationController extends Controller
                 $mainoperations = MainOperation::with([
                     'machineType',
                     'task',
+                    'smallTask',
                     'employee',
                     'machineNumber',
                     'plant',
@@ -82,6 +86,7 @@ class MainOperationController extends Controller
 
             $machinetypes = MachineTypeResource::collection(MachineType::all());
             $tasks = TaskResource::collection(Task::all());
+            $smalltasks = SmallTaskResource::collection(SmallTask::all());
            
             $plants = PlantResource::collection(Plant::all());
             $machinenumbers = MachineNumberResource::collection(MachineNumber::all());
@@ -90,6 +95,7 @@ class MainOperationController extends Controller
                 'mainoperations' => MainOperationResource::collection($mainoperations),
                 'machinetypes' => $machinetypes,
                 'tasks' => $tasks,
+                'smalltasks' => $smalltasks,
                 'employees' => $employees,
                 'plants' => $plants,
                 'machinenumbers' => $machinenumbers,

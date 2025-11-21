@@ -75,7 +75,7 @@ defineProps({
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-              stroke-width="1.8"　width="24" height="24">
+              stroke-width="1.8" 　width="24" height="24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16M6 20V10h5v10m0 0V6h7v14" />
             </svg>
 
@@ -164,8 +164,10 @@ defineProps({
           ]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
               stroke="currentColor" width="24" height="24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14 3l7 7-1 1-7-7 1-1zM4 21l7-7-1-1-7 7 1 1z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12l2 2 4-4M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
             </svg>
+
 
 
             <span class="ml-3"> 小作業</span>

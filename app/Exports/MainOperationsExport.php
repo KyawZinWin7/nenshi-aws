@@ -68,7 +68,7 @@ class MainOperationsExport implements FromQuery, WithHeadings, WithMapping, With
     public function headings(): array
     {
         return [
-            '日付', '工場', '機台', '機台の番号', '作業', '開始時間', '終了時間', '担当者', '担当メンバー', '合計時間'
+            '日付', '工場', '機台', '機台の番号', '作業','小作業', '開始時間', '終了時間', '担当者', '担当メンバー', '合計時間'
         ];
     }
 
@@ -80,6 +80,7 @@ class MainOperationsExport implements FromQuery, WithHeadings, WithMapping, With
             optional($mainOperation->machineType)->name ?? '',
             optional($mainOperation->machineNumber)->number ?? '',
             optional($mainOperation->task)->name ?? '',
+            optional($mainOperation->smallTask)->name ?? '',
             $mainOperation->start_time?->timezone('Asia/Tokyo')->format('H:i:s'),
             $mainOperation->end_time?->timezone('Asia/Tokyo')->format('H:i:s'),
             optional($mainOperation->employee)->name ?? '',

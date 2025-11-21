@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function(){
     Route::get('/machines/by-plant/{plant}', [MainOperationController::class, 'getMachinesByPlant']);
     Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
     Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);
+    Route::get('/smalltasks/by-machine-type', [SmallTaskController::class, 'getSmallTasksByMachineType']);
     Route::delete('/{id}', [MainOperationController::class, 'destroy'])->name('mainoperations.destroy');
 
 
