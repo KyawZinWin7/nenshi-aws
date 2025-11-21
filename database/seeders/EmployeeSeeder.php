@@ -18,10 +18,10 @@ class EmployeeSeeder extends Seeder
         // Super Admin user
 
          Employee::firstOrCreate(
-            ['employee_code' => '56789'],
+            ['employee_code' => 'SPA56789'],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('56789'),
+                'password' => Hash::make('password'),
                 'department_id' => 1,
                 'role' => 'superadmin',
             ]
