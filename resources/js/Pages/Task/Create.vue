@@ -1,12 +1,16 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage} from '@inertiajs/vue3';
+import { onMounted } from 'vue';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
+
 
 
 const props = defineProps({
   machineTypes: Object,
   departments: Object,
+
+
 })
 
 const form = useForm({
@@ -14,6 +18,17 @@ const form = useForm({
   machine_type_id: "",
   department_id: "",
 })
+
+const user = usePage().props.auth.user;
+
+console.log(user);
+
+
+onMounted(() => {
+  if (user.role !== "superadmin") {
+    form.department_id = user.department_id; // auto fill
+  }
+});
 
 
 //For Create Task
@@ -80,19 +95,6 @@ const createTask = () => {
 
               <!-- Department & Machine Type -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <!-- Department -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">部門</label>
-                  <select v-model="form.department_id"
-                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option value="">部門を選択</option>
-                    <option v-for="department in departments.data" :key="department.id" :value="department.id">
-                      {{ department.name }}
-                    </option>
-                  </select>
-                  <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
-                  }}</div>
-                </div>
 
 
                 <!-- Machine Type -->
@@ -105,9 +107,30 @@ const createTask = () => {
                       {{ machineType.name }}
                     </option>
                   </select>
+                  <div v-if="form.errors.machine_type_id" class="text-red-500 text-sm mt-1">{{ form.errors.machine_type_id
+                    }}</div>
+                </div>
+
+                <!-- Department -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">部門</label>
+                  <select v-model="form.department_id"
+                    :disabled="user.role !== 'superadmin'"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="">部門を選択</option>
+                    <option v-for="department in departments.data" :key="department.id" :value="department.id">
+                      {{ department.name }}
+                    </option>
+                  </select>
                   <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
                   }}</div>
                 </div>
+
+            
+
+
+
+
               </div>
 
 

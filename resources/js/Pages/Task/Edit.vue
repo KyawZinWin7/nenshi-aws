@@ -2,6 +2,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
+import { onMounted } from 'vue';
 
 
 
@@ -23,6 +24,8 @@ const props = defineProps({
 })
 
 let task = usePage().props.task.data;
+const user = usePage().props.auth.user;
+
 
 const form = useForm({
   name: task.name,
@@ -94,6 +97,7 @@ const updateTask = () => {
                 <div>
                   <label class="block text-sm font-medium text-gray-700">部門</label>
                   <select v-model="form.department_id"
+                    :disabled="user.role !== 'superadmin'"
                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     <option value="">部門を選択</option>
                     <option v-for="department in departments.data" :key="department.id" :value="department.id">
