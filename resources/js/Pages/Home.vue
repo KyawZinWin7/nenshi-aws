@@ -455,7 +455,7 @@ const cancelEdit = () => {
   <main class="p-4 sm:p-6 mx-auto min-h-screen text-xs sm:text-sm lg:text-base">
     <div class="flex flex-col items-center  gap-4">
       <!-- Left Form -->
-      {{ mainoperation }}
+      <!-- {{ mainoperation }} -->
       <div class="w-full lg:w-[30%] mb-8">
         <Container>
           <form @submit.prevent="submitForm" class="space-y-4 sm:space-y-6 text-xs sm:text-sm">
@@ -597,6 +597,7 @@ const cancelEdit = () => {
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.machine_number?.number ?? '未設定' }}</td>
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.task.name }}</td>
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.small_task?.name ?? '未設定' }}</td>
+
 
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.start_time }}</td>
               <!-- <td class="px-2 sm:px-4 py-2 whitespace-nowrap">{{ mo.end_time }}</td> -->

@@ -13,6 +13,7 @@ const props = defineProps({
   tasks: { type: Object, required: true },
   employees: { type: Object, required: true },
   plants: { type: Object, required: true },
+  departments: { type: Object, required: true },
 });
 
 const form = ref({
@@ -23,6 +24,7 @@ const form = ref({
   date_from: "",
   date_to: "",
   plant_id: "",
+  department_id: "",
 });
 
 // Compute unique task names with their IDs
@@ -55,6 +57,7 @@ const exportExcel = async () => {
     machine_number: form.value.machine_number,
     task_id: form.value.task_id,
     plant_id: form.value.plant_id,
+    department_id: form.value.department_id,
   };
 
   try {
@@ -78,54 +81,54 @@ const exportExcel = async () => {
     });
 
   } catch (error) {
-  // ✅ Validation Error (422)
-  if (error.response && error.response.status === 422) {
-    // blob data ကို text ပြန်ဖတ်
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
+    // ✅ Validation Error (422)
+    if (error.response && error.response.status === 422) {
+      // blob data ကို text ပြန်ဖတ်
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const errData = JSON.parse(reader.result);
+          const errors = errData.errors;
+          const firstError = Object.values(errors)[0][0];
+          Swal.fire({
+            icon: 'warning',
+            title: '入力エラー',
+            text: firstError,
+          });
+        } catch (e) {
+          Swal.fire({
+            icon: 'error',
+            title: 'エラー',
+            text: '不明なエラーが発生しました。',
+          });
+        }
+      };
+      reader.readAsText(error.response.data);
+      return;
+    }
+
+    // ✅ No data found (404)
+    if (error.response && error.response.status === 404) {
+      const reader = new FileReader();
+      reader.onload = () => {
         const errData = JSON.parse(reader.result);
-        const errors = errData.errors;
-        const firstError = Object.values(errors)[0][0];
-        Swal.fire({
-          icon: 'warning',
-          title: '入力エラー',
-          text: firstError,
-        });
-      } catch (e) {
         Swal.fire({
           icon: 'error',
           title: 'エラー',
-          text: '不明なエラーが発生しました。',
+          text: errData.message,
         });
-      }
-    };
-    reader.readAsText(error.response.data);
-    return;
-  }
+      };
+      reader.readAsText(error.response.data);
+      return;
+    }
 
-  // ✅ No data found (404)
-  if (error.response && error.response.status === 404) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const errData = JSON.parse(reader.result);
-      Swal.fire({
-        icon: 'error',
-        title: 'エラー',
-        text: errData.message,
-      });
-    };
-    reader.readAsText(error.response.data);
-    return;
+    // ✅ Other errors
+    Swal.fire({
+      icon: 'error',
+      title: 'エラー',
+      text: 'Excelのダウンロードに失敗しました！',
+    });
   }
-
-  // ✅ Other errors
-  Swal.fire({
-    icon: 'error',
-    title: 'エラー',
-    text: 'Excelのダウンロードに失敗しました！',
-  });
-}
 
 };
 
@@ -157,21 +160,34 @@ const exportExcel = async () => {
               </div>
             </div>
 
-            <!-- Employee -->
-            <div>
-              <label class="block text-xs sm:text-sm font-medium text-gray-700">担当者</label>
-              <select v-model="form.employee_id"
-                class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
-                <option value="">すべて</option>
-                <option v-for="employee in employees.data" :key="employee.id" :value="employee.id">
-                  {{ employee.name }}
-                </option>
-              </select>
-            </div>
 
+            <!-- Employee &  Department -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Employee -->
+              <div>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700">担当者</label>
+                <select v-model="form.employee_id"
+                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
+                  <option value="">すべて</option>
+                  <option v-for="employee in employees.data" :key="employee.id" :value="employee.id">
+                    {{ employee.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Department -->
+              <div>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700">部門</label>
+                <select v-model="form.department_id"
+                  class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm">
+                  <option value="">すべて</option>
+                  <option v-for="department in departments.data" :key="department.id" :value="department.id">{{ department.name }}</option>
+                </select>
+              </div>
+            </div>
             <!-- Plant & Machine Type -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
+
               <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700">工場</label>
                 <select v-model="form.plant_id"
@@ -194,7 +210,7 @@ const exportExcel = async () => {
 
             <!-- Task  & Mahcine Number  -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
+
               <!-- Task -->
               <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700">作業</label>
