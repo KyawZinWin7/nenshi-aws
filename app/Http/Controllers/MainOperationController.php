@@ -313,10 +313,12 @@ class MainOperationController extends Controller
             $mainoperations = MainOperation::with([
                     'machineType', 
                     'task', 
+                    'smallTask',
                     'employee', 
                     'machineNumber', 
                     'plant', 
                     'members'
+                    
                 ])
                 ->where('employee_id', auth()->id()) // owner
                 ->orWhereHas('members', function ($query) {
@@ -353,7 +355,7 @@ class MainOperationController extends Controller
 
                 $machinetypes = MachineTypeResource::collection(MachineType::all());
                 $tasks = TaskResource::collection(Task::all());
-                $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
+                $mainoperations = MainOperation::with(['machineType', 'task', 'smallTask', 'employee', 'machineNumber', 'plant', 'members',])
                 ->latest('updated_at')
                 ->take(500)
                 ->get();
@@ -371,7 +373,7 @@ class MainOperationController extends Controller
                 $tasks = TaskResource::collection(
                     Task::where('department_id', Auth::user()->department_id)->get()
                 );
-                $mainoperations = MainOperation::with(['machineType', 'task', 'employee', 'machineNumber', 'plant', 'members'])
+                $mainoperations = MainOperation::with(['machineType', 'task', 'smallTask', 'employee', 'machineNumber', 'plant', 'members'])
                 ->where('department_id',Auth::user()->department_id)
                 ->latest('updated_at')
                 ->take(500)

@@ -213,6 +213,7 @@ const refreshData = () => {
             <th class="px-2 sm:px-4 py-2">機台</th>
             <th class="px-2 sm:px-4 py-2">機号</th>
             <th class="px-2 sm:px-4 py-2">作業</th>
+            <th class="px-2 sm:px-4 py-2">小作業</th>
             <th class="px-2 sm:px-4 py-2">開始</th>
             <th class="px-2 sm:px-4 py-2">終了</th>
             <th class="px-2 sm:px-4 py-2">担当者</th>
@@ -232,6 +233,7 @@ const refreshData = () => {
             </td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.machine_number?.number ?? '未設定' }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.task?.name }}</td>
+            <td class="px-2 sm:px-4 py-2">{{ mainoperation.small_task?.name ?? '未設定' }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.start_time }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.end_time }}</td>
             <td class="px-2 sm:px-4 py-2">{{ mainoperation.employee?.name }}</td>
