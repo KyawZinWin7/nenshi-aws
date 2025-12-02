@@ -36,7 +36,7 @@ watch(
   (newData) => {
     if (newData?.length > 0) {
       currentPage.value = 1;
-      
+
     }
   },
   { immediate: true }
@@ -199,71 +199,81 @@ const refreshData = () => {
         <FilterDropdown :tasks="tasks" @filter="handleCheckboxFilter" />
       </div>
 
-     
-    
+
+
     </div>
 
     <!-- Responsive Table Wrapper -->
+
     <div class="overflow-x-auto">
-      <table class="min-w-[800px] sm:min-w-full text-[11px] sm:text-sm text-left text-gray-500">
+      <table class="w-full table-fixed text-[11px] sm:text-sm text-left text-gray-500">
+
         <thead class="text-[10px] sm:text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
-            <th class="px-2 sm:px-4 py-2">Date</th>
-            <th class="px-2 sm:px-4 py-2">工場</th>
-            <th class="px-2 sm:px-4 py-2">機台</th>
-            <th class="px-2 sm:px-4 py-2">機号</th>
-            <th class="px-2 sm:px-4 py-2">作業</th>
-            <th class="px-2 sm:px-4 py-2">小作業</th>
-            <th class="px-2 sm:px-4 py-2">開始</th>
-            <th class="px-2 sm:px-4 py-2">終了</th>
-            <th class="px-2 sm:px-4 py-2">担当者</th>
-            <th class="px-2 sm:px-4 py-2">合計時間</th>
-            <th class="px-2 sm:px-4 py-2">メンバー</th>
-            <th class="px-2 sm:px-4 py-2">操作</th>
+            <th class="px-2 py-2">Date</th>
+            <th class="px-2 py-2">工場</th>
+            <th class="px-2 py-2">機台</th>
+            <th class="px-2 py-2">機号</th>
+            <th class="px-2 py-2">作業</th>
+            <th class="px-2 py-2">小作業</th>
+            <th class="px-2 py-2">開始</th>
+            <th class="px-2 py-2">終了</th>
+            <th class="px-2 py-2">担当者</th>
+            <th class="px-2 py-2">合計時間</th>
+
+            <!-- limit width -->
+            <th class="px-2 py-2 max-w-[70px] truncate">メンバー</th>
+            <th class="px-2 py-2 w-20 text-center">操作</th>
           </tr>
         </thead>
+
         <tbody>
           <tr v-for="mainoperation in paginatedMainOperations" :key="mainoperation.id" class="border-b">
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.created_at }}</td>
-            <td class="px-2 sm:px-4 py-2">
-              {{ mainoperation.plant?.name ?? '未設定' }}
-            </td>
-            <td class="px-2 sm:px-4 py-2">
-              {{ mainoperation.machine_type?.name ?? '未設定' }}
-            </td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.machine_number?.number ?? '未設定' }}</td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.task?.name }}</td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.small_task?.name ?? '未設定' }}</td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.start_time }}</td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.end_time }}</td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.employee?.name }}</td>
-            <td class="px-2 sm:px-4 py-2">{{ mainoperation.total_time }}</td>
-            <td class="px-2 sm:px-4 py-2">
-              <div class="flex flex-col gap-1">
-                <span v-for="member in mainoperation.members" :key="member.id" class="sm:text-xs">
-                  {{ member.name }}
-                </span>
-              </div>
+
+            <td class="px-2 py-2">{{ mainoperation.created_at }}</td>
+            <td class="px-2 py-2">{{ mainoperation.plant?.name ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ mainoperation.machine_type?.name ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ mainoperation.machine_number?.number ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ mainoperation.task?.name }}</td>
+            <td class="px-2 py-2">{{ mainoperation.small_task?.name ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ mainoperation.start_time }}</td>
+            <td class="px-2 py-2">{{ mainoperation.end_time }}</td>
+            <td class="px-2 py-2">{{ mainoperation.employee?.name }}</td>
+            <td class="px-2 py-2">{{ mainoperation.total_time }}</td>
+
+            <!-- members -->
+            <td class="px-2 py-2 max-w-[70px] truncate">
+              <span v-for="member in mainoperation.members" :key="member.id" class="block truncate text-[10px]">
+                {{ member.name }}
+              </span>
             </td>
 
-            <td class="px-2 sm:px-4 py-2" 
-            v-if="['admin', 'superadmin'].includes(user.role) || user.id ===  mainoperation.employee.id || mainoperation.members.some(m => m.id === user.id)">
-            
-              <div class="flex items-center justify-center gap-1 sm:gap-2">
+            <!-- 操作 -->
+            <td class="px-1 py-1 w-20 text-center" v-if="['admin', 'superadmin'].includes(user.role) ||
+              user.id === mainoperation.employee.id ||
+              mainoperation.members.some(m => m.id === user.id)">
+
+              <div class="flex justify-center gap-1">
+
                 <button @click="uncompleteMO(mainoperation.id)"
-                  class="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded text-[10px] sm:text-sm hover:bg-blue-700">
+                  class="px-1 py-[2px] text-[9px] sm:text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
                   未完了
                 </button>
+
                 <button @click="deleteMO(mainoperation.id)"
-                  class="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-[10px] sm:text-sm hover:bg-red-700">
+                  class="px-1 py-[2px] text-[9px] sm:text-xs bg-red-600 text-white rounded hover:bg-red-700">
                   削除
                 </button>
+
               </div>
+
             </td>
           </tr>
         </tbody>
+
       </table>
     </div>
+
 
     <!-- Pagination -->
     <Pagination :total="filteredMainOperations.length" :per-page="perPage" v-model:current-page="currentPage" />
