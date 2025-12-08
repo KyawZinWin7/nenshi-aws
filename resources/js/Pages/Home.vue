@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios'
 import { initFlowbite } from 'flowbite'
 // import { route } from 'ziggy-js';
+import ExpandableTable from './Components/ExpandableTable.vue';
 
 
 
