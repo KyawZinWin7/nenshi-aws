@@ -11,7 +11,7 @@
     <!-- Main Content -->
     <main
       class="p-4 h-auto pt-20 transition-all duration-300"
-      :class="{ 'md:ml-64': isSidebarVisible }"
+      :class="{ 'md:ml-48': isSidebarVisible }"
     >
       <slot></slot>
     </main>

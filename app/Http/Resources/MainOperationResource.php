@@ -23,6 +23,7 @@ class MainOperationResource extends JsonResource
             'plant' => new PlantResource($this->whenLoaded('plant')),
             'machine_type' => new MachineTypeResource($this->whenLoaded('machineType')),
             'task' => new TaskResource($this->whenLoaded('task')),
+            'small_task' => new SmallTaskResource($this->whenLoaded('smallTask')),
             'employee' => new EmployeeResource($this->whenLoaded('employee')),
             'department' => new DepartmentResource($this->whenLoaded('department')),
             'members' => EmployeeResource::collection($this->whenLoaded('members')), // ✅ add this line

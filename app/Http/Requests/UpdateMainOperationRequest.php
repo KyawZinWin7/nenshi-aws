@@ -29,7 +29,7 @@ class UpdateMainOperationRequest extends FormRequest
             'employee_id' => 'required|integer|exists:employees,id',
             'team_ids' => 'nullable|array',
             'team_ids.*' => 'integer|exists:employees,id',
-            'small_task'=>'nullable|string|max:255',
+            'small_task_id' => 'nullable|integer|exists:small_tasks,id',
 
         ];
     }
@@ -62,6 +62,8 @@ class UpdateMainOperationRequest extends FormRequest
                     'team_ids.array' => 'チームメンバーの選択が不正です。',
                     'team_ids.*.integer' => 'チームメンバーの選択が不正です。',
                     'team_ids.*.exists' => 'チームメンバーが存在しません。',
+                    'small_task_id.integer' => '小作業の選択が不正です。',
+                    'small_task_id.exists' => '小作業が存在しません。',
                 ];
         }
 

@@ -9,6 +9,8 @@ use App\Models\Task;
 use App\Models\MachineType;
 use App\Models\MachineNumber;
 use App\Models\Department;
+use App\Models\Plant;
+use App\Models\SmallTask;
 
 class MainOperation extends Model
 {
@@ -24,7 +26,7 @@ class MainOperation extends Model
         'total_time',
         'employee_id',
         'department_id',
-        'small_task',
+        'small_task_id',
         'status',
     ];
 
@@ -86,6 +88,11 @@ class MainOperation extends Model
             'main_operation_id', 
             'employee_id'
         )->withTimestamps();
+    }
+
+    public function smallTask()
+    {
+        return $this->belongsTo(SmallTask::class);
     }
 
     

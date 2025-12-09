@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreEmployeeRequest extends FormRequest
+class StoreSmallTaskRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,25 +22,20 @@ class StoreEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=>'required|string|max:255',
-            'employee_code' => 'required|string|max:255|unique:employees,employee_code',
-            'department_id' => 'required|integer|exists:departments,id',
-            'password' => 'required',
-            'role' => 'required|in:superadmin,admin,user', // role validation
-
+            'name' => 'required|string|max:255',
+            'machine_type_id' => 'required|exists:machine_types,id',
         ];
     }
 
 
-     public function messages(): array
+    public function messages(): array
     {
         return [
             'name.required' => '名前を入力してください。',
             'name.string' => '名前は文字列である必要があります。',
             'name.max' => '名前は255文字以内で入力してください。',
-            'employee_code.required' => '社員コードを入力してください。',
-            'department_id.required' => '部門を入力してください。',
-            'password.required' => 'パスワードを入力してください。',
+            'machine_type_id.required' => '機台は必須です。',
+            'machine_type_id.exists' => '選択された機台は無効です。',
         ];
     }
 }

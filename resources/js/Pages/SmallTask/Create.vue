@@ -1,48 +1,29 @@
 <script setup>
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
-import { onMounted } from 'vue';
-
-
 
 
 const props = defineProps({
-  task: {
-    type: Object,
-    required: true,
-  },
-  machineTypes:{
-    type: Object,
-    required: true,
-  },
-  departments:{
-    type: Object,
-    required: true,
-  },
-
+  machinetypes: Object,
+  
 })
-
-let task = usePage().props.task.data;
-const user = usePage().props.auth.user;
-
 
 const form = useForm({
-  name: task.name,
-  machine_type_id: task.machine_type_id.id,
-  department_id: task.department_id.id,
+  name: "",
+  machine_type_id: "",
 })
 
 
-
-//For Update Task
-const updateTask = () => {
-  form.put(route("tasks.update", task.id), {
+//For Create SmallTask
+const createSmallTask = () => {
+  form.post(route("smalltasks.store"), {
     onSuccess: () => {
+      form.reset();
       Swal.fire({
         position: "top-end",
         icon: "success",
-        title: "作業が正常に更新されました。",
+        title: "小作業が正常に作成されました。",
         showConfirmButton: false,
         timer: 1500,
       });
@@ -50,16 +31,14 @@ const updateTask = () => {
     onError: () => {
       Swal.fire({
         icon: "error",
-        title: "更新に失敗しました",
+        title: "エラーが発生しました",
         text: "もう一度お試しください。",
       });
     },
   });
 };
 
-
 //End
-
 </script>
 
 
@@ -72,13 +51,13 @@ const updateTask = () => {
     <Head title=" - 作業" />
     <main class="mx-auto p-6 max-w-screen-sm min-h-screen">
       <div class="max-w-full px-6 py-6 bg-gray-100">
-        <form class="w-full" @submit.prevent="updateTask">
+        <form class="w-full" @submit.prevent="createSmallTask">
           <div class="shadow sm:rounded-md sm:overflow-hidden bg-white">
             <div class="py-6 px-4 space-y-6 sm:p-6">
               <div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900">作業の更新</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">小作業</h3>
               </div>
-
+              <!--Start Name-->
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-6 sm:col-span-6">
                   <label for="name" class="block text-sm font-medium text-gray-700">名前</label>
@@ -89,40 +68,30 @@ const updateTask = () => {
                   </div>
                 </div>
               </div>
+              <!--End Name-->
 
-
-                <!-- Department & Machine Type -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <!-- Department -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">部門</label>
-                  <select v-model="form.department_id"
-                    :disabled="user.role !== 'superadmin'"
-                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option value="">部門を選択</option>
-                    <option v-for="department in departments.data" :key="department.id" :value="department.id">
-                      {{ department.name }}
-                    </option>
-                  </select>
-                  <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
-                  }}</div>
-                </div>
-
-
-                <!-- Machine Type -->
-                <div>
-                  <label class="block text-xs sm:text-sm font-medium text-gray-700">機台</label>
+              <!--Start Task-->
+              <div class="grid grid-cols-6 gap-6">
+                <div class="col-span-6 sm:col-span-6">
+                  <label class="block text-sm font-medium text-gray-700">機台</label>
                   <select v-model="form.machine_type_id"
-                    class="mt-1 block w-full border rounded-md py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm focus:ring focus:outline-none">
-                    <option value="">担当者を選択</option>
-                    <option v-for="machineType in machineTypes.data" :key="machineType.id" :value="machineType.id">
-                      {{ machineType.name }}
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="">機台を選択</option>
+                    <option v-for="machinetype in machinetypes.data" :key="machinetype.id" :value="machinetype.id">
+                      {{ machinetype.name }}
                     </option>
                   </select>
-                  <div v-if="form.errors.department_id" class="text-red-500 text-sm mt-1">{{ form.errors.department_id
+                  <div v-if="form.errors.machine_type_id" class="text-red-500 text-sm mt-1">{{ form.errors.machine_type_id
                   }}</div>
                 </div>
               </div>
+
+              <!--End Task-->
+
+
+             
+
+
             </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
               <Link :href="route('tasks.index')"
@@ -131,7 +100,7 @@ const updateTask = () => {
               </Link>
               <button type="submit"
                 class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                更新
+                保存
               </button>
             </div>
           </div>

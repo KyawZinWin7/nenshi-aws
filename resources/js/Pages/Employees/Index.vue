@@ -51,13 +51,15 @@ const deleteEmployee = (employeeId) => {
           <table class="min-w-full divide-y divide-gray-300">
             <thead class="bg-gray-50">
               <tr>
-                
+
                 <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">名前
                 </th>
                 <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">
                   社員コード</th>
-                <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">部門</th>
-                <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">役割</th>
+                <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">部門
+                </th>
+                <th class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">役割
+                </th>
                 <th
                   class="relative whitespace-nowrap py-3.5 pl-3 pr-4 text-right text-xs font-semibold text-gray-900 sm:pr-6">
                   操作</th>
@@ -65,19 +67,23 @@ const deleteEmployee = (employeeId) => {
             </thead>
             <tbody class="divide-y divide-gray-200 text-sm">
               <tr v-for="employee in employees.data" :key="employee.id">
-                
+
                 <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ employee.name }}</td>
                 <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ employee.employee_code }}</td>
-                <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ employee.department_id.name }}</td>
+                <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">{{ employee.department_id.name }}
+                </td>
 
                 <td class="whitespace-nowrap py-3 pl-4 pr-3 text-gray-900 sm:pl-6">
-                  {{ employee.role === 'admin' ? '管理者' : '従業員' }}
+                  <span v-if="employee.role === 'superadmin'">スーパー管理者</span>
+                  <span v-else-if="employee.role === 'admin'">管理者</span>
+                  <span v-else>従業員</span>
                 </td>
+
                 <td class="relative whitespace-nowrap py-3 pl-3 pr-4 text-right sm:pr-6">
                   <Link :href="route('employees.edit', employee.id)"
                     class="inline-block text-indigo-600 hover:text-indigo-900 text-xs sm:text-sm">
                   編集
-                </Link>
+                  </Link>
                   <button @click="deleteEmployee(employee.id)"
                     class="inline-block ml-2 text-red-600 hover:text-red-800 text-xs sm:text-sm">
                     削除
