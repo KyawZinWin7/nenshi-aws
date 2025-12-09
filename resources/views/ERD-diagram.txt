@@ -1,0 +1,113 @@
+🔹 Entities & Relationships
+
+departments
+
+id (PK)
+
+name
+
+department_code
+
+employees
+
+id (PK)
+
+name
+
+employee_code
+
+password
+
+department_id → departments.id (nullable, nullOnDelete)
+
+role
+
+plants
+
+id (PK)
+
+name
+
+machine_types
+
+id (PK)
+
+name
+
+department_id → departments.id (restrictOnDelete)
+
+tasks
+
+id (PK)
+
+name
+
+machine_type_id → machine_types.id (restrictOnDelete)
+
+department_id → departments.id (restrictOnDelete)
+
+machine_type_plants
+
+id (PK)
+
+machine_type_id → machine_types.id (restrictOnDelete)
+
+plant_id → plants.id (restrictOnDelete)
+
+start_number
+
+end_number
+
+machine_numbers
+
+id (PK)
+
+machine_type_plant_id → machine_type_plants.id (cascadeOnDelete)
+
+number
+
+main_operations
+
+id (PK)
+
+plant_id → plants.id (restrictOnDelete)
+
+machine_type_id → machine_types.id (restrictOnDelete)
+
+machine_number_id → machine_numbers.id (restrictOnDelete)
+
+task_id → tasks.id (restrictOnDelete)
+
+employee_id → employees.id (restrictOnDelete)
+
+department_id → departments.id (restrictOnDelete)
+
+completed_by → employees.id (set null)
+
+uncompleted_by → employees.id (set null)
+
+start_time / end_time / total_time / small_task / description / status
+
+main_operation_members
+
+id (PK)
+
+main_operation_id → main_operations.id (cascadeOnDelete)
+
+employee_id → employees.id (cascadeOnDelete)
+
+🔹 ERD Relationship Overview
+departments ──< employees
+departments ──< machine_types
+departments ──< tasks
+plants ──< machine_type_plants >── machine_types
+machine_type_plants ──< machine_numbers
+machine_types ──< tasks
+machine_types ──< machine_type_plants
+tasks ──< main_operations
+plants ──< main_operations
+machine_types ──< main_operations
+machine_numbers ──< main_operations
+employees ──< main_operations (employee_id)
+employees ──< main_operations (completed_by, uncompleted_by)
+main_operations ──< main_operation_members >── employees

@@ -12,6 +12,7 @@ use App\Http\Controllers\PlantController;
 use App\Http\Controllers\MachineNumberController;
 use App\Http\Controllers\MainOperationController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\SmallTaskController;
 
 
 
@@ -51,6 +52,7 @@ Route::middleware('auth')->group(function(){
     Route::get('/machines/by-plant/{plant}', [MainOperationController::class, 'getMachinesByPlant']);
     Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
     Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);
+    Route::get('/smalltasks/by-machine-type', [SmallTaskController::class, 'getSmallTasksByMachineType']);
     Route::delete('/{id}', [MainOperationController::class, 'destroy'])->name('mainoperations.destroy');
 
 
@@ -61,6 +63,7 @@ Route::middleware('auth')->group(function(){
         Route::resource('employees',EmployeeController::class);
         Route::resource('machinetypes',MachineTypeController::class);
         Route::resource('tasks', TaskController::class)->except(['show']);
+        Route::resource('smalltasks',SmallTaskController::class);
         Route::resource('machinenumbers',MachineNumberController::class);
         Route::get('/export', [MainOperationController::class, 'export'])->name('mainoperations.export');
         Route::get('/admincompletelist', [MainOperationController::class, 'admincompletelist'])->name('mainoperations.admincompletelist');

@@ -10,6 +10,7 @@ use App\Models\Task;
 use App\Models\MachineNumber;
 use App\Models\MachineTypePlant;
 use App\Models\Department;
+use App\Models\SmallTask;
 
 class MachineType extends Model
 {
@@ -47,6 +48,11 @@ class MachineType extends Model
      public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function samllTasks()
+    {
+        return $this->hasMany(SmallTask::class);
     }
 
 }

@@ -17,8 +17,10 @@ defineProps({
 
 <template>
   <aside
-    class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 "
+    class="fixed top-0 left-0 z-40 w-48 h-screen pt-14 transition-transform bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 "
     :class="{ '-translate-x-full': !isVisible }" aria-label="Sidenav">
+
+    
     <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
       <ul class="space-y-2">
 
@@ -75,7 +77,7 @@ defineProps({
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-              stroke-width="1.8"　width="24" height="24">
+              stroke-width="1.8" 　width="24" height="24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16M6 20V10h5v10m0 0V6h7v14" />
             </svg>
 
@@ -149,6 +151,28 @@ defineProps({
 
 
             <span class="ml-3"> 作業</span>
+          </a>
+        </li>
+        <!--End Task-->
+
+
+        <!--Start Small Task -->
+        <li>
+          <a :href="route('smalltasks.index')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['smalltasks.index', 'smalltasks.create', 'smalltasks.edit'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12l2 2 4-4M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+            </svg>
+
+
+
+            <span class="ml-3"> 小作業</span>
           </a>
         </li>
         <!--End Task-->

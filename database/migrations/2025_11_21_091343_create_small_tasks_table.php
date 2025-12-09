@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('machine_types', function (Blueprint $table) {
+        Schema::create('small_tasks', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('department_id')
-                    ->constrained()
-                    ->restrictOnDelete();
-
+            $table->foreignId('machine_type_id')->constrained()->restrictOnDelete();
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('machine_types');
+        Schema::dropIfExists('small_tasks');
     }
 };

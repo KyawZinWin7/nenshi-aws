@@ -29,6 +29,7 @@ class ExportMainOperationRequest extends FormRequest
             'machine_number' => ['nullable', 'string'],
             'task_id' => ['nullable', 'integer'],
             'plant_id' => ['nullable', 'integer'],
+            'department_id' => ['nullable', 'integer'],
         ];
     }
 
