@@ -3,14 +3,10 @@ import { computed, ref, watch } from 'vue';
 import FilterRadios from './FilterRadios.vue';
 import SearchForm from './SearchForm.vue';
 import FilterDropdown from './FilterDropdown.vue';
-import DateFilter from './DateFilter.vue';
-import dayjs from 'dayjs';
 import Pagination from './Pagination.vue';
+import dayjs from 'dayjs';
 import { useForm, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import { id } from 'element-plus/es/locales.mjs';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -18,8 +14,6 @@ const user = computed(() => page.props.auth.user);
 const searchFilter = ref('');
 const radioFilter = ref('all');
 const checkboxFilter = ref([]);
-const startDateFilter = ref(null);
-const endDateFilter = ref(null);
 
 const currentPage = ref(1);
 const perPage = ref(50);
@@ -30,67 +24,40 @@ const props = defineProps({
   tasks: { type: Object, required: true },
 });
 
-// ✅ Watch for data reload to reset pagination or re-apply filters
 watch(
   () => props.mainoperations.data,
-  (newData) => {
-    if (newData?.length > 0) {
-      currentPage.value = 1;
-
-    }
+  () => {
+    currentPage.value = 1;
   },
   { immediate: true }
 );
 
 const filteredMainOperations = computed(() => {
   let items = props.mainoperations.data ?? [];
-  const search = searchFilter.value.trim().toLowerCase();
-  const radio = radioFilter.value;
-  const checkboxes = checkboxFilter.value || [];
+  const search = searchFilter.value.toLowerCase();
 
-  const filtered = items.filter((mainoperation) => {
-    const startDate = mainoperation.start_time
-      ? dayjs(mainoperation.start_time).format('YYYY-MM-DD')
-      : null;
+  return items
+    .filter((m) => {
+      const matchesSearch =
+        !search ||
+        m.start_time?.toLowerCase().includes(search) ||
+        m.end_time?.toLowerCase().includes(search) ||
+        m.machine_type?.name?.toLowerCase().includes(search) ||
+        m.machine_number?.number?.toLowerCase().includes(search) ||
+        m.task?.name?.toLowerCase().includes(search) ||
+        m.employee?.name?.toLowerCase().includes(search);
 
-    const matchesDateRange =
-      (!startDateFilter.value || !endDateFilter.value) ||
-      (startDate >= startDateFilter.value && startDate <= endDateFilter.value);
+      const matchesRadio =
+        radioFilter.value === 'all' ||
+        m.machine_type?.id === parseInt(radioFilter.value);
 
-    const matchesRadio =
-      !radio || radio === 'all' || mainoperation.machine_type?.id === parseInt(radio);
+      const matchesCheckbox =
+        checkboxFilter.value.length === 0 ||
+        checkboxFilter.value.includes(m.task?.name);
 
-    const matchesSearch =
-      !search ||
-      mainoperation.start_time?.toLowerCase().includes(search) ||
-      mainoperation.end_time?.toLowerCase().includes(search) ||
-      mainoperation.machine_type?.name?.toLowerCase().includes(search) ||
-      mainoperation.machine_number?.toLowerCase().includes(search) ||
-      mainoperation.task?.name?.toLowerCase().includes(search) ||
-      mainoperation.employee?.name?.toLowerCase().includes(search);
-
-    const taskName = mainoperation.task?.name || '';
-    const matchesCheckbox =
-      checkboxes.length === 0 || checkboxes.includes(taskName);
-
-    const matchesStatus = mainoperation.status == 1;
-
-    return (
-      matchesDateRange &&
-      matchesRadio &&
-      matchesSearch &&
-      matchesCheckbox &&
-      matchesStatus
-    );
-  });
-
-  return filtered.sort((a, b) => {
-    const dateA = dayjs(a.start_time);
-    const dateB = dayjs(b.start_time);
-    if (!dateA.isValid()) return 1;
-    if (!dateB.isValid()) return -1;
-    return dateB.valueOf() - dateA.valueOf();
-  });
+      return matchesSearch && matchesRadio && matchesCheckbox && m.status === 1;
+    })
+    .sort((a, b) => dayjs(b.start_time).valueOf() - dayjs(a.start_time).valueOf());
 });
 
 const paginatedMainOperations = computed(() => {
@@ -98,117 +65,76 @@ const paginatedMainOperations = computed(() => {
   return filteredMainOperations.value.slice(start, start + perPage.value);
 });
 
-const totalItems = computed(() => filteredMainOperations.value.length);
-
-const handleSearch = (search) => {
-  searchFilter.value = search;
-};
-
-const handleRadioFilter = (filter) => {
-  radioFilter.value = filter;
-};
-
-const handleCheckboxFilter = (filter) => {
-  checkboxFilter.value = filter;
-};
-
-const handleDateRangeSelected = (range) => {
-  startDateFilter.value = range.start;
-  endDateFilter.value = range.end;
-};
-
+const handleSearch = (val) => (searchFilter.value = val);
+const handleRadioFilter = (val) => (radioFilter.value = val);
+const handleCheckboxFilter = (val) => (checkboxFilter.value = val);
 
 const uncompleteForm = useForm({});
-const uncompleteMO = async (moId) => {
+const uncompleteMO = async (id) => {
   const result = await Swal.fire({
-    title: 'この作業を未完了にしてもよろしいですか？',
+    title: 'この作業を未完了にしますか？',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'はい、未完了にする',
-    cancelButtonText: 'キャンセル',
+    confirmButtonText: 'はい',
   });
 
   if (result.isConfirmed) {
-    uncompleteForm.post(route('mainoperations.uncomplete', moId), {
-      onSuccess: () => {
-        Swal.fire({
-          icon: 'success',
-          title: '未完了に変更されました！',
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      },
-      onError: () => {
-        Swal.fire({
-          icon: 'error',
-          title: '変更に失敗しました',
-          text: 'もう一度お試しください。',
-        });
-      },
-    });
+    uncompleteForm.post(route('mainoperations.uncomplete', id));
   }
 };
 
 const deleteForm = useForm({});
-const deleteMO = (moId) => {
+const deleteMO = (id) => {
   Swal.fire({
-    title: '本当に削除しますか？',
-    text: 'この作業を削除すると元に戻せません。',
+    title: '削除しますか？',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#e3342f',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'はい、削除します',
-    cancelButtonText: 'キャンセル',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      deleteForm.delete(route('mainoperations.destroy', moId));
+    confirmButtonText: '削除',
+  }).then((r) => {
+    if (r.isConfirmed) {
+      deleteForm.delete(route('mainoperations.destroy', id));
     }
   });
 };
 
-const refreshData = () => {
-  location.reload();
-};
+const refreshData = () => location.reload();
 </script>
 
-
 <template>
-  <div class="bg-white relative border rounded-lg overflow-x-auto">
-    <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
-      <!-- Search -->
+  <div class="bg-white border rounded-lg">
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 p-3">
       <SearchForm @search="handleSearch" />
 
-      <button @click="refreshData"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-1">
-        <!-- Lucide RefreshCcw Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          stroke-width="2">
-          <path d="M3 2v6h6"></path>
-          <path d="M21 12a9 9 0 1 0-3 6.7L21 22M21 16v6h-6"></path>
-        </svg>
+      <button
+        @click="refreshData"
+        class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 text-sm">
         更新
       </button>
 
-      <!-- Date Filter -->
-      <!-- <DateFilter @date-range-selected="handleDateRangeSelected" /> -->
+      <FilterRadios
+        :machinetypes="machinetypes"
+        :tasks="tasks"
+        @filter="handleRadioFilter" />
 
-      <!-- Filters -->
-      <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
-        <FilterRadios :machinetypes="machinetypes" :tasks="tasks" @filter="handleRadioFilter" />
-        <FilterDropdown :tasks="tasks" @filter="handleCheckboxFilter" />
-      </div>
-
-
-
+      <FilterDropdown
+        :tasks="tasks"
+        @filter="handleCheckboxFilter" />
     </div>
 
-    <!-- Responsive Table Wrapper -->
+    <!-- Scroll Hint -->
+    <div class="sm:hidden text-xs text-gray-400 px-3 pb-1">
+      ← 横にスクロールできます →
+    </div>
 
-    <div class="overflow-x-auto">
-      <table class="w-full table-fixed text-[11px] sm:text-sm text-left text-gray-500">
+    <!-- Horizontal Scroll Table -->
+    <div class="w-full overflow-x-auto">
+      <table
+        class="w-full min-w-[1200px] table-fixed whitespace-nowrap
+               text-[11px] sm:text-sm text-left text-gray-500">
 
-        <thead class="text-[10px] sm:text-xs text-gray-700 uppercase bg-gray-50">
+        <thead class="bg-gray-50 text-gray-700 uppercase text-xs">
           <tr>
             <th class="px-2 py-2">Date</th>
             <th class="px-2 py-2">工場</th>
@@ -220,62 +146,66 @@ const refreshData = () => {
             <th class="px-2 py-2">終了</th>
             <th class="px-2 py-2">担当者</th>
             <th class="px-2 py-2">合計時間</th>
-
-            <!-- limit width -->
-            <th class="px-2 py-2 max-w-[70px] truncate">メンバー</th>
-            <th class="px-2 py-2 w-20 text-center">操作</th>
+            <th class="px-2 py-2">メンバー</th>
+            <th class="px-2 py-2 text-center">操作</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr v-for="mainoperation in paginatedMainOperations" :key="mainoperation.id" class="border-b">
+          <tr
+            v-for="m in paginatedMainOperations"
+            :key="m.id"
+            class="border-b">
 
-            <td class="px-2 py-2">{{ mainoperation.created_at }}</td>
-            <td class="px-2 py-2">{{ mainoperation.plant?.name ?? '未設定' }}</td>
-            <td class="px-2 py-2">{{ mainoperation.machine_type?.name ?? '未設定' }}</td>
-            <td class="px-2 py-2">{{ mainoperation.machine_number?.number ?? '未設定' }}</td>
-            <td class="px-2 py-2">{{ mainoperation.task?.name }}</td>
-            <td class="px-2 py-2">{{ mainoperation.small_task?.name ?? '未設定' }}</td>
-            <td class="px-2 py-2">{{ mainoperation.start_time }}</td>
-            <td class="px-2 py-2">{{ mainoperation.end_time }}</td>
-            <td class="px-2 py-2">{{ mainoperation.employee?.name }}</td>
-            <td class="px-2 py-2">{{ mainoperation.total_time }}</td>
+            <td class="px-2 py-2">{{ m.created_at }}</td>
+            <td class="px-2 py-2">{{ m.plant?.name ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ m.machine_type?.name ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ m.machine_number?.number ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ m.task?.name }}</td>
+            <td class="px-2 py-2">{{ m.small_task?.name ?? '未設定' }}</td>
+            <td class="px-2 py-2">{{ m.start_time }}</td>
+            <td class="px-2 py-2">{{ m.end_time }}</td>
+            <td class="px-2 py-2">{{ m.employee?.name }}</td>
+            <td class="px-2 py-2">{{ m.total_time }}</td>
 
-            <!-- members -->
-            <td class="px-2 py-2 max-w-[70px] truncate">
-              <span v-for="member in mainoperation.members" :key="member.id" class="block truncate text-[10px]">
-                {{ member.name }}
-              </span>
+            <td class="px-2 py-2">
+              <div class="flex flex-col text-[10px]">
+                <span v-for="mem in m.members" :key="mem.id">
+                  {{ mem.name }}
+                </span>
+              </div>
             </td>
 
-            <!-- 操作 -->
-            <td class="px-1 py-1 w-20 text-center" v-if="['admin', 'superadmin'].includes(user.role) ||
-              user.id === mainoperation.employee.id ||
-              mainoperation.members.some(m => m.id === user.id)">
+            <td class="px-2 py-2 text-center">
+              <div
+                v-if="['admin','superadmin'].includes(user.role)
+                  || user.id === m.employee.id
+                  || m.members.some(mem => mem.id === user.id)"
+                class="flex gap-1 justify-center">
 
-              <div class="flex justify-center gap-1">
-
-                <button @click="uncompleteMO(mainoperation.id)"
-                  class="px-1 py-[2px] text-[9px] sm:text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  @click="uncompleteMO(m.id)"
+                  class="px-2 py-1 text-xs bg-blue-600 text-white rounded">
                   未完了
                 </button>
 
-                <button @click="deleteMO(mainoperation.id)"
-                  class="px-1 py-[2px] text-[9px] sm:text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                <button
+                  @click="deleteMO(m.id)"
+                  class="px-2 py-1 text-xs bg-red-600 text-white rounded">
                   削除
                 </button>
-
               </div>
-
             </td>
+
           </tr>
         </tbody>
-
       </table>
     </div>
 
-
     <!-- Pagination -->
-    <Pagination :total="filteredMainOperations.length" :per-page="perPage" v-model:current-page="currentPage" />
+    <Pagination
+      :total="filteredMainOperations.length"
+      :per-page="perPage"
+      v-model:current-page="currentPage" />
   </div>
 </template>
