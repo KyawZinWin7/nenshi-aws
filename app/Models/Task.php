@@ -33,5 +33,12 @@ class Task extends Model
         return $this->belongsTo(Department::class);
     }
 
-    
+    public function smallTasks()
+    {
+        return $this->hasMany(SmallTask::class);
+    }
+    public function sizingOperations()
+    {
+        return $this->hasMany(SizingOperation::class);
+    }
 }

@@ -46,4 +46,14 @@ class Employee extends Authenticatable
         return $this->belongsTo(Department::class);
     }
 
+    public function sizingOperations()
+    {
+        return $this->hasMany(SizingOperation::class);
+    }
+
+
+    public function sizingLogs()
+    {
+        return $this->hasMany(SizingLog::class);
+    }
 }

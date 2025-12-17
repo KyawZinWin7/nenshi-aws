@@ -19,7 +19,11 @@ use App\Http\Controllers\SizingOperationController;
 
 
 Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
-    Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);
+Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);
+ Route::get('/machines/by-plant/{plant}', [MainOperationController::class, 'getMachinesByPlant']);
+Route::get('/sizingoperations',[SizingOperationController::class,'index'])->name('sizingoperation');
+Route::post('/sizingoperations', [SizingOperationController::class, 'store'])->name('sizingoperations.store');
+    
 
 
 Route::middleware('guest')->group(function(){
@@ -29,11 +33,10 @@ Route::middleware('guest')->group(function(){
 
 
 
-    //----------------Login----------------
 
     Route::get('/',[AuthenticateController::class,'create'])->name('login');
     Route::post('/',[AuthenticateController::class,'store']);
-    Route::get('/sizingoperations',[SizingOperationController::class,'index'])->name('sizingoperation');
+   
     
 });
 
@@ -54,8 +57,8 @@ Route::middleware('auth')->group(function(){
 
 
     
-    Route::get('/machines/by-plant/{plant}', [MainOperationController::class, 'getMachinesByPlant']);
-    Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
+   
+   
     Route::get('/smalltasks/by-machine-type', [SmallTaskController::class, 'getSmallTasksByMachineType']);
     Route::delete('/{id}', [MainOperationController::class, 'destroy'])->name('mainoperations.destroy');
 

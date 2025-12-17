@@ -62,10 +62,7 @@ class MainOperationController extends Controller
                 'members',
             ])
                 ->where('status', 0)
-            // ->where('employee_id', Auth::id())
-            // ->orWhereHas('members', function ($query) {
-            //     $query->where('employee_id', Auth::id());
-            // })
+            
                 ->where('department_id', Auth::user()->department_id)
                 ->latest('updated_at')
                 ->take(200)
