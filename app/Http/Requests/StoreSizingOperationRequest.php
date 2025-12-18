@@ -27,7 +27,7 @@ class StoreSizingOperationRequest extends FormRequest
             'machine_number_id' => 'required|integer|exists:machine_numbers,id',
             'task_id' => 'required|integer|exists:tasks,id',
             // 'employee_id' => 'required|integer|exists:employees,id',
-            'team_ids' => 'nullable|array',
+            'team_ids' => 'required|array',
             'team_ids.*' => 'integer|exists:employees,id',
             'small_task_id' => 'nullable|integer|exists:small_tasks,id',
         ];

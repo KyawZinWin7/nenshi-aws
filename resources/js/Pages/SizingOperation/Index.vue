@@ -260,20 +260,20 @@ const teamMembers = ref(props.employees.data || [])
                                     <table class="w-full text-center">
                                         <thead class="bg-blue-200">
                                             <tr>
-                                                <th class="border p-1">担当者</th>
-                                                <th class="border p-1">開始</th>
-                                                <th class="border p-1">終了</th>
-                                                <th class="border p-1">合計時間</th>
+                                                <th class="border text-sm p-1">担当者</th>
+                                                <th class="border text-sm p-1">開始</th>
+                                                <th class="border text-sm p-1">終了</th>
+                                                <th class="border text-sm p-1">合計時間</th>
                                             </tr>
                                         </thead>
 
                                         <tbody>
                                            
                                             <tr v-for="log in op.sizinglogs" :key="log.id">
-                                                <td class="border p-1">{{ log.employee.name?? '-' }}</td>
-                                                <td class="border p-1">{{ log.start_time }}</td>
-                                                <td class="border p-1">{{ log.end_time ?? '-' }}</td>
-                                                <td class="border p-1">{{ log.duration }}</td>
+                                                <td class="border text-sm p-1">{{ log.employee.name?? '-' }}</td>
+                                                <td class="border text-sm p-1">{{ log.start_time }}</td>
+                                                <td class="border text-sm p-1">{{ log.end_time ?? '-' }}</td>
+                                                <td class="border text-sm p-1">{{ log.duration }}</td>
                                             </tr>
                                         </tbody>
                                     </table>

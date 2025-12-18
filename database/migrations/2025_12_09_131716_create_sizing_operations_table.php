@@ -40,7 +40,7 @@ return new class extends Migration
             $table->string('total_time')->default('00:00:00');
                 
            
-             // Employee (nullable)
+            // Employee (nullable)
             $table->foreignId('employee_id')
                   ->nullable()
                   ->constrained('employees')
