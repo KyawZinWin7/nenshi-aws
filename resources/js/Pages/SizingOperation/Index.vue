@@ -25,8 +25,7 @@ const form = useForm({
     task_id: '',
 })
 
-/* ================= UI STATE ================= */
-const isEditing = ref(false)
+
 
 /* ================= LOCAL COPY (IMPORTANT) ================= */
 /* ❌ props ကို မထိ
@@ -54,6 +53,84 @@ onMounted(() => {
     })
 })
 
+
+//For Create and Edit 
+const submitForm = () => {
+    if (isEditing.value) {
+        updateSizingOperation();
+    } else {
+        createSizingOperation()
+    }
+}
+
+//For Edit Function
+
+const isEditing = ref(false);
+const editingId = ref(null);
+
+
+const editSizingOperation = async (op) => {
+    console.log("Editing Sizing Operation:", op.sizinglogs);
+
+    isEditing.value = true;
+    editingId.value = op.id;
+
+    // team ids (from logs, unique)
+    form.team_ids = [
+        ...new Set(
+            op.sizinglogs
+                ?.map(log => log.employee?.id)
+                .filter(Boolean) // remove null/undefined
+        )
+    ];
+
+    
+
+    // plant
+    form.plant_id = op.plant?.id ?? '';
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // machine type
+    form.machine_type_id = op.machine_type?.id ?? '';
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // rest
+    form.machine_number_id = op.machine_number?.id ?? '';
+    form.task_id = op.task?.id ?? '';
+};
+
+
+
+const cancelEdit = () => {
+    isEditing.value = false;
+    editingId.value = null;
+    form.reset();
+};
+
+
+const updateSizingOperation = () => {
+    form.put(route('sizingoperations.update', { id: editingId.value }), {
+        onSuccess: () => {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: '準備課が更新されました',
+                showConfirmButton: false,
+                timer: 1500,
+            })
+            cancelEdit();
+        },
+        onError: () => {
+            Swal.fire({
+                icon: 'error',
+                title: 'エラーが発生しました',
+                text: 'もう一度試してください。',
+            })
+        },
+    })
+};
 /* ================= CREATE ================= */
 const createSizingOperation = () => {
     form.post(route('sizingoperations.store'), {
@@ -127,6 +204,103 @@ watch(
 
 /* ================= TEAM ================= */
 const teamMembers = ref(props.employees.data || [])
+
+
+/* ================= COMPLETE LOG ================= */
+
+const completeForm = useForm({});
+const completeSMO = async (opId) => {
+    //Confirm Dialog
+    const confirmResult = await Swal.fire({
+        title: "この作業を完了してもよろしいですか？",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "はい、完了します。",
+        cancelButtonText: "キャンセル",
+
+    });
+
+    if (!confirmResult.isConfirmed) return;
+
+    //Complete sizing operation directly
+
+    completeForm.post(route('sizingoperations.complete', { id: opId }), {
+        onSuccess: () => {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: '作業が完了しました',
+                showConfirmButton: false,
+                timer: 1500,
+            })
+        },
+        onError: () => {
+            Swal.fire({
+                icon: 'error',
+                title: 'エラーが発生しました',
+                text: 'もう一度試してください。',
+            })
+        },
+    })
+
+}
+
+//For add Employees
+
+
+
+const addEmployeeDialog = ref(false)
+const selectedEmployeeIds = ref([])
+// const editingId = ref(null)
+
+const openAddEmployeeModal = (op) => {
+    editingId.value = op.id
+
+    
+
+    addEmployeeDialog.value = true
+}
+
+
+
+const addEmployeeForm = useForm({
+    employee_ids: [],
+})
+
+
+const confirmAddEmployees = () => {
+    addEmployeeForm.employee_ids = selectedEmployeeIds.value
+
+    addEmployeeForm.post(
+        route('sizingoperations.addEmployees', { id: editingId.value }),
+        {
+            onSuccess: () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '担当者が追加されました',
+                    showConfirmButton: false,
+                    timer: 1200,
+                })
+
+                addEmployeeDialog.value = false
+                selectedEmployeeIds.value = []
+                addEmployeeForm.reset()
+            },
+            onError: (errors) => {
+                console.log(errors)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'エラーが発生しました',
+                    text: 'もう一度試してください。',
+                })
+            },
+        }
+    )
+}
+
+
+
+
 </script>
 <template>
 
@@ -139,11 +313,12 @@ const teamMembers = ref(props.employees.data || [])
             <!-- LEFT FORM -->
             <div class="w-full lg:w-[30%] mb-8">
                 <Container>
-                    <form @submit.prevent="createSizingOperation" class="space-y-4">
+                    <form @submit.prevent="submitForm" class="space-y-4">
 
                         <div>
                             <label class="form-label">担当者</label>
-                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択" class="select-uniform !p-0">
+                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
+                                class="select-uniform !p-0">
                                 <el-option v-for="member in teamMembers" :key="member.id" :label="member.name"
                                     :value="member.id" />
                             </el-select>
@@ -193,9 +368,20 @@ const teamMembers = ref(props.employees.data || [])
                             </div>
                         </div>
 
-                        <PrimaryBtn class="w-full">
-                            スタート
-                        </PrimaryBtn>
+                        <!-- Submit -->
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <!-- Submit button -->
+                            <PrimaryBtn class="w-full sm:flex-1 py-2 sm:py-2.5 text-xs sm:text-sm">
+                                {{ isEditing ? '更新' : 'スタート' }}
+                            </PrimaryBtn>
+
+                            <!-- Cancel button (only in edit mode) -->
+                            <button v-if="isEditing" type="button" @click="cancelEdit"
+                                class="w-full sm:flex-1 py-2 sm:py-2.5 text-xs sm:text-sm bg-gray-400 text-white rounded hover:bg-gray-500">
+                                キャンセル
+                            </button>
+                        </div>
+
 
                     </form>
                 </Container>
@@ -236,19 +422,61 @@ const teamMembers = ref(props.employees.data || [])
 
                                 <td class="border p-2">
                                     <div class="relative" @click.stop>
-                                        <button @click="op.menu = !op.menu" class="px-2 py-1">
-                                            ⋯
+                                        <button
+                                            class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
+                                            完了
                                         </button>
+                                        <button @click.stop="openAddEmployeeModal(op)"
+                                            class="m-1 bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
+                                            追加
+                                        </button>
+                                        <el-dialog v-model="addEmployeeDialog" title="担当者を追加" width="400px">
+                                            <el-select v-model="selectedEmployeeIds" multiple placeholder="担当者を選択"
+                                                style="width: 100%">
+                                                <el-option v-for="member in teamMembers" :key="member.id"
+                                                    :label="member.name" :value="member.id" />
+                                            </el-select>
+
+                                            <template #footer>
+                                                <el-button @click="addEmployeeDialog = false">
+                                                    キャンセル
+                                                </el-button>
+
+                                                <el-button type="primary" @click="confirmAddEmployees">
+                                                    追加
+                                                </el-button>
+                                            </template>
+                                        </el-dialog>
+
+                                        <button
+                                            class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
+                                            止
+                                        </button>
+                                        <button @click="editSizingOperation(op)"
+                                            class="m-1 bg-pink-500 text-white text-xs px-3 py-1 rounded hover:bg-pink-600">
+                                            編集
+                                        </button>
+                                        <button
+                                            class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
+                                            削除
+                                        </button>
+
+                                        <!-- <button @click="op.menu = !op.menu" class="px-2 py-1">
+                                            ⋯
+                                        </button> -->
 
                                         <div v-if="op.menu"
                                             class="absolute right-0 mt-1 bg-white border rounded shadow-md w-28 z-20">
-                                            <button class="block w-full px-3 py-2 hover:bg-gray-100">完了</button>
-                                            <button class="block w-full px-3 py-2 hover:bg-gray-100">編集</button>
+                                            <button @click="completeSMO(op.id)"
+                                                class="block w-full px-3 py-2 hover:bg-gray-100">完了</button>
+                                            <button @click="editSizingOperation(op)"
+                                                class="block w-full px-3 py-2 hover:bg-gray-100">編集</button>
                                             <button class="block w-full px-3 py-2 hover:bg-gray-100">追加</button>
                                             <button
                                                 class="block w-full px-3 py-2 text-pink-600 hover:bg-gray-100">止</button>
-                                            <button
-                                                class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">削除</button>
+                                            <button class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
+                                                削除
+                                            </button>
                                         </div>
                                     </div>
                                 </td>
@@ -260,20 +488,39 @@ const teamMembers = ref(props.employees.data || [])
                                     <table class="w-full text-center">
                                         <thead class="bg-blue-200">
                                             <tr>
-                                                <th class="border text-sm p-1">担当者</th>
+
                                                 <th class="border text-sm p-1">開始</th>
                                                 <th class="border text-sm p-1">終了</th>
                                                 <th class="border text-sm p-1">合計時間</th>
+                                                <th class="border text-sm p-1">担当者</th>
+                                                <th class="border text-sm p-1">操作</th>
                                             </tr>
                                         </thead>
 
                                         <tbody>
-                                           
                                             <tr v-for="log in op.sizinglogs" :key="log.id">
-                                                <td class="border text-sm p-1">{{ log.employee.name?? '-' }}</td>
+
                                                 <td class="border text-sm p-1">{{ log.start_time }}</td>
                                                 <td class="border text-sm p-1">{{ log.end_time ?? '-' }}</td>
                                                 <td class="border text-sm p-1">{{ log.duration }}</td>
+                                                <td class="border text-sm p-1">{{ log.employee.name ?? '-' }}</td>
+
+                                                <td class="border text-sm p-1">
+                                                    <button
+                                                        class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600"
+                                                        @click="completeLog(log)" v-if="!log.end_time">
+                                                        完了
+                                                    </button>
+                                                    <button
+                                                        class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
+                                                        止
+                                                    </button>
+                                                    <button
+                                                        class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
+                                                        削除
+                                                    </button>
+
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>

@@ -123,12 +123,12 @@ class MainOperationController extends Controller
             ->with('success', '作業が登録されました。');
     }
 
-    public function edit(MainOperation $mainoperation)
-    {
-        return Inertia::render('Home', [
-            'mainoperation' => new MainOperationResource($mainoperation->load('machineType')),
-        ]);
-    }
+    // public function edit(MainOperation $mainoperation)
+    // {
+    //     return Inertia::render('Home', [
+    //         'mainoperation' => new MainOperationResource($mainoperation->load('machineType')),
+    //     ]);
+    // }
 
     public function update(UpdateMainOperationRequest $request, MainOperation $mainoperation)
     {
