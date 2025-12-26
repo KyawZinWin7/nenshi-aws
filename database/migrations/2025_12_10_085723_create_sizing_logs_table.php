@@ -14,19 +14,22 @@ return new class extends Migration
         Schema::create('sizing_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sizing_operation_id')
-                  ->constrained('sizing_operations')
-                  ->cascadeOnDelete();
+                ->constrained('sizing_operations')
+                ->cascadeOnDelete();
 
             $table->foreignId('employee_id')
-                  ->nullable()
-                  ->constrained('employees')
-                  ->nullOnDelete();
+                ->nullable()
+                ->constrained('employees')
+                ->nullOnDelete();
 
             $table->dateTime('start_time')->nullable();
+            $table->dateTime('last_start_time')->nullable();
             $table->dateTime('end_time')->nullable();
 
-            $table->integer('duration')->default(0);
+            
 
+            // accumulated working seconds
+            $table->unsignedInteger('worked_seconds')->default(0);
             $table->timestamps();
         });
     }

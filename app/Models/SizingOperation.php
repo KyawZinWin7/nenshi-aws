@@ -17,6 +17,8 @@ class SizingOperation extends Model
         'start_time',
         'end_time',
         'total_time',
+        'worked_seconds',
+        'last_start_time',
         'description',
         'status',
     ];

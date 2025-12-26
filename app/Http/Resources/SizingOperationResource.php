@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\CarbonInterval;
 
 class SizingOperationResource extends JsonResource
 {
@@ -31,7 +32,12 @@ class SizingOperationResource extends JsonResource
             'end_time' => $this->end_time ? $this->end_time->timezone('Asia/Tokyo')->format('Y-m-d H:i:s') : null,
 
             'total_time' => $this->total_time,
-            'status' => (int) $this->status,
+            'status' => $this->status,
+            'worked_seconds' => $this->worked_seconds,
+            'worked_time' => CarbonInterval::seconds($this->worked_seconds)
+                ->cascade()
+                ->format('%H:%I:%S'),
+            'last_start_time' => $this->last_start_time,
             'created_at' => $this->created_at->timezone('Asia/Tokyo')->format('Y-m-d'),
         ];
     }

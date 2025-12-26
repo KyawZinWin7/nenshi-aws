@@ -120,6 +120,9 @@ const completeSMO = async (opId) => {
                             <th class="border p-2">機台</th>
                             <th class="border p-2">機号</th>
                             <th class="border p-2">作業</th>
+                            <th class="border p-2">開始</th>
+                            <th class="border p-2">終了</th>
+                            <th class="border p-2">合計時間</th>
                             <th class="border p-2">操作</th>
                         </tr>
                     </thead>
@@ -141,7 +144,12 @@ const completeSMO = async (opId) => {
                                 <td class="border p-2">{{ op.machine_type.name }}</td>
                                 <td class="border p-2">{{ op.machine_number.name }}</td>
                                 <td class="border p-2">{{ op.task.name }}</td>
-                                {{ op.sizingLogs }}
+                                <td class="border p-2">{{ op.start_time }}</td>
+                                <td class="border p-2">
+                                    <span v-if="op.end_time">{{ op.end_time }}</span>
+                                    <span v-else class="text-red-500">進行中</span> 
+                                </td>
+                                <td class="border p-2">{{ op.worked_time }}</td>
 
                                 <td class="border p-2">
                                     <div class="relative" @click.stop>
@@ -183,7 +191,7 @@ const completeSMO = async (opId) => {
                                                 <td class="border text-sm p-1">{{ log.employee.name ?? '-' }}</td>
                                                 <td class="border text-sm p-1">{{ log.start_time }}</td>
                                                 <td class="border text-sm p-1">{{ log.end_time ?? '-' }}</td>
-                                                <td class="border text-sm p-1">{{ log.duration }}</td>
+                                                <td class="border text-sm p-1">{{ log.duration_per_employee }}</td>
 
                                                 <td class="border text-sm p-1">
                                                     <button

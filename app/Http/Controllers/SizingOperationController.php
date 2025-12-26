@@ -19,7 +19,6 @@ use App\Models\SizingOperation;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class SizingOperationController extends Controller
 {
@@ -29,7 +28,8 @@ class SizingOperationController extends Controller
         $sizingoperations = SizingOperationResource::collection(
             SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
                 ->where('department_id', 2) // Sizing Department ID
-                ->where('status', 0) // Ongoing operations
+                ->where('status', 'running')
+                ->orWhere('status', 'paused')
                 ->orderBy('created_at', 'desc')
                 ->get()
         );
@@ -58,8 +58,10 @@ class SizingOperationController extends Controller
         $sodata = $request->validated();
 
         $sodata['department_id'] = 2; // Sizing Department ID
-        $sodata['status'] = 0; // Default status
+        $sodata['status'] = 'running'; // Default status
         $sodata['start_time'] = now();
+        $sodata['last_start_time'] = now();
+        $sodata['worked_seconds'] = 0;
         $sodata['employee_id'] = $request->employee_id; // Temporary employee ID, to be replaced with auth user ID
 
         $operation = SizingOperation::create($sodata);
@@ -71,6 +73,8 @@ class SizingOperationController extends Controller
                 'sizing_operation_id' => $operation->id,
                 'employee_id' => $employeeID, // from form / auth
                 'start_time' => now(),
+                'last_start_time' => now(),
+                'worked_seconds' => 0,
             ]);
         }
 
@@ -128,40 +132,53 @@ class SizingOperationController extends Controller
 
     public function complete($id)
     {
-        $sizingOperation = SizingOperation::findOrFail($id);
-        $endTime = Carbon::now('Asia/Tokyo');
+        $op = SizingOperation::findOrFail($id);
+        $now = Carbon::now('Asia/Tokyo');
 
-        // --- Operation time ---
-        $opStart = Carbon::parse($sizingOperation->start_time, 'Asia/Tokyo');
-
-        if ($endTime->lt($opStart)) {
-            return back()->with('error', '終了時間は開始時間より後でなければなりません。');
+        //  already completed guard
+        if ($op->status === 'completed') {
+            return back();
         }
 
-        $opSeconds = $opStart->diffInSeconds($endTime);
+        $workedSeconds = $op->worked_seconds;
 
-        $sizingOperation->update([
-            'status' => 1,
-            'end_time' => $endTime,
-            'total_time' => $opSeconds, // seconds
+        //  if running → add last segment
+        if ($op->status === 'running' && $op->last_start_time) {
+            $start = Carbon::parse($op->last_start_time, 'Asia/Tokyo');
+
+            if ($start->lte($now)) {
+                $workedSeconds += $start->diffInSeconds($now);
+            }
+        }
+
+        //  update operation
+        $op->update([
+            'status' => 'completed',
+            'end_time' => $now,
+            'worked_seconds' => $workedSeconds,
+            'last_start_time' => null,
         ]);
 
-        // --- Logs (same sizing_operation_id, all users) ---
-        $logs = SizingLog::where('sizing_operation_id', $sizingOperation->id)
+        //  close all running logs
+        $logs = SizingLog::where('sizing_operation_id', $op->id)
             ->whereNull('end_time')
             ->get();
 
         foreach ($logs as $log) {
-            if (! $log->start_time) {
-                continue; // safety
+            $worked = $log->worked_seconds;
+
+            if ($log->last_start_time) {
+                $start = Carbon::parse($log->last_start_time, 'Asia/Tokyo');
+
+                if ($start->lte($now)) {
+                    $worked += $start->diffInSeconds($now);
+                }
             }
 
-            $logStart = Carbon::parse($log->start_time, 'Asia/Tokyo');
-            $logSeconds = $logStart->diffInSeconds($endTime);
-
             $log->update([
-                'end_time' => $endTime,
-                'duration' => $logSeconds, // seconds
+                'worked_seconds' => $worked,
+                'last_start_time' => null,
+                'end_time' => $now,
             ]);
         }
 
@@ -174,7 +191,7 @@ class SizingOperationController extends Controller
         $sizingoperations = SizingOperationResource::collection(
             SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
                 ->where('department_id', 2) // Sizing Department ID
-                ->where('status', 1) // Completed operations
+                ->where('status', 'completed') // Completed operations
                 ->orderBy('created_at', 'desc')
                 ->get()
         );
@@ -214,5 +231,79 @@ class SizingOperationController extends Controller
         }
 
         return back()->with('success', 'Employees added');
+    }
+
+    public function stop($id)
+    {
+        $op = SizingOperation::findOrFail($id);
+
+        // guard
+        if ($op->status !== 'running' || empty($op->last_start_time)) {
+            return back();
+        }
+
+        $now = now();
+        $start = Carbon::parse($op->last_start_time);
+
+        if ($start->greaterThan($now)) {
+            return back()->with('error', '時間エラー');
+        }
+
+        // --- Operation ---
+        $worked = $start->diffInSeconds($now);
+
+        $op->update([
+            'worked_seconds' => $op->worked_seconds + $worked,
+            'last_start_time' => null,
+            'status' => 'paused',
+        ]);
+
+        // --- Logs (running ones only) ---
+        $logs = SizingLog::where('sizing_operation_id', $op->id)
+            ->whereNotNull('last_start_time')
+            ->get();
+
+        foreach ($logs as $log) {
+            $logStart = Carbon::parse($log->last_start_time);
+
+            if ($logStart->greaterThan($now)) {
+                continue; // safety
+            }
+
+            $logWorked = $logStart->diffInSeconds($now);
+
+            $log->update([
+                'worked_seconds' => $log->worked_seconds + $logWorked,
+                'last_start_time' => null,
+            ]);
+        }
+
+        return back()->with('success', '作業を停止しました');
+    }
+
+    public function resume($id)
+    {
+        $op = SizingOperation::findOrFail($id);
+
+        if ($op->status !== 'paused') {
+            return back();
+        }
+
+        $now = now();
+
+        // 1️⃣ Operation resume
+        $op->update([
+            'status' => 'running',
+            'last_start_time' => $now,
+        ]);
+
+        // 2️⃣ All paused logs resume
+        $op->sizingLogs()
+            ->whereNull('end_time')
+            ->update([
+                'last_start_time' => $now,
+            ]);
+
+        return back()->with('success', '作業を再開しました');
     }
 }

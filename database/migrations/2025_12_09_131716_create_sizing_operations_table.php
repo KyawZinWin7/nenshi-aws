@@ -38,14 +38,14 @@ return new class extends Migration
             $table->dateTime('start_time');
             $table->dateTime('end_time')->nullable();
             $table->string('total_time')->default('00:00:00');
-                
+            $table->datetime('last_start_time')->nullable();
+            $table->integer('worked_seconds')->default(0);    
            
             // Employee (nullable)
             $table->foreignId('employee_id')
                   ->nullable()
                   ->constrained('employees')
                   ->nullOnDelete();
-
              // Department
             $table->foreignId('department_id')
                   ->constrained('departments')
@@ -59,7 +59,7 @@ return new class extends Migration
 
               // Others
             $table->string('description')->nullable();
-            $table->string('status')->default('0');
+            $table->string('status')->default('running'); // running,paused,completed
 
             // Completed By → Set NULL
             $table->foreignId('completed_by')

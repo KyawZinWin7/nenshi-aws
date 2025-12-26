@@ -11,7 +11,8 @@ class SizingLog extends Model
         'employee_id',
         'start_time',
         'end_time',
-        'duration',
+        'worked_seconds',
+        'last_start_time',
     ];
 
     protected $casts = [

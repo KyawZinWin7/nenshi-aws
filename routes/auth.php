@@ -11,6 +11,7 @@ use App\Http\Controllers\PlantController;
 use App\Http\Controllers\SizingOperationController;
 use App\Http\Controllers\SmallTaskController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\SizingLogController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
@@ -31,6 +32,23 @@ Route::post(
     '/sizingoperations/{operation}/stop',
     [SizingOperationController::class, 'stop']
 )->name('sizingoperations.stop');
+
+
+Route::post(
+    '/sizingoperations/{operation}/stop',
+    [SizingOperationController::class, 'stop']
+)->name('sizingoperations.stop');
+
+Route::post(
+    '/sizingoperations/{operation}/resume',
+    [SizingOperationController::class, 'resume']
+)->name('sizingoperations.resume');
+
+
+Route::post(
+    '/sizing-logs/{log}/complete',
+    [SizingLogController::class, 'complete']
+)->name('sizinglogs.complete');
 
 
 Route::middleware('guest')->group(function () {
