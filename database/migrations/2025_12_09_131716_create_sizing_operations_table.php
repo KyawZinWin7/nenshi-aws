@@ -39,7 +39,12 @@ return new class extends Migration
             $table->dateTime('end_time')->nullable();
             $table->string('total_time')->default('00:00:00');
             $table->datetime('last_start_time')->nullable();
-            $table->integer('worked_seconds')->default(0);    
+            $table->dateTime('paused_time')->nullable();
+            $table->integer('worked_seconds')->default(0);
+            $table->integer('paused_seconds')->default(0);
+            
+            
+
            
             // Employee (nullable)
             $table->foreignId('employee_id')

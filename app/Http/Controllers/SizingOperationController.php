@@ -209,6 +209,7 @@ class SizingOperationController extends Controller
         ]);
 
         $operation = SizingOperation::findOrFail($id);
+        $now = now();
 
         foreach ($request->employee_ids as $employeeID) {
 
@@ -222,12 +223,24 @@ class SizingOperationController extends Controller
                 continue;
             }
 
-            // create new log
-            SizingLog::create([
+            $data = [
                 'sizing_operation_id' => $operation->id,
                 'employee_id' => $employeeID,
-                'start_time' => now(),
-            ]);
+                'worked_seconds' => 0,
+                'paused_seconds' => 0,
+            ];
+
+            if ($operation->status === 'running') {
+                $data['start_time'] = $now;
+                $data['last_start_time'] = $now;
+                $data['paused_at'] = null;
+            } else { // paused
+                $data['start_time'] = $now;
+                $data['last_start_time'] = null;
+                $data['paused_at'] = $now;
+            }
+
+            SizingLog::create($data);
         }
 
         return back()->with('success', 'Employees added');
@@ -256,6 +269,8 @@ class SizingOperationController extends Controller
             'worked_seconds' => $op->worked_seconds + $worked,
             'last_start_time' => null,
             'status' => 'paused',
+            'paused_time' => $now,
+
         ]);
 
         // --- Logs (running ones only) ---
@@ -275,6 +290,8 @@ class SizingOperationController extends Controller
             $log->update([
                 'worked_seconds' => $log->worked_seconds + $logWorked,
                 'last_start_time' => null,
+                'paused_time' => $now,
+
             ]);
         }
 
@@ -285,24 +302,44 @@ class SizingOperationController extends Controller
     {
         $op = SizingOperation::findOrFail($id);
 
-        if ($op->status !== 'paused') {
+        if ($op->status !== 'paused' || empty($op->paused_time)) {
             return back();
         }
 
         $now = now();
 
-        // 1️⃣ Operation resume
+        // --- Operation paused time ---
+        $pausedSeconds = Carbon::parse($op->paused_time)->diffInSeconds($now);
+
         $op->update([
-            'status' => 'running',
+            'paused_seconds' => $op->paused_seconds + $pausedSeconds,
+            'paused_time' => null,
             'last_start_time' => $now,
+            'status' => 'running',
         ]);
 
-        // 2️⃣ All paused logs resume
-        $op->sizingLogs()
+        // --- Logs resume ---
+        $logs = $op->sizingLogs()
             ->whereNull('end_time')
-            ->update([
-                'last_start_time' => $now,
-            ]);
+            ->get();
+
+        foreach ($logs as $log) {
+
+            if ($log->paused_time) {
+                $logPaused = Carbon::parse($log->paused_time)->diffInSeconds($now);
+
+                $log->update([
+                    'paused_seconds' => $log->paused_seconds + $logPaused,
+                    'paused_time' => null,
+                    'last_start_time' => $now,
+                ]);
+            } else {
+                // safety fallback
+                $log->update([
+                    'last_start_time' => $now,
+                ]);
+            }
+        }
 
         return back()->with('success', '作業を再開しました');
     }

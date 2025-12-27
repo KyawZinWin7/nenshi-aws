@@ -2,7 +2,7 @@
 import { Head, useForm } from '@inertiajs/vue3'
 import Container from '../../Components/Container.vue'
 import PrimaryBtn from '../../Components/PrimaryBtn.vue'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, h } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
@@ -582,7 +582,10 @@ const completeSizingLog = async (logId) => {
 
                                                 <td class="border text-sm p-1">{{ log.start_time }}</td>
                                                 <td class="border text-sm p-1">{{ log.end_time ?? '-' }}</td>
-                                                <td class="border text-sm p-1">{{ log.duration_per_employee }}</td>
+                                                <td class="border text-sm p-1">
+                                                    {{ log.end_time ? log.duration_per_employee : '-' }}
+                                                </td>
+
                                                 <td class="border text-sm p-1">{{ log.employee.name ?? '-' }}</td>
 
                                                 <td class="border text-sm p-1">
@@ -599,7 +602,6 @@ const completeSizingLog = async (logId) => {
                                                         class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
                                                         削除
                                                     </button>
-
                                                 </td>
                                             </tr>
                                         </tbody>

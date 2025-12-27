@@ -21,6 +21,9 @@ class SizingOperation extends Model
         'last_start_time',
         'description',
         'status',
+        'paused_time',
+        'paused_seconds',
+        
     ];
 
 

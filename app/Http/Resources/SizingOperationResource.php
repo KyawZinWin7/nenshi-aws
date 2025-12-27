@@ -37,6 +37,10 @@ class SizingOperationResource extends JsonResource
             'worked_time' => CarbonInterval::seconds($this->worked_seconds)
                 ->cascade()
                 ->format('%H:%I:%S'),
+            'paused_seconds' => $this->paused_seconds,
+            'paused_seconds_hour' => CarbonInterval::seconds($this->paused_seconds)
+                ->cascade()
+                ->format('%H:%I:%S'),
             'last_start_time' => $this->last_start_time,
             'created_at' => $this->created_at->timezone('Asia/Tokyo')->format('Y-m-d'),
         ];

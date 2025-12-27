@@ -25,6 +25,14 @@ class SizingLogResource extends JsonResource
             'duration_per_employee' => CarbonInterval::seconds($this->worked_seconds)
                 ->cascade()
                 ->format('%H:%I:%S'),
+
+            'paused_seconds' => $this->paused_seconds,
+            'paused_duration_per_employee' => CarbonInterval::seconds($this->paused_seconds)
+                ->cascade()
+                ->format('%H:%I:%S'),
+            'last_start_time' => $this->last_start_time,
+            
+           
         ];
     }
 }

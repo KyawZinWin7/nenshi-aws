@@ -71,10 +71,10 @@ const completeSMO = async (opId) => {
         showCancelButton: true,
         confirmButtonText: "はい、完了します。",
         cancelButtonText: "キャンセル",
-        
+
     });
 
-    if(!confirmResult.isConfirmed) return;
+    if (!confirmResult.isConfirmed) return;
 
     //Complete sizing operation directly
 
@@ -108,7 +108,7 @@ const completeSMO = async (opId) => {
 
         <div class="flex flex-col items-center gap-4">
 
-           
+
 
             <!-- TABLE -->
             <div class="p-2 sm:p-4 w-full overflow-x-auto">
@@ -122,6 +122,7 @@ const completeSMO = async (opId) => {
                             <th class="border p-2">作業</th>
                             <th class="border p-2">開始</th>
                             <th class="border p-2">終了</th>
+                            <th class="border p-2">時間停止</th>
                             <th class="border p-2">合計時間</th>
                             <th class="border p-2">操作</th>
                         </tr>
@@ -147,8 +148,9 @@ const completeSMO = async (opId) => {
                                 <td class="border p-2">{{ op.start_time }}</td>
                                 <td class="border p-2">
                                     <span v-if="op.end_time">{{ op.end_time }}</span>
-                                    <span v-else class="text-red-500">進行中</span> 
+                                    <span v-else class="text-red-500">進行中</span>
                                 </td>
+                                <td class="border p-2">{{ op.paused_seconds_hour }}</td>
                                 <td class="border p-2">{{ op.worked_time }}</td>
 
                                 <td class="border p-2">
@@ -181,6 +183,7 @@ const completeSMO = async (opId) => {
                                                 <th class="border text-sm p-1">担当者</th>
                                                 <th class="border text-sm p-1">開始</th>
                                                 <th class="border text-sm p-1">終了</th>
+                                                <th class="border text-sm p-1">時間停止</th>
                                                 <th class="border text-sm p-1">合計時間</th>
                                                 <th class="border text-sm p-1">操作</th>
                                             </tr>
@@ -191,6 +194,11 @@ const completeSMO = async (opId) => {
                                                 <td class="border text-sm p-1">{{ log.employee.name ?? '-' }}</td>
                                                 <td class="border text-sm p-1">{{ log.start_time }}</td>
                                                 <td class="border text-sm p-1">{{ log.end_time ?? '-' }}</td>
+                                                <td class="border text-sm p-1">
+                                                    {{
+                                                        log.paused_duration_per_employee
+                                                    }}
+                                                </td>
                                                 <td class="border text-sm p-1">{{ log.duration_per_employee }}</td>
 
                                                 <td class="border text-sm p-1">

@@ -24,12 +24,14 @@ return new class extends Migration
 
             $table->dateTime('start_time')->nullable();
             $table->dateTime('last_start_time')->nullable();
+            $table->datetime('paused_time')->nullable();
             $table->dateTime('end_time')->nullable();
 
             
 
             // accumulated working seconds
             $table->unsignedInteger('worked_seconds')->default(0);
+            $table->unsignedInteger('paused_seconds')->default(0);
             $table->timestamps();
         });
     }
