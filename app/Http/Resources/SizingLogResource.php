@@ -31,6 +31,7 @@ class SizingLogResource extends JsonResource
                 ->cascade()
                 ->format('%H:%I:%S'),
             'last_start_time' => $this->last_start_time,
+            'paused_time' => $this->paused_time,
             
            
         ];

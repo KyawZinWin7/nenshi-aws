@@ -70,7 +70,7 @@ const editingId = ref(null);
 
 
 const editSizingOperation = async (op) => {
-    console.log("Editing Sizing Operation:", op.sizinglogs);
+    // console.log("Editing Sizing Operation:", op.sizinglogs);
 
     isEditing.value = true;
     editingId.value = op.id;
@@ -328,18 +328,45 @@ const stopSizingOperation = async (opId) => {
 
 
 //For Resume Operation
+const editResumeEmployee = async (op) => {
+    // console.log("Editing Sizing Operation:", op.sizinglogs);
+
+    editingId.value = op.id;
+
+    // team ids (from logs, unique)
+    form.team_ids = [
+        ...new Set(
+            op.sizinglogs
+                ?.map(log => log.employee?.id)
+                .filter(Boolean) // remove null/undefined
+        )
+    ];
+
+
+
+
+};
+const resumeDialog = ref(false)
+const openResumeModal = (op) => {
+    editingId.value = op.id
+    resumeDialog.value = true
+    editResumeEmployee(op)
+}
+
+
 const resumeSizingOperation = async (opId) => {
-    const confirm = await Swal.fire({
-        title: '作業を再開しますか？',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'はい',
-        cancelButtonText: 'キャンセル',
-    })
+    // const confirm = await Swal.fire({
+    //     title: '作業を再開しますか？',
+    //     icon: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonText: 'はい',
+    //     cancelButtonText: 'キャンセル',
+    // })
 
-    if (!confirm.isConfirmed) return
+    // if (!confirm.isConfirmed) return
 
-    axios.post(route('sizingoperations.resume', { operation: opId }))
+    axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: form.team_ids })
+
         .then(() => {
             Swal.fire({
                 icon: 'success',
@@ -351,6 +378,9 @@ const resumeSizingOperation = async (opId) => {
             location.reload()
         })
 }
+
+
+
 /* ================= COMPLETE Sizing LOG ================= */
 
 const completeSizingLog = async (logId) => {
@@ -502,7 +532,7 @@ const completeSizingLog = async (logId) => {
                                             class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
                                             完了
                                         </button>
-                                        <button @click.stop="openAddEmployeeModal(op)"
+                                        <button v-if="op.status !== 'paused'" @click.stop="openAddEmployeeModal(op)"
                                             class="m-1 bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
                                             追加
                                         </button>
@@ -528,10 +558,27 @@ const completeSizingLog = async (logId) => {
                                             class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
                                             止
                                         </button>
-                                        <button v-if="op.status === 'paused'" @click.stop="resumeSizingOperation(op.id)"
+                                        <button v-if="op.status === 'paused'" @click="openResumeModal(op)"
                                             class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
                                             再開
                                         </button>
+                                        <el-dialog v-model="resumeDialog" title="担当者" width="400px">
+                                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
+                                                style="width: 100%">
+                                                <el-option v-for="member in teamMembers" :key="member.id"
+                                                    :label="member.name" :value="member.id" />
+                                            </el-select>
+
+                                            <template #footer>
+                                                <el-button @click="resumeDialog = false">
+                                                    キャンセル
+                                                </el-button>
+
+                                                <el-button type="primary" @click.stop="resumeSizingOperation(op.id)">
+                                                    再開
+                                                </el-button>
+                                            </template>
+                                        </el-dialog>
                                         <button @click="editSizingOperation(op)"
                                             class="m-1 bg-pink-500 text-white text-xs px-3 py-1 rounded hover:bg-pink-600">
                                             編集
@@ -550,8 +597,11 @@ const completeSizingLog = async (logId) => {
                                             <button @click="completeSMO(op.id)"
                                                 class="block w-full px-3 py-2 hover:bg-gray-100">完了</button>
                                             <button @click="editSizingOperation(op)"
-                                                class="block w-full px-3 py-2 hover:bg-gray-100">編集</button>
-                                            <button class="block w-full px-3 py-2 hover:bg-gray-100">追加</button>
+                                                class="block w-full px-3 py-2 hover:bg-gray-100">編集
+                                            </button>
+                                            <button class="block w-full px-3 py-2 hover:bg-gray-100">
+                                                追加
+                                            </button>
                                             <button
                                                 class="block w-full px-3 py-2 text-pink-600 hover:bg-gray-100">止</button>
                                             <button class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
@@ -581,23 +631,25 @@ const completeSizingLog = async (logId) => {
                                             <tr v-for="log in op.sizinglogs" :key="log.id">
 
                                                 <td class="border text-sm p-1">{{ log.start_time }}</td>
-                                                <td class="border text-sm p-1">{{ log.end_time ?? '-' }}</td>
                                                 <td class="border text-sm p-1">
-                                                    {{ log.end_time ? log.duration_per_employee : '-' }}
+                                                    {{ log.end_time ?? log.paused_time ?? '-' }}
                                                 </td>
+
+                                                <td class="border text-sm p-1">
+                                                    {{ (log.end_time || log.paused_time) ? log.duration_per_employee :
+                                                    '-' }}
+                                                </td>
+
 
                                                 <td class="border text-sm p-1">{{ log.employee.name ?? '-' }}</td>
 
                                                 <td class="border text-sm p-1">
                                                     <button
                                                         class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600"
-                                                        @click="completeSizingLog(log.id)" v-if="!log.end_time">
+                                                        @click="completeSizingLog(log.id)" v-if="!log.end_time && log.last_start_time">
                                                         完了
                                                     </button>
-                                                    <!-- <button
-                                                        class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
-                                                        止
-                                                    </button> -->
+                                                   
                                                     <button v-if="!log.end_time"
                                                         class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
                                                         削除

@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Carbon\CarbonInterval;
 
 class SizingOperationResource extends JsonResource
 {
@@ -27,7 +27,11 @@ class SizingOperationResource extends JsonResource
             'sizinglogs' => SizingLogResource::collection($this->whenLoaded('sizingLogs')),
 
             // direct fields
-            'machine_number' => $this->machineNumber ? new MachineNumberResource($this->whenLoaded('machineNumber')) : null,
+            // 'machine_number' => $this->machineNumber ? new MachineNumberResource($this->whenLoaded('machineNumber')) : null,
+            'machine_number' => new MachineNumberResource(
+                $this->whenLoaded('machineNumber')
+            ),
+
             'start_time' => $this->start_time ? $this->start_time->timezone('Asia/Tokyo')->format('H:i:s') : null,
             'end_time' => $this->end_time ? $this->end_time->timezone('Asia/Tokyo')->format('Y-m-d H:i:s') : null,
 

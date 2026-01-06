@@ -5,6 +5,7 @@ import PrimaryBtn from '../../Components/PrimaryBtn.vue'
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import { router } from '@inertiajs/vue3'
 
 /* ================= PROPS ================= */
 const props = defineProps({
@@ -36,14 +37,17 @@ const sizingoperations = ref([])
 watch(
     () => props.sizingoperations.data,
     (newData) => {
-        sizingoperations.value = newData.map(op => ({
-            ...op,
+        sizingoperations.value = newData.map(item => ({
+            ...item.data,   // ⭐⭐⭐ အရေးကြီး
             show: false,
             menu: false,
         }))
+
+        console.log('FIXED sizingoperations =', sizingoperations.value)
     },
     { immediate: true }
 )
+
 
 /* ================= GLOBAL CLICK (MENU CLOSE) ================= */
 onMounted(() => {
@@ -98,6 +102,18 @@ const completeSMO = async (opId) => {
     })
 
 }
+
+
+/* =================  Pagination ================= */
+const goToPage = (url) => {
+    if (!url) return
+
+    router.visit(url, {
+        preserveScroll: true,
+        preserveState: true,
+    })
+}
+
 </script>
 
 <template>
@@ -110,114 +126,163 @@ const completeSMO = async (opId) => {
 
 
 
+
             <!-- TABLE -->
-            <div class="p-2 sm:p-4 w-full overflow-x-auto">
-                <table class="w-full border-collapse min-w-[700px]">
-                    <thead>
-                        <tr class="bg-gray-200 text-center">
-                            <th class="border p-2">日付</th>
-                            <th class="border p-2">工場</th>
-                            <th class="border p-2">機台</th>
-                            <th class="border p-2">機号</th>
-                            <th class="border p-2">作業</th>
-                            <th class="border p-2">開始</th>
-                            <th class="border p-2">終了</th>
-                            <th class="border p-2">時間停止</th>
-                            <th class="border p-2">合計時間</th>
-                            <th class="border p-2">操作</th>
-                        </tr>
-                    </thead>
+            <div class="w-full max-w-full">
 
-                    <tbody>
-                        <template v-for="op in sizingoperations" :key="op.id">
+                <!-- HEADER + SEARCH -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
-                            <!-- MAIN ROW -->
-                            <tr class="text-center hover:bg-gray-50 cursor-pointer" @click="op.show = !op.show">
-                                <td class="border p-2 flex items-center gap-2">
-                                    <span class="text-lg">
-                                        <span v-if="op.show">▼</span>
-                                        <span v-else>►</span>
-                                    </span>
-                                    {{ op.created_at }}
-                                </td>
 
-                                <td class="border p-2">{{ op.plant.name }}</td>
-                                <td class="border p-2">{{ op.machine_type.name }}</td>
-                                <td class="border p-2">{{ op.machine_number.name }}</td>
-                                <td class="border p-2">{{ op.task.name }}</td>
-                                <td class="border p-2">{{ op.start_time }}</td>
-                                <td class="border p-2">
-                                    <span v-if="op.end_time">{{ op.end_time }}</span>
-                                    <span v-else class="text-red-500">進行中</span>
-                                </td>
-                                <td class="border p-2">{{ op.paused_seconds_hour }}</td>
-                                <td class="border p-2">{{ op.worked_time }}</td>
+                    <input type="text" placeholder="検索" class="border rounded px-3 py-2 text-sm w-full sm:w-64
+                   focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </div>
 
-                                <td class="border p-2">
-                                    <div class="relative" @click.stop>
-                                        <button @click="op.menu = !op.menu" class="px-2 py-1">
-                                            ⋯
-                                        </button>
+                <!-- TABLE CARD -->
+                <div class="bg-white rounded-lg shadow overflow-x-auto">
 
-                                        <div v-if="op.menu"
-                                            class="absolute right-0 mt-1 bg-white border rounded shadow-md w-28 z-20">
-                                            <button @click="completeSMO(op.id)"
-                                                class="block w-full px-3 py-2 hover:bg-gray-100">完了</button>
-                                            <button class="block w-full px-3 py-2 hover:bg-gray-100">編集</button>
-                                            <button class="block w-full px-3 py-2 hover:bg-gray-100">追加</button>
-                                            <button
-                                                class="block w-full px-3 py-2 text-pink-600 hover:bg-gray-100">止</button>
-                                            <button
-                                                class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">削除</button>
+                    <table class="w-full border-collapse min-w-[1000px] text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 text-center text-gray-700">
+                                <th class="border p-2">日付</th>
+                                <th class="border p-2">工場</th>
+                                <th class="border p-2">機台</th>
+                                <th class="border p-2">機号</th>
+                                <th class="border p-2">作業</th>
+                                <th class="border p-2">開始</th>
+                                <th class="border p-2">終了</th>
+                                <th class="border p-2">時間停止</th>
+                                <th class="border p-2">合計時間</th>
+                                <th class="border p-2">操作</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <template v-for="op in sizingoperations" :key="op.id">
+
+                                <!-- MAIN ROW -->
+                                <tr class="text-center hover:bg-blue-50 cursor-pointer transition"
+                                    @click="op.show = !op.show">
+                                    <td class="border p-2 flex items-center gap-2 justify-center">
+                                        <span class="text-sm">
+                                            <span v-if="op.show">▼</span>
+                                            <span v-else>►</span>
+                                        </span>
+                                        {{ op.created_at }}
+                                    </td>
+
+                                    <td>{{ op.plant?.name ?? '-' }}</td>
+                                    <td>{{ op.machine_type?.name ?? '-' }}</td>
+                                    <td>{{ op.machine_number?.name ?? '-' }}</td>
+
+                                    <td class="border p-2">
+                                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                                            {{ op.task?.name ?? '-' }}
+                                        </span>
+                                    </td>
+
+                                    <td class="border p-2">{{ op.start_time }}</td>
+
+                                    <td class="border p-2">
+                                        <span v-if="op.end_time">{{ op.end_time }}</span>
+                                        <span v-else class="text-red-500 font-medium">進行中</span>
+                                    </td>
+
+                                    <td class="border p-2">{{ op.paused_seconds_hour }}</td>
+                                    <td class="border p-2 font-semibold">{{ op.worked_time }}</td>
+
+                                    <td class="border p-2">
+                                        <div class="relative" @click.stop>
+                                            <button @click="op.menu = !op.menu"
+                                                class="px-2 py-1 rounded hover:bg-gray-200">
+                                                ⋯
+                                            </button>
+
+                                            <div v-if="op.menu"
+                                                class="absolute right-0 mt-1 bg-white border rounded shadow-md w-28 z-20 text-left">
+                                                <button @click="completeSMO(op.id)"
+                                                    class="block w-full px-3 py-2 hover:bg-gray-100">
+                                                    完了
+                                                </button>
+                                                <button class="block w-full px-3 py-2 hover:bg-gray-100">
+                                                    編集
+                                                </button>
+                                                <button class="block w-full px-3 py-2 hover:bg-gray-100">
+                                                    追加
+                                                </button>
+                                                <button class="block w-full px-3 py-2 text-pink-600 hover:bg-gray-100">
+                                                    止
+                                                </button>
+                                                <button class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
+                                                    削除
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
 
-                            <!-- SUB TABLE -->
-                            <tr v-if="op.show" class="bg-blue-50">
-                                <td colspan="6" class="p-0 border">
-                                    <table class="w-full text-center">
-                                        <thead class="bg-blue-200">
-                                            <tr>
-                                                <th class="border text-sm p-1">担当者</th>
-                                                <th class="border text-sm p-1">開始</th>
-                                                <th class="border text-sm p-1">終了</th>
-                                                <th class="border text-sm p-1">時間停止</th>
-                                                <th class="border text-sm p-1">合計時間</th>
-                                                <th class="border text-sm p-1">操作</th>
-                                            </tr>
-                                        </thead>
+                                <!-- SUB TABLE -->
+                                <tr v-if="op.show" class="bg-blue-50">
+                                    <td colspan="10" class="p-0 border">
 
-                                        <tbody>
-                                            <tr v-for="log in op.sizinglogs" :key="log.id">
-                                                <td class="border text-sm p-1">{{ log.employee.name ?? '-' }}</td>
-                                                <td class="border text-sm p-1">{{ log.start_time }}</td>
-                                                <td class="border text-sm p-1">{{ log.end_time ?? '-' }}</td>
-                                                <td class="border text-sm p-1">
-                                                    {{
-                                                        log.paused_duration_per_employee
-                                                    }}
-                                                </td>
-                                                <td class="border text-sm p-1">{{ log.duration_per_employee }}</td>
+                                        <table class="w-full text-center text-xs">
+                                            <thead class="bg-blue-200 text-gray-700">
+                                                <tr>
+                                                    <th class="border p-1">担当者</th>
+                                                    <th class="border p-1">開始</th>
+                                                    <th class="border p-1">終了</th>
+                                                    <th class="border p-1">時間停止</th>
+                                                    <th class="border p-1">合計時間</th>
+                                                    <th class="border p-1">操作</th>
+                                                </tr>
+                                            </thead>
 
-                                                <td class="border text-sm p-1">
-                                                    <button
-                                                        class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600"
-                                                        @click="completeLog(log)" v-if="!log.end_time">
-                                                        完了
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
+                                            <tbody>
+                                                <tr v-for="log in op.sizinglogs" :key="log.id"
+                                                    class="hover:bg-blue-100 transition">
+                                                    <td class="border p-1 font-medium">
+                                                        {{ log.employee.name ?? '-' }}
+                                                    </td>
 
-                        </template>
-                    </tbody>
-                </table>
+                                                    <td class="border p-1">{{ log.start_time }}</td>
+                                                    <td class="border p-1">{{ log.end_time ?? '-' }}</td>
+                                                    <td class="border p-1">
+                                                        {{ log.paused_duration_per_employee }}
+                                                    </td>
+                                                    <td class="border p-1 font-semibold">
+                                                        {{ log.duration_per_employee }}
+                                                    </td>
+
+                                                    <td class="border p-1">
+                                                        <button v-if="!log.end_time" @click="completeLog(log)"
+                                                            class="bg-green-500 text-white text-xs px-2 py-1 rounded hover:bg-green-600">
+                                                            完了
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </td>
+                                </tr>
+
+                            </template>
+                        </tbody>
+                    </table>
+                    <!-- PAGINATION -->
+                    <div v-if="props.sizingoperations.links.length > 3"
+                        class="flex justify-center items-center gap-1 py-4">
+                        <button v-for="(link, index) in props.sizingoperations.links" :key="index"
+                            @click="goToPage(link.url)" :disabled="!link.url" v-html="link.label" class="px-3 py-1 border text-sm rounded
+               hover:bg-blue-100 transition" :class="{
+                'bg-blue-500 text-white': link.active,
+                'text-gray-400 cursor-not-allowed': !link.url
+            }" />
+                    </div>
+
+                </div>
             </div>
+
 
         </div>
     </main>

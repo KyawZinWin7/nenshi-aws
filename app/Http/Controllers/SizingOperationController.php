@@ -19,6 +19,7 @@ use App\Models\SizingOperation;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class SizingOperationController extends Controller
 {
@@ -152,9 +153,13 @@ class SizingOperationController extends Controller
         }
 
         //  update operation
+
+        $endTime = $op->status === 'paused'
+            ? $op->paused_time
+            : $now;
         $op->update([
             'status' => 'completed',
-            'end_time' => $now,
+            'end_time' => $endTime,
             'worked_seconds' => $workedSeconds,
             'last_start_time' => null,
         ]);
@@ -178,28 +183,52 @@ class SizingOperationController extends Controller
             $log->update([
                 'worked_seconds' => $worked,
                 'last_start_time' => null,
-                'end_time' => $now,
+                'end_time' => $endTime,
             ]);
         }
 
         return back()->with('success', 'Sizing operation completed');
     }
 
-    public function completelist()
-    {
+    // public function completelist()
+    // {
 
-        $sizingoperations = SizingOperationResource::collection(
-            SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
-                ->where('department_id', 2) // Sizing Department ID
-                ->where('status', 'completed') // Completed operations
-                ->orderBy('created_at', 'desc')
-                ->get()
-        );
+    //     $sizingoperations = SizingOperationResource::collection(
+    //         SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
+    //             ->where('department_id', 2) // Sizing Department ID
+    //             ->where('status', 'completed') // Completed operations
+    //             ->orderBy('created_at', 'desc')
+    //             ->get()
+    //     );
 
-        return Inertia('Complete/SizingCompleteList', [
-            'sizingoperations' => $sizingoperations,
-        ]);
-    }
+    //     return Inertia('Complete/SizingCompleteList', [
+    //         'sizingoperations' => $sizingoperations,
+    //     ]);
+    // }
+
+   public function completelist()
+{
+    $sizingoperations = SizingOperation::with([
+            'plant',
+            'machineType',
+            'task',
+            'smallTask',
+            'employee',
+            'department',
+            'machineNumber',
+            'sizingLogs.employee',
+        ])
+        ->where('department_id', 2)
+        ->where('status', 'completed')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10)
+        ->through(fn ($op) => new SizingOperationResource($op)); // ⭐ အရေးကြီး
+
+    return Inertia::render('Complete/SizingCompleteList', [
+        'sizingoperations' => $sizingoperations,
+    ]);
+}
+
 
     public function addEmployees(Request $request, $id)
     {
@@ -291,6 +320,7 @@ class SizingOperationController extends Controller
                 'worked_seconds' => $log->worked_seconds + $logWorked,
                 'last_start_time' => null,
                 'paused_time' => $now,
+                // 'end_time' => $now,
 
             ]);
         }
@@ -298,18 +328,26 @@ class SizingOperationController extends Controller
         return back()->with('success', '作業を停止しました');
     }
 
-    public function resume($id)
+    public function resume(Request $request, $id)
     {
         $op = SizingOperation::findOrFail($id);
+
+        $request->validate([
+            'team_ids' => 'nullable|array',
+            'team_ids.*' => 'exists:employees,id',
+        ]);
 
         if ($op->status !== 'paused' || empty($op->paused_time)) {
             return back();
         }
 
-        $now = now();
+        $now = Carbon::now('Asia/Tokyo');
 
-        // --- Operation paused time ---
-        $pausedSeconds = Carbon::parse($op->paused_time)->diffInSeconds($now);
+        // -------------------------------------------------
+        // 1. Resume operation
+        // -------------------------------------------------
+        $pausedSeconds = Carbon::parse($op->paused_time, 'Asia/Tokyo')
+            ->diffInSeconds($now);
 
         $op->update([
             'paused_seconds' => $op->paused_seconds + $pausedSeconds,
@@ -318,27 +356,87 @@ class SizingOperationController extends Controller
             'status' => 'running',
         ]);
 
-        // --- Logs resume ---
-        $logs = $op->sizingLogs()
+        // -------------------------------------------------
+        // 2. Get active logs
+        // -------------------------------------------------
+        $existingLogs = $op->sizingLogs()
             ->whereNull('end_time')
             ->get();
 
-        foreach ($logs as $log) {
+        $teamIds = $request->input('team_ids', []);
 
-            if ($log->paused_time) {
-                $logPaused = Carbon::parse($log->paused_time)->diffInSeconds($now);
+        $existingEmployeeIds = $existingLogs
+            ->pluck('employee_id')
+            ->filter()
+            ->unique()
+            ->toArray();
+
+        // -------------------------------------------------
+        // 3. COMPLETE removed employees (same as complete())
+        // -------------------------------------------------
+        $removedEmployeeIds = array_diff($existingEmployeeIds, $teamIds);
+
+        foreach ($existingLogs as $log) {
+
+            if (in_array($log->employee_id, $removedEmployeeIds)) {
+
+                $workedSeconds = $log->worked_seconds;
+
+                if ($log->last_start_time) {
+                    $start = Carbon::parse($log->last_start_time, 'Asia/Tokyo');
+
+                    if ($start->lte($now)) {
+                        $workedSeconds += $start->diffInSeconds($now);
+                    }
+                }
 
                 $log->update([
-                    'paused_seconds' => $log->paused_seconds + $logPaused,
+                    'end_time' => $now,
+                    'worked_seconds' => $workedSeconds,
+                    'last_start_time' => null,
                     'paused_time' => null,
-                    'last_start_time' => $now,
-                ]);
-            } else {
-                // safety fallback
-                $log->update([
-                    'last_start_time' => $now,
                 ]);
             }
+        }
+
+        // -------------------------------------------------
+        // 4. RESUME remaining employees
+        // -------------------------------------------------
+        foreach ($existingLogs as $log) {
+
+            if (! in_array($log->employee_id, $removedEmployeeIds)) {
+
+                if ($log->paused_time) {
+                    $logPaused = Carbon::parse($log->paused_time, 'Asia/Tokyo')
+                        ->diffInSeconds($now);
+
+                    $log->update([
+                        'paused_seconds' => $log->paused_seconds + $logPaused,
+                        'paused_time' => null,
+                        'last_start_time' => $now,
+                        // 'end_time' => null,
+                    ]);
+                } else {
+                    $log->update([
+                        'last_start_time' => $now,
+                    ]);
+                }
+            }
+        }
+
+        // -------------------------------------------------
+        // 5. ADD new employees
+        // -------------------------------------------------
+        $newEmployeeIds = array_diff($teamIds, $existingEmployeeIds);
+
+        foreach ($newEmployeeIds as $employeeId) {
+            $op->sizingLogs()->create([
+                'employee_id' => $employeeId,
+                'start_time' => $now,
+                'last_start_time' => $now,
+                'worked_seconds' => 0,
+                'paused_seconds' => 0,
+            ]);
         }
 
         return back()->with('success', '作業を再開しました');
