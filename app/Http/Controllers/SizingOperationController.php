@@ -94,6 +94,7 @@ class SizingOperationController extends Controller
             'machine_type_id' => $data['machine_type_id'],
             'machine_number_id' => $data['machine_number_id'],
             'task_id' => $data['task_id'],
+            // 'last_start_time' => now(),
         ]);
 
         //  New team ids from form
@@ -125,6 +126,8 @@ class SizingOperationController extends Controller
                 'sizing_operation_id' => $operation->id,
                 'employee_id' => $employeeId,
                 'start_time' => now(),
+                'worked_seconds' => 0,
+                'last_start_time' => now(),
             ]);
         }
 
@@ -190,6 +193,41 @@ class SizingOperationController extends Controller
         return back()->with('success', 'Sizing operation completed');
     }
 
+    public function uncomplete($id)
+    {
+        $op = SizingOperation::findOrFail($id);
+        $now = Carbon::now('Asia/Tokyo');
+
+        // not completed guard
+        if ($op->status !== 'completed') {
+            return back();
+        }
+
+        // save old end time BEFORE update
+        $oldEndTime = $op->end_time;
+
+        // reopen operation as running
+        $op->update([
+            'status' => 'running',
+            'end_time' => null,
+            'last_start_time' => $now,
+        ]);
+
+        // reopen logs that were closed at completion time
+        $logs = SizingLog::where('sizing_operation_id', $op->id)
+            ->where('end_time', $oldEndTime)
+            ->get();
+
+        foreach ($logs as $log) {
+            $log->update([
+                'end_time' => null,
+                'last_start_time' => $now,
+            ]);
+        }
+
+        return back()->with('success', 'Sizing operation uncompleted and running');
+    }
+
     // public function completelist()
     // {
 
@@ -201,14 +239,17 @@ class SizingOperationController extends Controller
     //             ->get()
     //     );
 
+    //     $machinetypes = MachineTypeResource::collection(MachineType::where('department_id', 2)->get());
+
     //     return Inertia('Complete/SizingCompleteList', [
     //         'sizingoperations' => $sizingoperations,
+    //         'machinetypes' => $machinetypes,
     //     ]);
     // }
 
-   public function completelist()
-{
-    $sizingoperations = SizingOperation::with([
+    public function completelist(Request $request)
+    {
+        $query = SizingOperation::with([
             'plant',
             'machineType',
             'task',
@@ -218,17 +259,125 @@ class SizingOperationController extends Controller
             'machineNumber',
             'sizingLogs.employee',
         ])
-        ->where('department_id', 2)
-        ->where('status', 'completed')
-        ->orderBy('created_at', 'desc')
-        ->paginate(10)
-        ->through(fn ($op) => new SizingOperationResource($op)); // ⭐ အရေးကြီး
+            ->where('department_id', 2)
+            ->where('status', 'completed');
 
-    return Inertia::render('Complete/SizingCompleteList', [
-        'sizingoperations' => $sizingoperations,
-    ]);
-}
+        //  Search (工場・日付・担当者)
+        if ($request->filled('search')) {
+            $search = $request->search;
 
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('plant', fn ($q) => $q->where('name', 'like', "%{$search}%")
+                )
+                    ->orWhereDate('created_at', $search)
+                    ->orWhereHas('employee', fn ($q) => $q->where('name', 'like', "%{$search}%")
+                    );
+            });
+        }
+
+        //  Machine Type filter
+        if ($request->filled('machine_type_id')) {
+            $query->where('machine_type_id', $request->machine_type_id);
+        }
+
+        //  Task multi filter
+        if ($request->filled('tasks')) {
+            $query->whereHas('task', function ($q) use ($request) {
+                $q->whereIn('name', $request->tasks);
+            });
+        }
+
+        $sizingoperations = $query
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn ($op) => new SizingOperationResource($op));
+
+        return Inertia::render('Complete/SizingCompleteList', [
+            'sizingoperations' => $sizingoperations,
+            'machinetypes' => MachineTypeResource::collection(
+                MachineType::where('department_id', 2)->get()
+            ),
+            'tasks' => TaskResource::collection(
+                Task::where('department_id', 2)
+                    ->select('name')
+                    ->distinct()
+                    ->orderBy('name')
+                    ->get()
+            ),
+            'filters' => $request->only([
+                'search',
+                'machine_type_id',
+                'tasks',
+            ]),
+        ]);
+    }
+
+    public function admincompletelist(Request $request)
+    {
+        $query = SizingOperation::with([
+            'plant',
+            'machineType',
+            'task',
+            'smallTask',
+            'employee',
+            'department',
+            'machineNumber',
+            'sizingLogs.employee',
+        ])
+            ->where('department_id', 2)
+            ->where('status', 'completed');
+
+        //  Search (工場・日付・担当者)
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('plant', fn ($q) => $q->where('name', 'like', "%{$search}%")
+                )
+                    ->orWhereDate('created_at', $search)
+                    ->orWhereHas('employee', fn ($q) => $q->where('name', 'like', "%{$search}%")
+                    );
+            });
+        }
+
+        //  Machine Type filter
+        if ($request->filled('machine_type_id')) {
+            $query->where('machine_type_id', $request->machine_type_id);
+        }
+
+        //  Task multi filter
+        if ($request->filled('tasks')) {
+            $query->whereHas('task', function ($q) use ($request) {
+                $q->whereIn('name', $request->tasks);
+            });
+        }
+
+        $sizingoperations = $query
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn ($op) => new SizingOperationResource($op));
+
+        return Inertia::render('Complete/SizingAdminCompleteList', [
+            'sizingoperations' => $sizingoperations,
+            'machinetypes' => MachineTypeResource::collection(
+                MachineType::where('department_id', 2)->get()
+            ),
+            'tasks' => TaskResource::collection(
+                Task::where('department_id', 2)
+                    ->select('name')
+                    ->distinct()
+                    ->orderBy('name')
+                    ->get()
+            ),
+            'filters' => $request->only([
+                'search',
+                'machine_type_id',
+                'tasks',
+            ]),
+        ]);
+    }
 
     public function addEmployees(Request $request, $id)
     {
@@ -440,5 +589,23 @@ class SizingOperationController extends Controller
         }
 
         return back()->with('success', '作業を再開しました');
+    }
+
+    public function destroy($id)
+    {
+        $operation = SizingOperation::findOrFail($id);
+
+        // only allow deletion if not completed
+        if ($operation->status === 'completed') {
+            return back()->with('error', 'Completed operations cannot be deleted.');
+        }
+
+        // delete related sizing logs
+        SizingLog::where('sizing_operation_id', $operation->id)->delete();
+
+        // delete the operation
+        $operation->delete();
+
+        return back()->with('success', 'Sizing operation deleted successfully.');
     }
 }

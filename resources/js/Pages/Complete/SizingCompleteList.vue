@@ -6,6 +6,7 @@ import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import { router } from '@inertiajs/vue3'
+import debounce from 'lodash/debounce'
 
 /* ================= PROPS ================= */
 const props = defineProps({
@@ -15,6 +16,7 @@ const props = defineProps({
     tasks: Object,
     machinenumbers: Object,
     sizingoperations: Object,
+    filters: Object,
 })
 
 /* ================= FORM ================= */
@@ -38,12 +40,12 @@ watch(
     () => props.sizingoperations.data,
     (newData) => {
         sizingoperations.value = newData.map(item => ({
-            ...item.data,   // ⭐⭐⭐ အရေးကြီး
+            ...item.data,
             show: false,
             menu: false,
         }))
 
-        console.log('FIXED sizingoperations =', sizingoperations.value)
+        // console.log('FIXED sizingoperations =', sizingoperations.value)
     },
     { immediate: true }
 )
@@ -64,16 +66,16 @@ onMounted(() => {
 
 
 
-/* ================= COMPLETE LOG ================= */
+/* =================  UNCOMPLETE LOG ================= */
 
-const completeForm = useForm({});
-const completeSMO = async (opId) => {
+const uncompleteForm = useForm({});
+const uncompleteSMO = async (opId) => {
     //Confirm Dialog
     const confirmResult = await Swal.fire({
-        title: "この作業を完了してもよろしいですか？",
+        title: "この作業を未完了してもよろしいですか？",
         icon: "question",
         showCancelButton: true,
-        confirmButtonText: "はい、完了します。",
+        confirmButtonText: "はい、未完了します。",
         cancelButtonText: "キャンセル",
 
     });
@@ -82,12 +84,12 @@ const completeSMO = async (opId) => {
 
     //Complete sizing operation directly
 
-    completeForm.post(route('sizingoperations.complete', { id: opId }), {
+    uncompleteForm.post(route('sizingoperations.uncomplete', { id: opId }), {
         onSuccess: () => {
             Swal.fire({
                 position: 'top-end',
                 icon: 'success',
-                title: '作業が完了しました',
+                title: '作業が未完了しました',
                 showConfirmButton: false,
                 timer: 1500,
             })
@@ -114,6 +116,46 @@ const goToPage = (url) => {
     })
 }
 
+
+//Radio Button For Machinetype select and Search Function and dropdown fileter
+
+const search = ref(props.filters.search ?? '')
+const selectedMachineType = ref(props.filters.machine_type_id ?? 'all')
+const selectedTasks = ref(props.filters.tasks ?? [])
+const showFilter = ref(false)
+
+
+/* ================= WATCH ================= */
+watch(
+    [search, selectedMachineType, selectedTasks],
+    debounce(() => {
+        router.get(
+            route('sizingoperations.completelist'),
+            {
+                search: search.value || null,
+                machine_type_id:
+                    selectedMachineType.value === 'all'
+                        ? null
+                        : selectedMachineType.value,
+                tasks: selectedTasks.value.length
+                    ? selectedTasks.value
+                    : null,
+            },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        )
+    }, 400)
+)
+
+
+/* ================= CLICK OUTSIDE ================= */
+onMounted(() => {
+    window.addEventListener('click', () => {
+        showFilter.value = false
+    })
+})
 </script>
 
 <template>
@@ -130,13 +172,56 @@ const goToPage = (url) => {
             <!-- TABLE -->
             <div class="w-full max-w-full">
 
-                <!-- HEADER + SEARCH -->
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
+                    <!--  Search -->
+                    <input type="text" v-model="search" placeholder="検索（工場・日付・担当者）"  class="border rounded px-3 py-2 text-sm w-full sm:w-64
+                   focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-400" />
 
-                    <input type="text" placeholder="検索" class="border rounded px-3 py-2 text-sm w-full sm:w-64
-                   focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    <!--  Machine Type Radio -->
+                    <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                        <label class="flex mr-4 items-center">
+                            <input type="radio" value="all" v-model="selectedMachineType" class="mr-2" />
+                            すべて
+                        </label>
+
+                        <label v-for="machinetype in machinetypes.data" :key="machinetype.id"
+                            class="flex mr-4 items-center">
+                            <input type="radio" :value="machinetype.id" v-model="selectedMachineType" class="mr-2" />
+                            {{ machinetype.name }}
+                        </label>
+                    </div>
+
+                    <!--  Task Filter Dropdown -->
+                    <div class="relative">
+                        <button @click.stop="showFilter = !showFilter"
+                            class="border px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-100">
+                            フィルター
+                            <span v-if="selectedTasks.length" class="text-xs bg-blue-500 text-white px-2 rounded-full">
+                                {{ selectedTasks.length }}
+                            </span>
+                            ▼
+                        </button>
+
+                        <div v-if="showFilter"
+                            class="absolute right-0 mt-2 w-56 bg-white border rounded shadow-lg z-50 p-3" @click.stop>
+                            <p class="text-sm font-semibold mb-2">作業を選択</p>
+
+                            <div v-for="task in tasks.data" :key="task.name" class="flex items-center gap-2 mb-1">
+                                <input type="checkbox" :value="task.name" v-model="selectedTasks" />
+                                <span class="text-sm">{{ task.name }}</span>
+                            </div>
+
+                            <button v-if="selectedTasks.length" @click="selectedTasks = []"
+                                class="text-xs text-blue-600 hover:underline mt-2">
+                                クリア
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+
+
 
                 <!-- TABLE CARD -->
                 <div class="bg-white rounded-lg shadow overflow-x-auto">
@@ -171,9 +256,9 @@ const goToPage = (url) => {
                                         {{ op.created_at }}
                                     </td>
 
-                                    <td>{{ op.plant?.name ?? '-' }}</td>
-                                    <td>{{ op.machine_type?.name ?? '-' }}</td>
-                                    <td>{{ op.machine_number?.name ?? '-' }}</td>
+                                    <td class="border p-2">{{ op.plant?.name ?? '-' }}</td>
+                                    <td class="border p-2">{{ op.machine_type?.name ?? '-' }}</td>
+                                    <td class="border p-2">{{ op.machine_number?.number ?? '-' }}</td>
 
                                     <td class="border p-2">
                                         <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
@@ -190,9 +275,14 @@ const goToPage = (url) => {
 
                                     <td class="border p-2">{{ op.paused_seconds_hour }}</td>
                                     <td class="border p-2 font-semibold">{{ op.worked_time }}</td>
-
+                                    
                                     <td class="border p-2">
-                                        <div class="relative" @click.stop>
+                                        <button @click.stop="uncompleteSMO(op.id)"
+                                            v-if="op.status === 'completed'"
+                                            class="bg-orange-500 text-white text-xs px-3 py-1 rounded hover:bg-orange-600">
+                                            未完了
+                                        </button>
+                                        <!-- <div class="relative" @click.stop>
                                             <button @click="op.menu = !op.menu"
                                                 class="px-2 py-1 rounded hover:bg-gray-200">
                                                 ⋯
@@ -200,24 +290,16 @@ const goToPage = (url) => {
 
                                             <div v-if="op.menu"
                                                 class="absolute right-0 mt-1 bg-white border rounded shadow-md w-28 z-20 text-left">
-                                                <button @click="completeSMO(op.id)"
+                                                <button @click="uncompleteSMO(op.id)"
                                                     class="block w-full px-3 py-2 hover:bg-gray-100">
-                                                    完了
+                                                    未完了
                                                 </button>
-                                                <button class="block w-full px-3 py-2 hover:bg-gray-100">
-                                                    編集
-                                                </button>
-                                                <button class="block w-full px-3 py-2 hover:bg-gray-100">
-                                                    追加
-                                                </button>
-                                                <button class="block w-full px-3 py-2 text-pink-600 hover:bg-gray-100">
-                                                    止
-                                                </button>
-                                                <button class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
+                                              
+                                                <button @click="deleteSizingOperation(op.id)" class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
                                                     削除
                                                 </button>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </td>
                                 </tr>
 
@@ -270,15 +352,35 @@ const goToPage = (url) => {
                         </tbody>
                     </table>
                     <!-- PAGINATION -->
-                    <div v-if="props.sizingoperations.links.length > 3"
-                        class="flex justify-center items-center gap-1 py-4">
-                        <button v-for="(link, index) in props.sizingoperations.links" :key="index"
-                            @click="goToPage(link.url)" :disabled="!link.url" v-html="link.label" class="px-3 py-1 border text-sm rounded
-               hover:bg-blue-100 transition" :class="{
-                'bg-blue-500 text-white': link.active,
-                'text-gray-400 cursor-not-allowed': !link.url
-            }" />
+                    <div v-if="props.sizingoperations.total > 0"
+                        class="flex items-center justify-between text-sm text-gray-600 py-3">
+                        <!-- 件数表示 (LEFT) -->
+                        <div>
+                            全 {{ props.sizingoperations.total }} 件中
+                            {{ props.sizingoperations.from }} ～ {{ props.sizingoperations.to }} 件を表示
+                        </div>
+
+                        <!-- PAGINATION (RIGHT) -->
+                        <div v-if="props.sizingoperations.links.length > 3" class=" px-3 flex items-center gap-1">
+                            <button v-for="(link, index) in props.sizingoperations.links" :key="index"
+                                @click="link.url && goToPage(link.url)" :disabled="!link.url"
+                                class="px-3 py-1 border text-sm rounded transition" :class="{
+                                    'bg-blue-500 text-white': link.active,
+                                    'text-gray-400 cursor-not-allowed': !link.url,
+                                    'hover:bg-blue-100': link.url && !link.active
+                                }">
+                                <span v-if="link.label.includes('Previous')">前へ</span>
+                                <span v-else-if="link.label.includes('Next')">次へ</span>
+                                <span v-else v-html="link.label"></span>
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- No Data -->
+                    <div v-else class="text-sm text-gray-400 py-3 text-center">
+                        表示するデータがありません
+                    </div>
+
 
                 </div>
             </div>

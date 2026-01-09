@@ -20,8 +20,26 @@ Route::get('/machines/by-plant/{plant}', [MainOperationController::class, 'getMa
 Route::get('/sizingoperations', [SizingOperationController::class, 'index'])->name('sizingoperation');
 Route::post('/sizingoperations', [SizingOperationController::class, 'store'])->name('sizingoperations.store');
 Route::post('/{id}/sizingcomplete', [SizingOperationController::class, 'complete'])->name('sizingoperations.complete');
+Route::post('/{id}/sizinguncomplete', [SizingOperationController::class, 'uncomplete'])->name('sizingoperations.uncomplete');
 Route::get('/sizingcompletelist', [SizingOperationController::class, 'completelist'])->name('sizingoperations.completelist');
+Route::get('/sizingadmincompletelist', [SizingOperationController::class, 'admincompletelist'])->name('sizingoperations.admincompletelist');
 Route::put('/sizingoperations/{sizingoperations}', [SizingOperationController::class, 'update'])->name('sizingoperations.update');
+Route::delete('/sizingoperations/{id}', [SizingOperationController::class, 'destroy'])->name('sizingoperations.destroy');
+
+// Sizing Log
+Route::delete('/sizinglogs/{id}', [SizingLogController::class, 'destroy'])->name('sizinglogs.destroy');
+Route::post(
+    '/sizinglogs/{log}/stop',
+    [SizingLogController::class, 'stop']
+)->name('sizinglogs.stop');
+
+Route::post(
+    '/sizinglogs/{log}/resume',
+    [SizingLogController::class, 'resume']
+)->name('sizinglogs.resume');
+
+
+
 Route::post(
     '/sizingoperations/{id}/add-employees',
     [SizingOperationController::class, 'addEmployees']

@@ -325,8 +325,51 @@ const stopSizingOperation = async (opId) => {
         })
 }
 
+const stopSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: '自分の作業を停止してもよろしいですか？',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'はい',
+        cancelButtonText: 'キャンセル',
+    })
+
+    if (!result.isConfirmed) return
+    axios.post(route('sizinglogs.stop', { log: logId }))
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '1200',
+                showConfirmButton: false,
+            })
+
+            location.reload()
+        })
+}
 
 
+const resumeSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: '自分の作業を再開してもよろしいですか？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'はい',
+        cancelButtonText: 'キャンセル',
+    })
+    if (!result.isConfirmed) return
+    
+    axios.post(route('sizinglogs.resume', { log: logId }))
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '作業を再開しました',
+                timer: 1200,
+                showConfirmButton: false,
+            })
+
+            location.reload()
+        })
+}
 //For Resume Operation
 const editResumeEmployee = async (op) => {
     // console.log("Editing Sizing Operation:", op.sizinglogs);
@@ -355,16 +398,7 @@ const openResumeModal = (op) => {
 
 
 const resumeSizingOperation = async (opId) => {
-    // const confirm = await Swal.fire({
-    //     title: '作業を再開しますか？',
-    //     icon: 'warning',
-    //     showCancelButton: true,
-    //     confirmButtonText: 'はい',
-    //     cancelButtonText: 'キャンセル',
-    // })
-
-    // if (!confirm.isConfirmed) return
-
+    
     axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: form.team_ids })
 
         .then(() => {
@@ -408,6 +442,74 @@ const completeSizingLog = async (logId) => {
 
 
 
+/* ================= DELETE Sizing Operation ================= */
+const deleteForm = useForm({});
+const deleteSizingOperation = async (opId) => {
+    const result = await Swal.fire({
+        title: 'この作業を削除してもよろしいですか？',
+        text: 'この操作は元に戻せません。',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'はい、削除します。',
+        cancelButtonText: 'キャンセル',
+    })
+
+    if (!result.isConfirmed) return
+
+    deleteForm.delete(route("sizingoperations.destroy", opId), {
+        onSuccess: () => {
+            Swal.fire({
+                icon: "success",
+                title: "削除されました！",
+                showConfirmButton: false,
+                timer: 1500,
+            });
+        },
+        onError: () => {
+            Swal.fire({
+                icon: "error",
+                title: "削除に失敗しました",
+                text: "もう一度お試しください。",
+            });
+        }
+    });
+}
+
+
+/*============= DELETE Sizing Log ========*/
+
+
+const deleteSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: '自分の作業を削除してもよろしいですか？',
+        text: 'この操作は元に戻せません。',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'はい、削除します。',
+        cancelButtonText: 'キャンセル',
+    })
+    if (!result.isConfirmed) return
+    deleteForm.delete(route("sizinglogs.destroy", logId), {
+        onSuccess: () => {
+            Swal.fire({
+                icon: "success",
+                title: "削除されました！",
+                showConfirmButton: false,
+                timer: 1500,
+            });
+        },
+        onError: () => {
+            Swal.fire({
+                icon: "error",
+                title: "削除に失敗しました",
+                text: "もう一度お試しください。",
+            });
+        }
+    });
+}
+
+
+
 </script>
 <template>
 
@@ -425,7 +527,7 @@ const completeSizingLog = async (logId) => {
                         <div>
                             <label class="form-label">担当者</label>
                             <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
-                                class="select-uniform !p-0">
+                                class="select-uniform !p-0" :disabled="isEditing">
                                 <el-option v-for="member in teamMembers" :key="member.id" :label="member.name"
                                     :value="member.id" />
                             </el-select>
@@ -583,7 +685,7 @@ const completeSizingLog = async (logId) => {
                                             class="m-1 bg-pink-500 text-white text-xs px-3 py-1 rounded hover:bg-pink-600">
                                             編集
                                         </button>
-                                        <button
+                                        <button v-if="op.status !== 'completed'" @click="deleteSizingOperation(op.id)"
                                             class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
                                             削除
                                         </button>
@@ -592,7 +694,7 @@ const completeSizingLog = async (logId) => {
                                             ⋯
                                         </button> -->
 
-                                        <div v-if="op.menu"
+                                        <!-- <div v-if="op.menu"
                                             class="absolute right-0 mt-1 bg-white border rounded shadow-md w-28 z-20">
                                             <button @click="completeSMO(op.id)"
                                                 class="block w-full px-3 py-2 hover:bg-gray-100">完了</button>
@@ -607,7 +709,7 @@ const completeSizingLog = async (logId) => {
                                             <button class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
                                                 削除
                                             </button>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </td>
                             </tr>
@@ -634,10 +736,10 @@ const completeSizingLog = async (logId) => {
                                                 <td class="border text-sm p-1">
                                                     {{ log.end_time ?? log.paused_time ?? '-' }}
                                                 </td>
-
+                                                
                                                 <td class="border text-sm p-1">
                                                     {{ (log.end_time || log.paused_time) ? log.duration_per_employee :
-                                                    '-' }}
+                                                        '-' }}
                                                 </td>
 
 
@@ -646,11 +748,23 @@ const completeSizingLog = async (logId) => {
                                                 <td class="border text-sm p-1">
                                                     <button
                                                         class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600"
-                                                        @click="completeSizingLog(log.id)" v-if="!log.end_time && log.last_start_time">
+                                                        @click="completeSizingLog(log.id)"
+                                                        v-if="!log.end_time && log.last_start_time">
                                                         完了
                                                     </button>
-                                                   
-                                                    <button v-if="!log.end_time"
+                                                    <button v-if="op.status === 'running' && !log.paused_time && !log.end_time"
+                                                        @click.stop="stopSizingLog(log.id)"
+                                                        class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
+                                                        止
+                                                    </button>
+
+                                                    <button v-if="log.paused_time && op.status === 'running'" @click.stop="resumeSizingLog(log.id)"
+                                                        class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
+                                                        再開
+                                                    </button>
+
+
+                                                    <button v-if="!log.end_time" @click="deleteSizingLog(log.id)"
                                                         class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
                                                         削除
                                                     </button>

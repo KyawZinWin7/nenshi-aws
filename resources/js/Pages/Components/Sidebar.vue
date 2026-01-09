@@ -42,10 +42,30 @@ defineProps({
 
 
 
-            <span class="ml-3">完了</span>
+            <span class="ml-3">完了(撚糸)</span>
           </a>
         </li>
         <!--End Mainoperation Complete-->
+         <!--Start SizingOperationComplete-->
+        <li>
+          <a :href="route('sizingoperations.admincompletelist')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            route().current('sizingoperations.admincompletelist')
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12l2 2 4-4M7 7h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+
+
+
+            <span class="ml-3">完了(準備)</span>
+          </a>
+        </li>
+        <!--End SizingOperation Complete-->
         <!--Start Plants-->
         <li>
           <a :href="route('plants.index')" :class="[
