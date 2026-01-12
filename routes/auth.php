@@ -39,6 +39,14 @@ Route::post(
 )->name('sizinglogs.resume');
 
 
+Route::post(
+    '/sizing-logs/{log}/complete',
+    [SizingLogController::class, 'complete']
+)->name('sizinglogs.complete');
+
+
+
+//For sizingoperation
 
 Route::post(
     '/sizingoperations/{id}/add-employees',
@@ -63,10 +71,14 @@ Route::post(
 )->name('sizingoperations.resume');
 
 
-Route::post(
-    '/sizing-logs/{log}/complete',
-    [SizingLogController::class, 'complete']
-)->name('sizinglogs.complete');
+
+//For sizingoperation export
+ Route::get('/sizingoperations/export', [SizingOperationController::class, 'export'])->name('sizingoperations.export');
+
+ Route::post('/sizingoperations/exportstore', [SizingOperationController::class, 'exportStore'])->name('sizingoperations.exportstore');
+
+
+
 
 
 Route::middleware('guest')->group(function () {

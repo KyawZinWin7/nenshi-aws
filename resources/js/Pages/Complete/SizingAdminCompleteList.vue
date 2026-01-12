@@ -162,7 +162,7 @@ onMounted(() => {
 
     <Head title="-準備課" />
     <AdminLayout>
-        <main class="p-4 sm:p-6 mx-auto min-h-screen text-xs sm:text-sm lg:text-base">
+        <main class="p-4 sm:p-6 mx-auto  min-h-screen text-xs sm:text-sm lg:text-base">
 
             <div class="flex flex-col items-center gap-4">
 

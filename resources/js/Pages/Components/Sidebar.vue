@@ -219,7 +219,7 @@ defineProps({
         </li>
         <!--End Machine Number-->
 
-        <!--Start　Export with excel -->
+        <!--Start　Export with excel mainoperation -->
         <li>
           <a :href="route('mainoperations.export')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -239,9 +239,31 @@ defineProps({
             <span class="ml-3"> エクスポート</span>
           </a>
         </li>
-        <!--End Export with excel-->
+        <!--End Export with excel mainoperation -->
 
 
+          <!--Start　Export with excel for Sizingoperation -->
+        <li>
+          <a :href="route('sizingoperations.export')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['sizingoperations.export'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="2" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8M8 12l4-4 4 4" />
+            </svg>
+
+
+
+
+            <span class="ml-1 text-sm"> エクスポート(準備)</span>
+          </a>
+        </li>
+        <!--End Export with excel for sizingoperation-->
+      
 
 
 

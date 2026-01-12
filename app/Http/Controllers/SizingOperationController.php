@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SizingOperationsExport;
+use App\Http\Requests\ExportSizingOperationRequest;
 use App\Http\Requests\StoreSizingOperationRequest;
 use App\Http\Requests\UpdateSizingOperationRequest;
 use App\Http\Resources\EmployeeResource;
@@ -20,6 +22,7 @@ use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SizingOperationController extends Controller
 {
@@ -589,6 +592,87 @@ class SizingOperationController extends Controller
         }
 
         return back()->with('success', '作業を再開しました');
+    }
+
+    public function export()
+    {
+        $sizingoperations = SizingOperationResource::collection(
+            SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
+                ->where('department_id', 2) // Sizing Department ID
+                ->where('status', 'completed')
+                ->orderBy('created_at', 'desc')
+                ->get()
+        );
+
+        $machinetypes = MachineTypeResource::collection(MachineType::where('department_id', 2)->get());
+        $tasks = TaskResource::collection(Task::where('department_id', 2)->get());
+        $plants = PlantResource::collection(
+            Plant::whereIn('id', [8, 9])->get()
+        );
+        $employees = EmployeeResource::collection(Employee::where('department_id', 2)->get());
+
+        return Inertia('Report/SizingExport', [
+            'sizingoperations' => $sizingoperations,
+            'machinetypes' => $machinetypes,
+            'tasks' => $tasks,
+            'plants' => $plants,
+            'employees' => $employees,
+        ]);
+    }
+
+    public function exportStore(ExportSizingOperationRequest $request)
+    {
+        try {
+            $filters = $request->validated();
+
+            $exists = SizingOperation::query()
+                ->when(! empty($filters['date_from']),
+                    fn ($q) => $q->whereDate('start_time', '>=', $filters['date_from'])
+                )
+                ->when(! empty($filters['date_to']),
+                    fn ($q) => $q->whereDate('start_time', '<=', $filters['date_to'])
+                )
+                ->when(! empty($filters['employee_id']), function ($q) use ($filters) {
+                    $q->whereHas('sizingLogs', function ($q) use ($filters) {
+                        $q->where('employee_id', $filters['employee_id']);
+                    });
+                })
+
+                ->when(! empty($filters['machine_type_id']),
+                    fn ($q) => $q->where('machine_type_id', $filters['machine_type_id'])
+                )
+                ->when(! empty($filters['task_id']),
+                    fn ($q) => $q->where('task_id', $filters['task_id'])
+                )
+                ->when(! empty($filters['plant_id']),
+                    fn ($q) => $q->where('plant_id', $filters['plant_id'])
+                )
+                ->when(! empty($filters['machine_number']), function ($q) use ($filters) {
+                    $q->whereHas('machineNumber', function ($q) use ($filters) {
+                        $q->where('number', $filters['machine_number']);
+                    });
+                })
+                ->exists();
+
+            if (! $exists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'エクスポートできるデータがありません。',
+                ], 404);
+            }
+
+            return Excel::download(
+                new SizingOperationsExport($filters),
+                'sizing_operations.xlsx'
+            );
+
+        } catch (\Exception $e) {
+            \Log::error('Sizing Export Error: '.$e->getMessage());
+
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function destroy($id)
