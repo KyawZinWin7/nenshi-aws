@@ -118,9 +118,9 @@ const statusClass = (status) => {
               <div class="text-base sm:text-lg font-bold">
                 {{ machine.number }}
               </div>
-              <div>{{ machine.status === 'running' ? '運転'
-                : machine.status === 'prepare' ? '準備'
-                  : machine.status === 'repair' ? '修理' : '停止' }}
+              <div>{{ machine.status === 'running' ? '運転中'
+                : machine.status === 'prepare' ? '準備中'
+                  : machine.status === 'repair' ? '修理中' : '停止' }}
               </div>
             </div>
           </div>

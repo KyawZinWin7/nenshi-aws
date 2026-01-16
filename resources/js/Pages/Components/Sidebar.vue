@@ -259,7 +259,7 @@ defineProps({
         <li>
           <a :href="route('machines.status')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
-            ['machines.status'].includes(route().current())
+            [''].includes(route().current())
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
@@ -270,21 +270,14 @@ defineProps({
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-              <!-- Gear -->
+              
               <circle cx="12" cy="12" r="3" />
               <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
            M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
 
-              <!-- Clock hand -->
+              
               <path d="M12 12l4 2" />
             </svg>
-
-
-
-
-
-
-
             <span class="ml-3 txt-sm"> 機械稼働時間</span>
           </a>
 
