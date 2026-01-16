@@ -12,7 +12,7 @@ use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreMachineTypeRequest;
 use App\Http\Requests\UpdateMachineTypeRequest;
 use App\Http\Resources\PlantResource;
-
+use App\Models\Task;
 class MachineTypeController extends Controller
 {
     
@@ -44,10 +44,27 @@ class MachineTypeController extends Controller
     public function store(StoreMachineTypeRequest $request)
     
     {
-        MachineType::create($request->validated());
+
+        // Create machine type
+
+        $machinetype = MachineType::create($request->validated());
 
 
-        return redirect()->route('machinetypes.index');
+
+        //Auto Create 運転　task
+
+
+        Task::create([
+            'machine_type_id' => $machinetype->id,
+            'name' => '運転',
+            'department_id' => $machinetype->department_id,
+            'is_drive_task' => true,
+
+        ]);
+
+
+        return redirect()->route('machinetypes.index')
+        ->with('success','Machine type created with 運転 task');
     }
 
     public function edit(MachineType $machinetype)

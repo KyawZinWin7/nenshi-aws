@@ -625,8 +625,9 @@ const deleteSizingLog = async (logId) => {
 
                                 <td class="border p-2">{{ op.plant.name }}</td>
                                 <td class="border p-2">{{ op.machine_type.name }}</td>
-                                <td class="border p-2">{{ op.machine_number.name }}</td>
+                                <td class="border p-2">{{ op.machine_number.number }}</td>
                                 <td class="border p-2">{{ op.task.name }}</td>
+                                <!-- <td class="border p-2">{{ op.status }}</td> -->
                                 <td class="border p-2">
                                     <div class="relative">
                                         <button @click.stop="completeSMO(op.id)"

@@ -13,6 +13,10 @@ use App\Http\Controllers\SmallTaskController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\SizingLogController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MachineStatusController;
+
+
+
 
 Route::get('/machines/by-type', [MainOperationController::class, 'getMachineNumbersByType']);
 Route::get('/tasks/by-machine-type', [TaskController::class, 'getTasksByMachineType']);
@@ -120,5 +124,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/export', [MainOperationController::class, 'export'])->name('mainoperations.export');
         Route::get('/admincompletelist', [MainOperationController::class, 'admincompletelist'])->name('mainoperations.admincompletelist');
     });
+
+
+
+    //----------------Machine Status----------------
+    Route::get('/sizing/machines/status', [MachineStatusController::class, 'index'])->name('machines.status');
 
 });

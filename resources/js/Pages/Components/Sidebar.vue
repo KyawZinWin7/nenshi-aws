@@ -219,6 +219,26 @@ defineProps({
         </li>
         <!--End Machine Number-->
 
+         <!--Start　Machine Status -->
+        <li>
+          <a :href="route('machines.status')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['machines.status'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 4h10M7 20h10M9 4v16M15 4v16" />
+            </svg>
+
+
+
+            <span class="ml-3"> 機械状態</span>
+          </a>
+        </li>
+        <!--End Machine Status-->
+
         <!--Start　Export with excel mainoperation -->
         <li>
           <a :href="route('mainoperations.export')" :class="[

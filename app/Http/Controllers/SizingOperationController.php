@@ -231,24 +231,6 @@ class SizingOperationController extends Controller
         return back()->with('success', 'Sizing operation uncompleted and running');
     }
 
-    // public function completelist()
-    // {
-
-    //     $sizingoperations = SizingOperationResource::collection(
-    //         SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
-    //             ->where('department_id', 2) // Sizing Department ID
-    //             ->where('status', 'completed') // Completed operations
-    //             ->orderBy('created_at', 'desc')
-    //             ->get()
-    //     );
-
-    //     $machinetypes = MachineTypeResource::collection(MachineType::where('department_id', 2)->get());
-
-    //     return Inertia('Complete/SizingCompleteList', [
-    //         'sizingoperations' => $sizingoperations,
-    //         'machinetypes' => $machinetypes,
-    //     ]);
-    // }
 
     public function completelist(Request $request)
     {

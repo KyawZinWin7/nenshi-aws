@@ -44,6 +44,7 @@ return new class extends Migration
             $table->integer('paused_seconds')->default(0);
             
             
+            
 
            
             // Employee (nullable)
