@@ -61,50 +61,36 @@ const statusClass = (status) => {
   switch (status) {
     case 'running': return 'bg-green-500'
     case 'prepare': return 'bg-yellow-400 text-black'
-    case 'repair':  return 'bg-blue-500'
+    case 'repair': return 'bg-blue-500'
     case 'stopped':
-    default:        return 'bg-red-500'
+    default: return 'bg-red-500'
   }
 }
 </script>
 
 <template>
   <AdminLayout>
+
     <Head title="機械状況" />
 
     <div class="p-4 sm:p-6 space-y-10">
 
       <!--  Plant Filter (mobile scrollable) -->
-      <div
-        class="flex gap-3 items-center
+      <div class="flex gap-3 items-center
                overflow-x-auto pb-2
-               sm:overflow-visible sm:flex-wrap"
-      >
-        <label
-          v-for="plant in plants"
-          :key="plant.id"
-          class="flex items-center gap-2 cursor-pointer
+               sm:overflow-visible sm:flex-wrap">
+        <label v-for="plant in plants" :key="plant.id" class="flex items-center gap-2 cursor-pointer
                  whitespace-nowrap
                  px-3 py-1 rounded-full border
                  text-sm
-                 sm:text-base sm:border-none"
-        >
-          <input
-            type="radio"
-            :value="Number(plant.id)"
-            v-model="selectedPlant"
-            class="accent-green-600"
-          />
+                 sm:text-base sm:border-none">
+          <input type="radio" :value="Number(plant.id)" v-model="selectedPlant" class="accent-green-600" />
           {{ plant.name }}
         </label>
       </div>
 
       <!-- Plant loop -->
-      <div
-        v-for="(types, plantName) in groupedByPlant"
-        :key="plantName"
-        class="space-y-8"
-      >
+      <div v-for="(types, plantName) in groupedByPlant" :key="plantName" class="space-y-8">
         <!-- Plant title -->
         <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2">
           <span class="w-3 h-3 bg-green-600 rounded-full"></span>
@@ -118,28 +104,24 @@ const statusClass = (status) => {
           </h3>
 
           <!--  Machine Grid -->
-          <div
-            class="grid gap-3
+          <div class="grid gap-3
                    grid-cols-2
                    sm:grid-cols-4
                    md:grid-cols-6
-                   lg:grid-cols-10"
-          >
-            <div
-              v-for="machine in list"
-              :key="machine.machine_id"
-              class="rounded-lg flex flex-col items-center justify-center
+                   lg:grid-cols-10">
+            <div v-for="machine in list" :key="machine.machine_id" class="rounded-lg flex flex-col items-center justify-center
                      text-white shadow
-                     h-20 sm:h-24"
-              :class="statusClass(machine.status)"
-            >
+                     h-20 sm:h-24" :class="statusClass(machine.status)">
               <div class="text-xs sm:text-sm font-semibold">
                 {{ machine.type }}
               </div>
               <div class="text-base sm:text-lg font-bold">
                 {{ machine.number }}
               </div>
-              <div>{{ machine.status }}</div>
+              <div>{{ machine.status === 'running' ? '運転'
+                : machine.status === 'prepare' ? '準備'
+                  : machine.status === 'repair' ? '修理' : '停止' }}
+              </div>
             </div>
           </div>
         </div>
@@ -164,10 +146,9 @@ const statusClass = (status) => {
           修理
         </div>
 
-        
+
       </div>
 
     </div>
   </AdminLayout>
 </template>
-

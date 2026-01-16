@@ -20,7 +20,7 @@ defineProps({
     class="fixed top-0 left-0 z-40 w-48 h-screen pt-14 transition-transform bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 "
     :class="{ '-translate-x-full': !isVisible }" aria-label="Sidenav">
 
-    
+
     <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
       <ul class="space-y-2">
 
@@ -46,7 +46,7 @@ defineProps({
           </a>
         </li>
         <!--End Mainoperation Complete-->
-         <!--Start SizingOperationComplete-->
+        <!--Start SizingOperationComplete-->
         <li>
           <a :href="route('sizingoperations.admincompletelist')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -219,7 +219,7 @@ defineProps({
         </li>
         <!--End Machine Number-->
 
-         <!--Start　Machine Status -->
+        <!--Start　Machine Status -->
         <li>
           <a :href="route('machines.status')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -227,15 +227,24 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-              stroke="currentColor" width="24" height="24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7 4h10M7 20h10M9 4v16M15 4v16" />
+           
+            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#ddd" stroke-width="4" fill="none" />
+              <circle cx="12" cy="12" r="8" fill="green" />
             </svg>
+
+
+            
+
 
 
 
             <span class="ml-3"> 機械状態</span>
           </a>
+
+
+
+          
         </li>
         <!--End Machine Status-->
 
@@ -262,7 +271,7 @@ defineProps({
         <!--End Export with excel mainoperation -->
 
 
-          <!--Start　Export with excel for Sizingoperation -->
+        <!--Start　Export with excel for Sizingoperation -->
         <li>
           <a :href="route('sizingoperations.export')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -283,7 +292,7 @@ defineProps({
           </a>
         </li>
         <!--End Export with excel for sizingoperation-->
-      
+
 
 
 

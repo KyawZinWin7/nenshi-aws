@@ -35,6 +35,7 @@ class MachineTypeSeeder extends Seeder
         $machineTypes = [
             ['id' => 5, 'name' => 'W','department_id' => 2 ],
             ['id' => 6, 'name' => 'K','department_id' => 2 ],
+
         ];
 
         foreach ($machineTypes as $type) {
