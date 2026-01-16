@@ -130,7 +130,7 @@ watch(
     [search, selectedMachineType, selectedTasks],
     debounce(() => {
         router.get(
-            route('sizingoperations.completelist'),
+            route('sizingoperations.admincompletelist'),
             {
                 search: search.value || null,
                 machine_type_id:
