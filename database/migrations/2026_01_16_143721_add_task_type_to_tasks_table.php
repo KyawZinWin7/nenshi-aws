@@ -12,10 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            
-            $table->boolean('is_drive_task')
-              ->default(false)
-              ->after('name');
+            $table->enum('task_type', ['drive', 'prepare', 'repair'])
+                ->default('prepare')
+                ->after('name');
         });
     }
 
@@ -25,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->dropColumn('is_drive_task');
+            $table->dropColumn('task_type');
         });
     }
 };

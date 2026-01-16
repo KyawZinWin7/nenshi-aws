@@ -24,24 +24,19 @@ class MachineStatusController extends Controller
                 ->latest()
                 ->first();
 
-            // 1. no operation
-            if (! $lastOp) {
+            // no operation or not running
+            if (! $lastOp || $lastOp->status !== 'running') {
                 $machine->drive_status = 'stopped';
 
                 return;
             }
 
-            // 2. if running
-            if ($lastOp->status === 'running') {
-                $machine->drive_status = $lastOp->task?->is_drive_task
-                    ? 'running'   // drive task
-                    : 'prepare';  // non-drive task
-
-                return;
-            }
-
-            // 3. if completed / paused
-            $machine->drive_status = 'stopped';
+            // running
+            $machine->drive_status = match ($lastOp->task?->task_type) {
+                'drive' => 'running',
+                'repair' => 'repair',
+                default => 'prepare', // prepare is default
+            };
         });
 
         return inertia('MachineStatus/SMDashboard', [

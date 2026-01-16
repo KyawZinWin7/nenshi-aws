@@ -315,7 +315,7 @@ onMounted(() => {
                                                     <th class="border p-1">終了</th>
                                                     <th class="border p-1">時間停止</th>
                                                     <th class="border p-1">合計時間</th>
-                                                    <th class="border p-1">操作</th>
+                                                    <!-- <th class="border p-1">操作</th> -->
                                                 </tr>
                                             </thead>
 
@@ -335,12 +335,12 @@ onMounted(() => {
                                                         {{ log.duration_per_employee }}
                                                     </td>
 
-                                                    <td class="border p-1">
+                                                    <!-- <td class="border p-1">
                                                         <button v-if="!log.end_time" @click="completeLog(log)"
                                                             class="bg-green-500 text-white text-xs px-2 py-1 rounded hover:bg-green-600">
                                                             完了
                                                         </button>
-                                                    </td>
+                                                    </td> -->
                                                 </tr>
                                             </tbody>
                                         </table>

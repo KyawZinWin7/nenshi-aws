@@ -219,6 +219,10 @@ defineProps({
         </li>
         <!--End Machine Number-->
 
+
+
+
+
         <!--Start　Machine Status -->
         <li>
           <a :href="route('machines.status')" :class="[
@@ -227,14 +231,17 @@ defineProps({
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">
-           
-            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#ddd" stroke-width="4" fill="none" />
-              <circle cx="12" cy="12" r="8" fill="green" />
+
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h4l2-4 4 8 2-4h4" />
             </svg>
 
 
-            
+
+
 
 
 
@@ -244,9 +251,49 @@ defineProps({
 
 
 
-          
+
         </li>
         <!--End Machine Status-->
+
+        <!--Start　Machine operation time summary -->
+        <li>
+          <a :href="route('machines.status')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['machines.status'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+
+
+
+
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <!-- Gear -->
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+           M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+
+              <!-- Clock hand -->
+              <path d="M12 12l4 2" />
+            </svg>
+
+
+
+
+
+
+
+            <span class="ml-3 txt-sm"> 機械稼働時間</span>
+          </a>
+
+
+
+
+        </li>
+        <!--End Machine operation time summary-->
+
 
         <!--Start　Export with excel mainoperation -->
         <li>

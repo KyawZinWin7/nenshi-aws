@@ -65,7 +65,7 @@ return new class extends Migration
 
               // Others
             $table->string('description')->nullable();
-            $table->string('status')->default('running'); // running,paused,completed
+            $table->enum('status', ['running', 'paused', 'completed','repair'])->default('running');
 
             // Completed By → Set NULL
             $table->foreignId('completed_by')
