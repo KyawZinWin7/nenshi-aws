@@ -36,9 +36,9 @@ class SizingOperationsExport implements FromCollection, WithEvents, WithHeadings
             'task',
             'sizingLogs',
             'sizingLogs.employee',
-        ]);
+        ])->where('status', 'completed');
 
-        // 🔴 parent filter (critical)
+        //  parent filter (critical)
         if (! empty($this->filters['employee_id'])) {
             $query->whereHas('sizingLogs', function ($q) {
                 $q->where('employee_id', $this->filters['employee_id']);
@@ -75,7 +75,7 @@ class SizingOperationsExport implements FromCollection, WithEvents, WithHeadings
             $color = $colors[$colorIndex % count($colors)];
             $colorIndex++;
 
-            // 🔴 Task header
+            //  Task header
             $rows->push([
                 $op->start_time?->format('Y-m-d'),
                 $op->plant?->name,
@@ -85,7 +85,7 @@ class SizingOperationsExport implements FromCollection, WithEvents, WithHeadings
                 $op->start_time?->format('H:i:s'),
                 $op->end_time?->format('H:i:s'),
                 gmdate('H:i:s', $op->paused_seconds),
-                $op->total_time,
+                $op->worked_seconds ? gmdate('H:i:s', $op->worked_seconds) : '',
             ]);
 
             $this->rowStyles[] = [
@@ -95,7 +95,7 @@ class SizingOperationsExport implements FromCollection, WithEvents, WithHeadings
             ];
             $currentRow++;
 
-            // 🟠 employee header
+            //  employee header
             $rows->push(['担当者', '', '', '', '', '開始', '終了', '時間停止', '合計時間']);
             $this->rowStyles[] = [
                 'row' => $currentRow,
@@ -104,7 +104,7 @@ class SizingOperationsExport implements FromCollection, WithEvents, WithHeadings
             ];
             $currentRow++;
 
-            // 🔵 employee rows
+            //  employee rows
             foreach ($op->sizingLogs as $log) {
                 $rows->push([
                     $log->employee?->name,
@@ -127,7 +127,7 @@ class SizingOperationsExport implements FromCollection, WithEvents, WithHeadings
             $currentRow++;
         }
 
-        // ⭐⭐ THIS LINE FIXES YOUR ERROR ⭐⭐
+       
         return $rows ?? collect();
     }
 
