@@ -164,7 +164,7 @@ const statusClass = (status) => {
           修理
         </div>
 
-        {{  }}
+        
       </div>
 
     </div>
