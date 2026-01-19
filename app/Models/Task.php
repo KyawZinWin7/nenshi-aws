@@ -14,7 +14,7 @@ class Task extends Model
     use HasFactory;
 
 
-    protected $fillable = ['name','machine_type_id','department_id','is_drive_task'];
+    protected $fillable = ['name','machine_type_id','department_id','task_type'];
 
 
     public function mainOperations()
