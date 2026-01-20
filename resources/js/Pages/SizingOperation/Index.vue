@@ -523,7 +523,9 @@ const deleteSizingLog = async (logId) => {
             <div class="w-full lg:w-[30%] mb-8">
                 <Container>
                     <form @submit.prevent="submitForm" class="space-y-4">
-
+                        <h3 class="text-lg font-semibold mb-4 text-center">
+                            準備課
+                        </h3>
                         <div>
                             <label class="form-label">担当者</label>
                             <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
