@@ -45,7 +45,7 @@ watch(
             menu: false,
         }))
 
-        
+
     },
     { immediate: true }
 )
@@ -174,9 +174,19 @@ onMounted(() => {
 
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
-                    <!--  Search -->
-                    <input type="text" v-model="search" placeholder="検索（工場・日付・担当者）"  class="border rounded px-3 py-2 text-sm w-full sm:w-64
-                   focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-400" />
+                    
+                    <div class="relative w-full sm:w-64">
+                        <input type="text" v-model="search" placeholder="検索（工場・日付・担当者）" class="border rounded px-3 py-2 pr-9 text-sm w-full
+                            focus:outline-none focus:ring-2 focus:ring-blue-400
+                            placeholder-gray-400" />
+
+                        <!-- Clear button -->
+                        <button v-if="search" @click="search = ''" type="button" class="absolute right-2 top-1/2 -translate-y-1/2
+                         text-gray-400 hover:text-gray-600">
+                            ✕
+                        </button>
+                    </div>
+
 
                     <!--  Machine Type Radio -->
                     <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
@@ -275,10 +285,9 @@ onMounted(() => {
 
                                     <td class="border p-2">{{ op.paused_seconds_hour }}</td>
                                     <td class="border p-2 font-semibold">{{ op.worked_time }}</td>
-                                    
+
                                     <td class="border p-2">
-                                        <button @click.stop="uncompleteSMO(op.id)"
-                                            v-if="op.status === 'completed'"
+                                        <button @click.stop="uncompleteSMO(op.id)" v-if="op.status === 'completed'"
                                             class="bg-orange-500 text-white text-xs px-3 py-1 rounded hover:bg-orange-600">
                                             未完了
                                         </button>
