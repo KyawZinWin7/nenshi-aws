@@ -1,7 +1,10 @@
 <script setup>
 import { router, Head } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import AdminLayout from '../Components/AdminLayout.vue'
+import route from 'ziggy-js'
+
+
 
 const props = defineProps({
     machinenumbers: {
