@@ -257,9 +257,9 @@ defineProps({
 
         <!--Start　Machine operation time summary -->
         <li>
-          <a :href="route('machines.status')" :class="[
+          <a :href="route('sizing.machines.operation-hours')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
-            [''].includes(route().current())
+            ['sizing.machines.operation-hours'].includes(route().current())
               ? 'bg-[#FF9500] text-white'
               : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
           ]">

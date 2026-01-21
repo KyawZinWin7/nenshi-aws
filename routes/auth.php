@@ -14,6 +14,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\SizingLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MachineStatusController;
+use App\Http\Controllers\MachineOperationHourController;
 
 
 
@@ -82,7 +83,8 @@ Route::post(
  Route::post('/sizingoperations/exportstore', [SizingOperationController::class, 'exportStore'])->name('sizingoperations.exportstore');
 
 
-
+// For machine opetaion hours
+Route::get('sizing/machines/operation-hours', [MachineOperationHourController::class, 'getSizingMachine'])->name('sizing.machines.operation-hours');
 
 
 Route::middleware('guest')->group(function () {
