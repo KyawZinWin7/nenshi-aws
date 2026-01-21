@@ -2,7 +2,7 @@
 import { router, Head } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import AdminLayout from '../Components/AdminLayout.vue'
-import route from 'ziggy-js'
+
 
 
 
