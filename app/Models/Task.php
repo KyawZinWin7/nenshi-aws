@@ -14,7 +14,7 @@ class Task extends Model
     use HasFactory;
 
 
-    protected $fillable = ['name','machine_type_id','department_id'];
+    protected $fillable = ['name','machine_type_id','department_id','task_type'];
 
 
     public function mainOperations()
@@ -33,5 +33,12 @@ class Task extends Model
         return $this->belongsTo(Department::class);
     }
 
-    
+    public function smallTasks()
+    {
+        return $this->hasMany(SmallTask::class);
+    }
+    public function sizingOperations()
+    {
+        return $this->hasMany(SizingOperation::class);
+    }
 }

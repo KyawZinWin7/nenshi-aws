@@ -20,7 +20,7 @@ defineProps({
     class="fixed top-0 left-0 z-40 w-48 h-screen pt-14 transition-transform bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 "
     :class="{ '-translate-x-full': !isVisible }" aria-label="Sidenav">
 
-    
+
     <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
       <ul class="space-y-2">
 
@@ -42,10 +42,30 @@ defineProps({
 
 
 
-            <span class="ml-3">完了</span>
+            <span class="ml-3">完了(撚糸)</span>
           </a>
         </li>
         <!--End Mainoperation Complete-->
+        <!--Start SizingOperationComplete-->
+        <li>
+          <a :href="route('sizingoperations.admincompletelist')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            route().current('sizingoperations.admincompletelist')
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12l2 2 4-4M7 7h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+
+
+
+            <span class="ml-3">完了(準備)</span>
+          </a>
+        </li>
+        <!--End SizingOperation Complete-->
         <!--Start Plants-->
         <li>
           <a :href="route('plants.index')" :class="[
@@ -199,7 +219,76 @@ defineProps({
         </li>
         <!--End Machine Number-->
 
-        <!--Start　Export with excel -->
+
+
+
+
+        <!--Start　Machine Status -->
+        <li>
+          <a :href="route('machines.status')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['machines.status'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h4l2-4 4 8 2-4h4" />
+            </svg>
+
+
+
+
+
+
+
+
+            <span class="ml-3"> 機械状態</span>
+          </a>
+
+
+
+
+        </li>
+        <!--End Machine Status-->
+
+        <!--Start　Machine operation time summary -->
+        <li>
+          <a :href="route('sizing.machines.operation-hours')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['sizing.machines.operation-hours'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+
+
+
+
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+           M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+
+              
+              <path d="M12 12l4 2" />
+            </svg>
+            <span class="ml-3 txt-sm"> 機械稼働時間</span>
+          </a>
+
+
+
+
+        </li>
+        <!--End Machine operation time summary-->
+
+
+        <!--Start　Export with excel mainoperation -->
         <li>
           <a :href="route('mainoperations.export')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
@@ -219,8 +308,30 @@ defineProps({
             <span class="ml-3"> エクスポート</span>
           </a>
         </li>
-        <!--End Export with excel-->
+        <!--End Export with excel mainoperation -->
 
+
+        <!--Start　Export with excel for Sizingoperation -->
+        <li>
+          <a :href="route('sizingoperations.export')" :class="[
+            'flex items-center p-2 text-base font-medium rounded-lg group',
+            ['sizingoperations.export'].includes(route().current())
+              ? 'bg-[#FF9500] text-white'
+              : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="24" height="24">
+              <rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="2" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8M8 12l4-4 4 4" />
+            </svg>
+
+
+
+
+            <span class="ml-1 text-sm"> エクスポート(準備)</span>
+          </a>
+        </li>
+        <!--End Export with excel for sizingoperation-->
 
 
 

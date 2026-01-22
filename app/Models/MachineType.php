@@ -55,4 +55,10 @@ class MachineType extends Model
         return $this->hasMany(SmallTask::class);
     }
 
+    public function sizingOperations()
+    {
+        return $this->hasMany(SizingOperation::class);
+    }
+    
+
 }

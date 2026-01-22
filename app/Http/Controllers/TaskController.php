@@ -106,6 +106,9 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
+        // if ($task->is_drive_task) {
+        //     return back()->withErrors('運転作業は削除できません');
+        // }
         $task->delete();
 
         return redirect()->route('tasks.index');

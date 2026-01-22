@@ -62,10 +62,7 @@ class MainOperationController extends Controller
                 'members',
             ])
                 ->where('status', 0)
-            // ->where('employee_id', Auth::id())
-            // ->orWhereHas('members', function ($query) {
-            //     $query->where('employee_id', Auth::id());
-            // })
+            
                 ->where('department_id', Auth::user()->department_id)
                 ->latest('updated_at')
                 ->take(200)
@@ -126,12 +123,12 @@ class MainOperationController extends Controller
             ->with('success', '作業が登録されました。');
     }
 
-    public function edit(MainOperation $mainoperation)
-    {
-        return Inertia::render('Home', [
-            'mainoperation' => new MainOperationResource($mainoperation->load('machineType')),
-        ]);
-    }
+    // public function edit(MainOperation $mainoperation)
+    // {
+    //     return Inertia::render('Home', [
+    //         'mainoperation' => new MainOperationResource($mainoperation->load('machineType')),
+    //     ]);
+    // }
 
     public function update(UpdateMainOperationRequest $request, MainOperation $mainoperation)
     {

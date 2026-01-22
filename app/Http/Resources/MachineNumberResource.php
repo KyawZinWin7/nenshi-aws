@@ -18,6 +18,7 @@ class MachineNumberResource extends JsonResource
             'id' => $this->id,
             'number' => $this->number,
             'machine_type_plant_id' => new MachineTypePlantResource($this->whenLoaded('machineTypePlant')),
+            'drive_status' => $this->drive_status ?? 'stopped',
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

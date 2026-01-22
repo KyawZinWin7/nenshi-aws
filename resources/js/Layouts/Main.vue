@@ -95,7 +95,17 @@ watch(() => page.url, () => {
                                 'text-white bg-blue-700 md:bg-transparent md:text-blue-700 dark:text-white md:dark:text-blue-500': route().current('home'),
                                 'text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('home')
                             }" @click="closeMenu">
-                        ホーム
+                        撚糸課
+                        </Link>
+                    </li>
+
+                     <li>
+                        <Link :href="route('sizingoperation')" class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
+                            :class="{
+                                'text-white bg-blue-700 md:bg-transparent md:text-blue-700 dark:text-white md:dark:text-blue-500': route().current('sizingoperation'),
+                                'text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('sizingoperation')
+                            }" @click="closeMenu">
+                        準備課
                         </Link>
                     </li>
 
@@ -106,9 +116,19 @@ watch(() => page.url, () => {
                                 'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperations.completelist'),
                                 'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('mainoperations.completelist')
                             }" @click="closeMenu">
-                        完了
+                        撚糸/完了
                         </Link>
                     </li>
+                     <li >
+                        <Link :href="route('sizingoperations.completelist')"
+                            class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
+                                'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('sizingoperations.completelist'),
+                                'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('sizingoperations.completelist')
+                            }" @click="closeMenu">
+                        準備/完了
+                        </Link>
+                    </li>
+
 
                     <li v-if="employee">
                         <div ref="dropdown" class="relative">

@@ -30,4 +30,10 @@ class Plant extends Model
         return $this->hasMany(MainOperation::class);
     }
 
+    public function sizingOperations()
+    {
+        return $this->hasMany(SizingOperation::class);
+    }
+    
+
 }

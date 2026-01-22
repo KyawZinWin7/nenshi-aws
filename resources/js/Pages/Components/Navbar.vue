@@ -25,35 +25,45 @@
         </a>
       </div>
 
-      <!-- Right side: Notification + Username + dropdown -->
-      <div class="flex items-center space-x-4 relative">
-        <!-- Home Link -->
-        <div>
-          <Link :href="route('login')" class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
-            'text-white bg-blue-700 md:bg-transparent md:text-blue-700 dark:text-white md:dark:text-blue-500': route().current('home'),
-            'text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('home')
-          }" @click="closeMenu">
-          ホーム
+      <!-- Right side: Buttons + Username -->
+      <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 relative">
+
+        <!-- Buttons -->
+        <div class="flex flex-row gap-2">
+          <!-- 撚糸課 -->
+          <Link :href="route('login')" @click="closeMenu" class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+             bg-white text-gray-800 border border-gray-300
+             hover:bg-blue-50 hover:text-blue-700 shadow-sm">
+          撚糸課
+          </Link>
+
+          <!-- 準備課 -->
+          <Link :href="route('sizingoperation')" @click="closeMenu" class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+             bg-white text-gray-800 border border-gray-300
+             hover:bg-blue-50 hover:text-blue-700 shadow-sm">
+          準備課
           </Link>
         </div>
+
         <!-- Username Dropdown -->
-        <div class="relative">
-          <button @click="toggleDropdown($event)"
-            class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <div class="relative self-start md:self-auto">
+          <button @click="toggleDropdown($event)" class="flex items-center gap-1 text-sm font-medium rounded-md
+             px-2 py-1 hover:bg-gray-100">
             <span>{{ $page.props.auth.user.name }}</span>
-            <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           <div v-if="dropdownOpen" ref="dropdownRef"
-            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+            class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-1 z-50">
             <a href="#" @click.prevent="logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               ログアウト
             </a>
           </div>
         </div>
       </div>
+
 
 
     </div>

@@ -16,4 +16,17 @@ class SmallTask extends Model
     {
         return $this->belongsTo(MachineType::class);
     }
+
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
+    }
+    public function mainOperations()
+    {
+        return $this->hasMany(MainOperation::class);
+    }
+    public function sizingOperations()
+    {
+        return $this->hasMany(SizingOperation::class);
+    }
 }
