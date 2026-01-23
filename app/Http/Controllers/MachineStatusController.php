@@ -42,7 +42,7 @@ class MachineStatusController extends Controller
         return inertia('MachineStatus/SMDashboard', [
             'machinenumbers' => MachineNumberResource::collection($machines),
             'plants' => PlantResource::collection(
-                Plant::where('id', 8)->orWhere('id', 9)->get()
+                Plant::all() //all factories
             ),
 
         ]);

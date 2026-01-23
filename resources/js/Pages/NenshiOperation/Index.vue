@@ -228,6 +228,43 @@ const createSizingOperation = () => {
     })
 }
 
+//For Edit Operation
+
+
+
+const editSizingOperation = async (op) => {
+    // console.log("Editing Sizing Operation:", op.sizinglogs);
+
+    isEditing.value = true;
+    editingId.value = op.id;
+
+    // team ids (from logs, unique)
+    form.team_ids = [
+        ...new Set(
+            op.sizinglogs
+                ?.map(log => log.employee?.id)
+                .filter(Boolean) // remove null/undefined
+        )
+    ];
+
+
+
+    // plant
+    form.plant_id = op.plant?.id ?? '';
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // machine type
+    form.machine_type_id = op.machine_type?.id ?? '';
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    form.small_task_id = op.small_task?.id ?? '';
+    await new Promise(resolve => setTimeout(resolve, 300));
+    // rest
+    form.machine_number_id = op.machine_number?.id ?? '';
+    form.task_id = op.task?.id ?? '';
+};
 
 
 /* ================= COMPLETE LOG ================= */
@@ -301,6 +338,246 @@ const deleteSizingOperation = async (opId) => {
             });
         }
     });
+}
+
+const cancelEdit = () => {
+    isEditing.value = false;
+    editingId.value = null;
+    form.reset();
+};
+
+
+//For add Employees
+
+
+
+const addEmployeeDialog = ref(false)
+const selectedEmployeeIds = ref([])
+// const editingId = ref(null)
+
+const openAddEmployeeModal = (op) => {
+    editingId.value = op.id
+
+
+
+    addEmployeeDialog.value = true
+}
+
+
+
+const addEmployeeForm = useForm({
+    employee_ids: [],
+})
+
+
+const confirmAddEmployees = () => {
+    addEmployeeForm.employee_ids = selectedEmployeeIds.value
+
+    addEmployeeForm.post(
+        route('sizingoperations.addEmployees', { id: editingId.value }),
+        {
+            onSuccess: () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '担当者が追加されました',
+                    showConfirmButton: false,
+                    timer: 1200,
+                })
+
+                addEmployeeDialog.value = false
+                selectedEmployeeIds.value = []
+                addEmployeeForm.reset()
+            },
+            onError: (errors) => {
+                console.log(errors)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'エラーが発生しました',
+                    text: 'もう一度試してください。',
+                })
+            },
+        }
+    )
+}
+
+
+//For Stop Operation
+
+const stopSizingOperation = async (opId) => {
+    const confirm = await Swal.fire({
+        title: '作業を停止しますか？',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'はい',
+        cancelButtonText: 'キャンセル',
+    })
+
+    if (!confirm.isConfirmed) return
+
+    axios.post(route('sizingoperations.stop', { operation: opId }))
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '作業を停止しました',
+                timer: 1200,
+                showConfirmButton: false,
+            })
+
+            location.reload()
+        })
+}
+
+// Stop SizingLog
+const stopSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: '自分の作業を停止してもよろしいですか？',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'はい',
+        cancelButtonText: 'キャンセル',
+    })
+
+    if (!result.isConfirmed) return
+    axios.post(route('sizinglogs.stop', { log: logId }))
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '1200',
+                showConfirmButton: false,
+            })
+
+            location.reload()
+        })
+}
+
+
+
+//For Resume Operation
+const editResumeEmployee = async (op) => {
+    // console.log("Editing Sizing Operation:", op.sizinglogs);
+
+    editingId.value = op.id;
+
+    // team ids (from logs, unique)
+    form.team_ids = [
+        ...new Set(
+            op.sizinglogs
+                ?.map(log => log.employee?.id)
+                .filter(Boolean) // remove null/undefined
+        )
+    ];
+
+
+
+
+};
+const resumeDialog = ref(false)
+const openResumeModal = (op) => {
+    editingId.value = op.id
+    resumeDialog.value = true
+    editResumeEmployee(op)
+}
+
+
+const resumeSizingOperation = async (opId) => {
+    
+    axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: form.team_ids })
+
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '作業を再開しました',
+                timer: 1200,
+                showConfirmButton: false,
+            })
+
+            location.reload()
+        })
+}
+
+
+// Resume Sizing Log
+
+const resumeSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: '自分の作業を再開してもよろしいですか？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'はい',
+        cancelButtonText: 'キャンセル',
+    })
+    if (!result.isConfirmed) return
+    
+    axios.post(route('sizinglogs.resume', { log: logId }))
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '作業を再開しました',
+                timer: 1200,
+                showConfirmButton: false,
+            })
+
+            location.reload()
+        })
+}
+
+
+/*============= DELETE Sizing Log ========*/
+
+
+const deleteSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: '自分の作業を削除してもよろしいですか？',
+        text: 'この操作は元に戻せません。',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'はい、削除します。',
+        cancelButtonText: 'キャンセル',
+    })
+    if (!result.isConfirmed) return
+    deleteForm.delete(route("sizinglogs.destroy", logId), {
+        onSuccess: () => {
+            Swal.fire({
+                icon: "success",
+                title: "削除されました！",
+                showConfirmButton: false,
+                timer: 1500,
+            });
+        },
+        onError: () => {
+            Swal.fire({
+                icon: "error",
+                title: "削除に失敗しました",
+                text: "もう一度お試しください。",
+            });
+        }
+    });
+}
+
+
+/* ================= COMPLETE Sizing LOG ================= */
+
+const completeSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: 'この作業を完了してもよろしいですか？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'はい、完了します。',
+        cancelButtonText: 'キャンセル',
+    })
+
+    if (!result.isConfirmed) return
+
+    axios.post(route('sizinglogs.complete', logId))
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '完了しました',
+                timer: 1200,
+                showConfirmButton: false,
+            })
+            location.reload()
+        })
 }
 
 
@@ -461,6 +738,25 @@ const deleteSizingOperation = async (opId) => {
                                             </el-icon>
                                         </button>
 
+                                        <!--Add Employee Dialog-->
+                                        <el-dialog v-model="addEmployeeDialog" title="担当者を追加" width="400px">
+                                            <el-select v-model="selectedEmployeeIds" multiple placeholder="担当者を選択"
+                                                style="width: 100%">
+                                                <el-option v-for="member in teamMembers" :key="member.id"
+                                                    :label="member.name" :value="member.id" />
+                                            </el-select>
+
+                                            <template #footer>
+                                                <el-button @click="addEmployeeDialog = false">
+                                                    キャンセル
+                                                </el-button>
+
+                                                <el-button type="primary" @click="confirmAddEmployees">
+                                                    追加
+                                                </el-button>
+                                            </template>
+                                        </el-dialog>
+
                                         <!-- 止 -->
                                         <button v-if="op.status === 'running'" @click.stop="stopSizingOperation(op.id)"
                                             class="bg-yellow-500 text-white p-1 rounded hover:bg-yellow-600" title="停止">
@@ -476,7 +772,24 @@ const deleteSizingOperation = async (opId) => {
                                                 <VideoPlay />
                                             </el-icon>
                                         </button>
+                                        <!-- Resume Employee Dialog -->
+                                        <el-dialog v-model="resumeDialog" title="担当者" width="400px">
+                                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
+                                                style="width: 100%">
+                                                <el-option v-for="member in teamMembers" :key="member.id"
+                                                    :label="member.name" :value="member.id" />
+                                            </el-select>
 
+                                            <template #footer>
+                                                <el-button @click="resumeDialog = false">
+                                                    キャンセル
+                                                </el-button>
+
+                                                <el-button type="primary" @click.stop="resumeSizingOperation(op.id)">
+                                                    再開
+                                                </el-button>
+                                            </template>
+                                        </el-dialog>
                                         <!-- 編集 -->
                                         <button @click.stop="editSizingOperation(op)"
                                             class="bg-pink-500 text-white p-1 rounded hover:bg-pink-600" title="編集">
