@@ -15,6 +15,7 @@ const form = useForm({
   plant_id: "",
   start_number: "",
   end_number: "",
+  auto_stop_hours: "",
 })
 
 
@@ -91,7 +92,8 @@ const createMachineNumber = () => {
                     {{ machineType.name }}
                   </option>
                 </select>
-                 <p v-if="form.errors.machine_type_id" class="text-red-500 text-xs mt-1">{{ form.errors.machine_type_id }}</p>
+                <p v-if="form.errors.machine_type_id" class="text-red-500 text-xs mt-1">{{ form.errors.machine_type_id
+                }}</p>
               </div>
 
               <!--End Machine Type-->
@@ -103,17 +105,32 @@ const createMachineNumber = () => {
                   <label for="start_number" class="block text-sm font-medium text-gray-700">開始番号</label>
                   <input type="number" v-model="form.start_number" id="start_number"
                     class="mt-1 block w-full border  rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                    <p v-if="form.errors.start_number" class="text-red-500 text-xs mt-1">{{ form.errors.start_number }}</p>
+                  <p v-if="form.errors.start_number" class="text-red-500 text-xs mt-1">{{ form.errors.start_number }}
+                  </p>
                 </div>
                 <div class="flex-1">
                   <label for="end_number" class="block text-sm font-medium text-gray-700">終了番号</label>
                   <input type="number" v-model="form.end_number" id="end_number"
                     class="mt-1 block w-full border  rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                    
-                     <p v-if="form.errors.end_number" class="text-red-500 text-xs mt-1">{{ form.errors.end_number }}</p>
+
+                  <p v-if="form.errors.end_number" class="text-red-500 text-xs mt-1">{{ form.errors.end_number }}</p>
                 </div>
               </div>
               <!-- End Number Range -->
+
+              <!--Start Machine Hour-->
+              <div>
+                <label for="auto_stop_hours" class="block text-sm font-medium text-gray-700">自動停止時間</label>
+                <input type="number" v-model="form.auto_stop_hours" id="auto_stop_hours"
+                  class="mt-1 block w-full border  rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+
+                <p v-if="form.errors.auto_stop_hours" class="text-red-500 text-xs mt-1">{{ form.errors.auto_stop_hours
+                }}</p>
+              </div>
+
+              <!--End Machine Hour-->
+
+
 
               <!-- ✅ Custom overlap error (from Request::after) -->
               <p v-if="form.errors.number" class="text-red-500 text-xs mt-1">{{ form.errors.number }}</p>
@@ -123,7 +140,7 @@ const createMachineNumber = () => {
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
               <Link :href="route('machinenumbers.index')"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-4">
-              キャンセル
+                キャンセル
               </Link>
               <button type="submit"
                 class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">

@@ -95,6 +95,11 @@ const deleteMachineNumber = (machinenumberId) => {
                                                     機械番号
                                                 </th>
 
+                                                 <th scope="col"
+                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                                    自動停止時間
+                                                </th>
+
                                                
 
 
@@ -117,6 +122,11 @@ const deleteMachineNumber = (machinenumberId) => {
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                                     {{ machineNumber.number }}
+                                                </td>
+
+                                                 <td
+                                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                                    {{ machineNumber.auto_stop_hours }}
                                                 </td>
 
                                                 <td
