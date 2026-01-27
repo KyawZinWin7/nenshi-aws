@@ -3,9 +3,6 @@ import { router, Head } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import AdminLayout from '../Components/AdminLayout.vue'
 
-
-
-
 const props = defineProps({
     machinenumbers: {
         type: Array,
@@ -13,29 +10,91 @@ const props = defineProps({
     },
     month: {
         type: String,
-        default: null,
+        required: true,
+    },
+    plants: {
+        type: Array,
+        required: true,
+    },
+    selectedPlant: {
+        type: String,
+      
     },
 })
 
+/**
+ *  month (already searched)
+ */
+const [initYear, initMonth] = props.month.split('-')
+const year = ref(initYear)
+const monthVal = ref(initMonth)
 
+/**
+ *  plant filter (backend)
+ */
+const selectedPlant = ref(props.selectedPlant ?? '')
 
+/**
+ *  year list
+ */
 const now = new Date()
-
-const year = ref(now.getFullYear())
-const month = ref(String(now.getMonth() + 1).padStart(2, '0'))
-
 const years = Array.from({ length: 6 }, (_, i) => now.getFullYear() - 3 + i)
 
-const search = () => {
+/**
+ *  search (date + plant)
+ */
+// const search = () => {
+//     router.get(
+//         route('sizing.machines.operation-hours'),
+//         {
+//             month: `${year.value}-${monthVal.value}`,
+//             plant_id: selectedPlant.value,
+//         },
+//         {
+//             preserveState: true,
+//             preserveScroll: true,
+//         }
+//     )
+// }
+
+
+/**
+ *  date search (manual)
+ */
+const searchByDate = () => {
     router.get(
         route('sizing.machines.operation-hours'),
-        { month: `${year.value}-${month.value}` },
-        { preserveState: true }
+        {
+            month: `${year.value}-${monthVal.value}`,
+            plant_id: selectedPlant.value, // keep current plant
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
     )
 }
 
 /**
- * format seconds → H:mm:ss
+ *  plant filter (auto)
+ */
+const searchByPlant = () => {
+    router.get(
+        route('sizing.machines.operation-hours'),
+        {
+            month: `${year.value}-${monthVal.value}`, // keep date
+            plant_id: selectedPlant.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true, // history မပေါင်း
+        }
+    )
+}
+
+/**
+ * ⏱ seconds → H:mm:ss
  */
 const formatTime = (seconds) => {
     seconds = Number(seconds) || 0
@@ -52,39 +111,58 @@ const formatTime = (seconds) => {
         <Head title="機械別 作業時間一覧" />
 
         <div class="bg-gray-100 py-8 min-h-screen">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl px-4">
 
-                <!-- Header -->
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                    <h1 class="text-xl font-semibold text-gray-900 mb-4 sm:mb-0">
-                        機械別 作業時間一覧
-                    </h1>
+                <h1 class="text-xl font-semibold mb-6">
+                    機械別 作業時間一覧
+                </h1>
 
-                    <div class="flex items-center gap-3">
-                        <!-- Year -->
-                        <select v-model="year" class="border rounded px-3 py-2 text-sm">
+                <!--  Filters -->
+                <div class="bg-white p-4 rounded shadow mb-6 space-y-4">
+
+                    <!-- Date -->
+                    <div class="flex gap-3">
+                        <select v-model="year" class="border rounded px-3 py-2">
                             <option v-for="y in years" :key="y" :value="y">
                                 {{ y }}年
                             </option>
                         </select>
 
-                        <!-- Month -->
-                        <select v-model="month" class="border rounded px-3 py-2 text-sm">
+                        <select v-model="monthVal" class="border rounded px-3 py-2">
                             <option v-for="m in 12" :key="m" :value="String(m).padStart(2, '0')">
                                 {{ m }}月
                             </option>
                         </select>
-
-                        <button @click="search"
-                            class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
-                            検索
-                        </button>
+                          <button @click="searchByDate" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        検索
+                    </button>
                     </div>
+                   
+                    <!-- Plant radio -->
+                    <div>
+                        <p class="font-semibold mb-2">工場</p>
+                        <div class="flex gap-4 flex-wrap">
+                            <label class="flex items-center gap-1">
+                                <input type="radio" v-model="selectedPlant" value="" @change="searchByPlant">
+                                全部
+                            </label>
+
+                            <label v-for="p in plants" :key="p.id" class="flex items-center gap-1">
+                                <input type="radio" v-model="selectedPlant" :value="String(p.id)"
+                                    @change="searchByPlant">
+                                {{ p.name }}
+                            </label>
+
+
+                        </div>
+                    </div>
+
+                   
 
                 </div>
 
-                <!-- Table -->
-                <div class="overflow-x-auto bg-white shadow rounded">
+                <!-- 📊 Table -->
+                <div class="bg-white shadow rounded overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -98,7 +176,8 @@ const formatTime = (seconds) => {
                         </thead>
 
                         <tbody class="divide-y divide-gray-200">
-                            <tr v-for="m in machinenumbers" :key="m.id" class="hover:bg-gray-50">
+                            <tr v-for="m in machinenumbers" :key="`${m.plant_name}-${m.machine_type_name}-${m.number}`"
+                                class="hover:bg-gray-50">
                                 <td class="px-4 py-2 text-sm">{{ m.plant_name }}</td>
                                 <td class="px-4 py-2 text-sm">{{ m.machine_type_name }}</td>
                                 <td class="px-4 py-2 text-sm">{{ m.number }}</td>
@@ -108,7 +187,7 @@ const formatTime = (seconds) => {
                             </tr>
 
                             <tr v-if="machinenumbers.length === 0">
-                                <td colspan="7" class="px-4 py-6 text-center text-gray-500">
+                                <td colspan="6" class="px-4 py-6 text-center text-gray-500">
                                     データがありません
                                 </td>
                             </tr>
@@ -120,14 +199,3 @@ const formatTime = (seconds) => {
         </div>
     </AdminLayout>
 </template>
-
-
-<style scoped>
-.th {
-    @apply py-3.5 px-4 text-left text-sm font-semibold text-gray-900;
-}
-
-.td {
-    @apply whitespace-nowrap py-4 px-4 text-sm text-gray-900;
-}
-</style>
