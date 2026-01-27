@@ -11,36 +11,40 @@ use App\Models\MachineNumber;
 use App\Models\MachineType;
 use App\Models\MachineTypePlant;
 use App\Models\Plant;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class MachineNumberController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        // SUPERADMIN → all data
-        if ($user->role === 'superadmin') {
-            $machineNumbers = MachineNumber::with([
-                'machineTypePlant.machineType',
-                'machineTypePlant.plant',
-            ])->get();
-        }
-        // NOT SUPERADMIN → filter by department
-        else {
+        $query = MachineNumber::with([
+            'machineTypePlant.machineType',
+            'machineTypePlant.plant',
+        ]);
 
-            $machineNumbers = MachineNumber::whereHas('machineTypePlant.machineType', function ($q) use ($user) {
+        // 🔐 role-based filter
+        if ($user->role !== 'superadmin') {
+            $query->whereHas('machineTypePlant.machineType', function ($q) use ($user) {
                 $q->where('department_id', $user->department_id);
-            })
-                ->with([
-                    'machineTypePlant.machineType',
-                    'machineTypePlant.plant',
-                ])
-                ->get();
+            });
         }
+
+        // 🏭 plant filter (optional)
+        if ($request->filled('plant_id')) {
+            $query->whereHas('machineTypePlant', function ($q) use ($request) {
+                $q->where('plant_id', $request->plant_id);
+            });
+        }
+
+        $machineNumbers = $query->get();
 
         return inertia('MachineNumbers/Index', [
             'machineNumbers' => MachineNumberResource::collection($machineNumbers),
+            'plants' => PlantResource::collection(Plant::all()),
+            'filters' => $request->only(['plant_id']),
         ]);
     }
 
