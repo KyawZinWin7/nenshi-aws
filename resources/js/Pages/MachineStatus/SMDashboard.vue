@@ -88,6 +88,25 @@ const refresh = () => {
   )
 }
 
+const statusLabel = (machine) => {
+  switch (machine.status) {
+    case 'running':
+      return '運転中'
+
+    case 'repair':
+      return '修理中'
+
+    case 'stopped':
+      return '停止'
+
+    case 'prepare':
+      return machine.task_name || '準備中'
+
+    default:
+      return '停止'
+  }
+}
+
 
 // =====================
 // Status color
@@ -178,17 +197,11 @@ const statusClass = (status) => {
               <div class="text-base sm:text-lg font-bold">
                 {{ machine.number }}
               </div>
-              <div class="text-xs">
-                {{
-                  machine.status === 'running'
-                    ? '運転中'
-                    : machine.status === 'prepare'
-                      ? '準備中'
-                      : machine.status === 'repair'
-                        ? '修理中'
-                        : '停止'
-                }}
+              <div class="text-xs sm:text-sm opacity-90">
+                {{ statusLabel(machine) }}
               </div>
+
+
             </div>
           </div>
         </div>
