@@ -18,25 +18,6 @@ class TaskController extends Controller
     public function index( Request $request)
     {
 
-        // if (auth()->user()->role === 'superadmin') {
-        //     // if superadmin get all records
-        //     $tasks = Task::with('machineType', 'department')
-        //         ->join('machine_types', 'tasks.machine_type_id', '=', 'machine_types.id')
-        //         ->select('tasks.*')
-        //         ->orderBy('machine_types.name') // machine_types table မှာ name column (ဥပမာ DT-302) ကို sort
-        //         ->orderBy('tasks.name')         // task name (ဥပမာ 糸下ろし, パーン変える)
-        //         ->get();
-        // } else {
-        //     // if not superadmin get only their department
-        //     $tasks = Task::with(['machineType', 'department'])
-        //         ->join('machine_types', 'tasks.machine_type_id', '=', 'machine_types.id')
-        //         ->where('tasks.department_id', Auth::user()->department_id)
-        //         ->orderBy('machine_types.name')   // Machine Type name (DT-302)
-        //         ->orderBy('tasks.name')           // Task name (糸下ろし)
-        //         ->select('tasks.*')
-        //         ->get();
-        // }
-
         $query = Task::with('machineType', 'department')
             ->join('machine_types', 'tasks.machine_type_id', '=', 'machine_types.id')
             ->select('tasks.*')

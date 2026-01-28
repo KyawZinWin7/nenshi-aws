@@ -18,6 +18,10 @@ const props = defineProps({
         type: Object,
         required: false,
     },
+    filters: {
+        type: Object,
+        required: false,
+    },
 });
 
 
@@ -46,7 +50,7 @@ const deleteTask = (taskId) => {
 
 /* Filter by Machine Type */
 
-const selectedMachineType = ref('all');
+const selectedMachineType = ref(props.filters.machine_type_id ?? 'all');
 
 watch(
     () => selectedMachineType.value,
