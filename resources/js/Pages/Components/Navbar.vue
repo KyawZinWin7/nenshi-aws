@@ -31,7 +31,7 @@
         <!-- Buttons -->
         <div class="flex flex-row gap-2">
           <!-- 撚糸課 -->
-          <Link :href="route('login')" @click="closeMenu" class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+          <Link :href="route('nenshioperations')" @click="closeMenu" class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
              bg-white text-gray-800 border border-gray-300
              hover:bg-blue-50 hover:text-blue-700 shadow-sm">
           撚糸課

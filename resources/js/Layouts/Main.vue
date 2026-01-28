@@ -89,7 +89,7 @@ watch(() => page.url, () => {
                            dark:bg-gray-800 md:dark:bg-gray-900 
                            dark:border-gray-700">
 
-                    <li>
+                    <!-- <li>
                         <Link :href="route('login')" class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
                             :class="{
                                 'text-white bg-blue-700 md:bg-transparent md:text-blue-700 dark:text-white md:dark:text-blue-500': route().current('home'),
@@ -97,7 +97,7 @@ watch(() => page.url, () => {
                             }" @click="closeMenu">
                         撚糸課
                         </Link>
-                    </li>
+                    </li> -->
 
                     <li>
                         <Link :href="route('nenshioperations')" class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base"
@@ -105,7 +105,7 @@ watch(() => page.url, () => {
                                 'text-white bg-blue-700 md:bg-transparent md:text-blue-700 dark:text-white md:dark:text-blue-500': route().current('nenshioperations'),
                                 'text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('nenshioperations')
                             }" @click="closeMenu">
-                        Nenshi
+                        撚糸課
                         </Link>
                     </li>
 
@@ -174,10 +174,10 @@ watch(() => page.url, () => {
                         </div>
                         
                     </li><li v-if="employee && ['admin','superadmin'].includes(employee.role)">
-                        <Link :href="route('mainoperations.admincompletelist')"
+                        <Link :href="route('nenshioperations.admincompletelist')"
                             class="block py-2 px-3 rounded-sm md:p-0 text-sm md:text-base" :class="{
-                                'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('mainoperations.admincompletelist'),
-                                'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('mainoperations.admincompletelist')
+                                'text-blue-700 bg-gray-100 md:bg-transparent md:text-blue-700 dark:text-blue-500': route().current('nenshioperations.admincompletelist'),
+                                'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent': !route().current('nenshioperations.admincompletelist')
                             }" @click="closeMenu">
                         ダッシュボード
                         </Link>

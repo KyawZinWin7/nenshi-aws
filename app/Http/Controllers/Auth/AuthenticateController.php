@@ -31,10 +31,10 @@ class AuthenticateController extends Controller
                 
                 // Role-based redirect
                     $user = auth()->user();
-                    if ($user->role === 'admin') {
-                        return redirect()->route('mainoperations.admincompletelist'); // admin dashboard route
+                    if ($user->role === 'superadmin' || $user->role === 'admin') {
+                        return redirect()->route('nenshioperations.admincompletelist'); // admin dashboard route
                     } else {
-                        return redirect()->route('home'); // normal user home page route
+                        return redirect()->route('nenshioperations'); // normal user home page route
                     }
             }
 
