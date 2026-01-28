@@ -18,6 +18,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    filters: {
+        type: Object,
+        required: false,
+    },
 
 });
 
@@ -47,7 +51,7 @@ const deleteMachineNumber = (machinenumberId) => {
 
 /* Filter by Plant */
 
-const selectedPlantType = ref('all');
+const selectedPlantType = ref(props.filters.plant_id ?? 'all');
 
 watch(
     () => selectedPlantType.value,
