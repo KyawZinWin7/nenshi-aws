@@ -393,7 +393,8 @@ const resumeDialog = ref(false)
 const openResumeModal = (op) => {
     editingId.value = op.id
     resumeDialog.value = true
-    editResumeEmployee(op)
+    // editResumeEmployee(op)
+    form.team_ids = []
 }
 
 
@@ -629,7 +630,6 @@ const deleteSizingLog = async (logId) => {
                                 <td class="border p-2">{{ op.machine_type.name }}</td>
                                 <td class="border p-2">{{ op.machine_number.number }}</td>
                                 <td class="border p-2">{{ op.task.name }}</td>
-                                <!-- <td class="border p-2">{{ op.status }}</td> -->
                                 <td class="border p-2">
                                     <div class="relative">
                                         <button @click.stop="completeSMO(op.id)"
@@ -693,26 +693,7 @@ const deleteSizingLog = async (logId) => {
                                             削除
                                         </button>
 
-                                        <!-- <button @click="op.menu = !op.menu" class="px-2 py-1">
-                                            ⋯
-                                        </button> -->
-
-                                        <!-- <div v-if="op.menu"
-                                            class="absolute right-0 mt-1 bg-white border rounded shadow-md w-28 z-20">
-                                            <button @click="completeSMO(op.id)"
-                                                class="block w-full px-3 py-2 hover:bg-gray-100">完了</button>
-                                            <button @click="editSizingOperation(op)"
-                                                class="block w-full px-3 py-2 hover:bg-gray-100">編集
-                                            </button>
-                                            <button class="block w-full px-3 py-2 hover:bg-gray-100">
-                                                追加
-                                            </button>
-                                            <button
-                                                class="block w-full px-3 py-2 text-pink-600 hover:bg-gray-100">止</button>
-                                            <button class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
-                                                削除
-                                            </button>
-                                        </div> -->
+                                       
                                     </div>
                                 </td>
                             </tr>
