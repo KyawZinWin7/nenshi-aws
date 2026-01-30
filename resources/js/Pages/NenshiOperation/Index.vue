@@ -475,7 +475,8 @@ const resumeDialog = ref(false)
 const openResumeModal = (op) => {
     editingId.value = op.id
     resumeDialog.value = true
-    editResumeEmployee(op)
+    //editResumeEmployee(op)
+     form.team_ids = []
 }
 
 
