@@ -289,7 +289,7 @@ defineProps({
 
 
         <!--Start　Export with excel mainoperation -->
-        <li>
+        <!-- <li>
           <a :href="route('mainoperations.export')" :class="[
             'flex items-center p-2 text-base font-medium rounded-lg group',
             ['mainoperations.export'].includes(route().current())
@@ -307,7 +307,7 @@ defineProps({
 
             <span class="ml-3"> エクスポート</span>
           </a>
-        </li>
+        </li> -->
         <!--End Export with excel mainoperation -->
 
 
@@ -328,7 +328,7 @@ defineProps({
 
 
 
-            <span class="ml-1 text-sm"> エクスポート(準備)</span>
+            <span class="ml-1 text-sm"> エクスポート</span>
           </a>
         </li>
         <!--End Export with excel for sizingoperation-->
