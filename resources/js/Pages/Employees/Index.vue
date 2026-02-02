@@ -2,12 +2,23 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
+import { watch, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
+import { debounce } from 'lodash-es';
 
 
-defineProps({
+const props = defineProps({
   employees: {
     type: Object,
     required: true,
+  },
+  departments: {
+    type: Object,
+    required: false,
+  },
+  filters: {
+    type: Object,
+    required: false,
   },
 });
 
@@ -27,6 +38,27 @@ const deleteEmployee = (employeeId) => {
     }
   });
 };
+
+// Filter by Department 
+
+const selectedDepartment = ref(props.filters.department_id ?? 'all');
+watch(
+  () => selectedDepartment.value,
+  debounce((val) => {
+    const query = {};
+
+    if (val !== 'all') {
+      query.department_id = val;
+    }
+
+    router.get(route('employees.index'), query, {
+      preserveState: true,
+      replace: true,
+    });
+  }, 300)
+);
+
+
 </script>
 
 <template>
@@ -43,8 +75,20 @@ const deleteEmployee = (employeeId) => {
 
           <Link :href="route('employees.create')"
             class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-          追加
+            追加
           </Link>
+        </div>
+        <!--  Department Radio -->
+        <div class="flex flex-wrap items-center gap-2 mt-3 text-sm font-semibold">
+          <label class="flex mr-4 items-center">
+            <input type="radio" value="all" v-model="selectedDepartment" class="mr-2" />
+            すべて
+          </label>
+
+          <label v-for="department in departments.data" :key="department.id" class="flex mr-4 items-center">
+            <input type="radio" :value="department.id" v-model="selectedDepartment" class="mr-2" />
+            {{ department.name }}
+          </label>
         </div>
 
         <div class="mt-8 overflow-x-auto rounded-lg shadow ring-1 ring-black ring-opacity-5 bg-white">
@@ -82,7 +126,7 @@ const deleteEmployee = (employeeId) => {
                 <td class="relative whitespace-nowrap py-3 pl-3 pr-4 text-right sm:pr-6">
                   <Link :href="route('employees.edit', employee.id)"
                     class="inline-block text-indigo-600 hover:text-indigo-900 text-xs sm:text-sm">
-                  編集
+                    編集
                   </Link>
                   <button @click="deleteEmployee(employee.id)"
                     class="inline-block ml-2 text-red-600 hover:text-red-800 text-xs sm:text-sm">

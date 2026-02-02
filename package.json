@@ -16,6 +16,7 @@
         "vite": "^6.4.1"
     },
     "dependencies": {
+        "@element-plus/icons-vue": "^2.3.2",
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@inertiajs/vue3": "^1.2.0",
         "dayjs": "^1.11.13",

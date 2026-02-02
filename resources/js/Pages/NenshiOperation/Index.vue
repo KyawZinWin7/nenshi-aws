@@ -1,10 +1,22 @@
 <script setup>
+
 import { Head, useForm } from '@inertiajs/vue3'
 import Container from '../../Components/Container.vue'
 import PrimaryBtn from '../../Components/PrimaryBtn.vue'
-import { ref, onMounted, watch, h } from 'vue'
+import { ref, onMounted, onUnmounted, watch, h } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import {
+    CircleCheck,   // 完了
+    VideoPause,   // 止
+    VideoPlay,    // 再開
+    Edit,         // 編集
+    Delete,        // 削除
+    Plus,         // 追加
+} from '@element-plus/icons-vue'
+
+
+
 
 /* ================= PROPS ================= */
 const props = defineProps({
@@ -14,7 +26,9 @@ const props = defineProps({
     tasks: Object,
     machinenumbers: Object,
     sizingoperations: Object,
+    smalltasks: Object,
 })
+
 
 /* ================= FORM ================= */
 const form = useForm({
@@ -23,13 +37,116 @@ const form = useForm({
     machine_type_id: '',
     machine_number_id: '',
     task_id: '',
+    small_task_id: '',
 })
 
+/* ================= TEAM ================= */
+const teamMembers = ref(props.employees.data || [])
 
 
-/* ================= LOCAL COPY (IMPORTANT) ================= */
-/* ❌ props ကို မထိ
-   ✅ local ref ထုတ်ပြီး show/menu ထည့် */
+
+/* ================= MACHINE FILTER ================= */
+//For Small task filter by machine type 
+const machinenumbers = ref([])
+const machinetypes = ref([])
+const tasks = ref([])
+const smalltasks = ref([]);
+
+// watch(
+//     () => form.machine_type_id,
+//     async (newTypeId) => {
+//         if (!newTypeId) {
+//             machinenumbers.value = []
+//             tasks.value = []
+//             form.machine_number_id = ''
+//             form.task_id = ''
+//             return
+//         }
+
+//         const numbersResponse = await axios.get('/machines/by-type', {
+//             params: {
+//                 plant_id: form.plant_id,
+//                 machine_type_id: newTypeId,
+//             },
+//         })
+//         machinenumbers.value = numbersResponse.data
+
+//         const tasksResponse = await axios.get('/tasks/by-machine-type', {
+//             params: { machine_type_id: newTypeId },
+//         })
+//         tasks.value = tasksResponse.data
+//     }
+// )
+watch(() => form.machine_type_id, async (newTypeId) => {
+    if (!newTypeId) {
+        machinenumbers.value = []
+        tasks.value = []
+        smalltasks.value = []
+        form.machine_number_id = ''
+        form.task_id = ''
+        if (!isEditing.value) form.small_task_id = ''
+        return
+    }
+
+    const [numbersRes, tasksRes, smallRes] = await Promise.all([
+        axios.get('/machines/by-type', {
+            params: { plant_id: form.plant_id, machine_type_id: newTypeId }
+        }),
+        axios.get('/tasks/by-machine-type', {
+            params: { machine_type_id: newTypeId }
+        }),
+        axios.get('/smalltasks/by-machine-type', {
+            params: { machine_type_id: newTypeId }
+        })
+    ])
+
+    machinenumbers.value = numbersRes.data
+    tasks.value = tasksRes.data
+    smalltasks.value = smallRes.data
+})
+
+watch(
+    () => form.plant_id,
+    async (newPlantId) => {
+        if (!newPlantId) {
+            machinetypes.value = []
+            machinenumbers.value = []
+            form.machine_type_id = ''
+            form.machine_number_id = ''
+            return
+        }
+
+        const { data } = await axios.get(`/machines/by-plant/${newPlantId}`)
+        machinetypes.value = data.machineTypes
+        machinenumbers.value = data.machineNumbers
+    }
+)
+
+//For Small task filter by machine type
+// watch(
+//     () => form.machine_type_id,
+//     async (newTypeId) => {
+//         if (!newTypeId) {
+//             smalltasks.value = [];
+//             if (!isEditing.value) form.small_task_id = "";
+//             return;
+//         }
+
+//         try {
+//             const response = await axios.get(`/smalltasks/by-machine-type`, {
+//                 params: { machine_type_id: newTypeId }
+//             });
+//             smalltasks.value = response.data;
+
+//             if (!isEditing.value) form.small_task_id = "";
+//         } catch (error) {
+//             console.error("Error fetching small tasks:", error);
+//         }
+//     }
+// );
+
+
+
 const sizingoperations = ref([])
 
 watch(
@@ -44,17 +161,40 @@ watch(
     { immediate: true }
 )
 
-/* ================= GLOBAL CLICK (MENU CLOSE) ================= */
-onMounted(() => {
-    window.addEventListener('click', () => {
-        sizingoperations.value.forEach(op => {
-            op.menu = false
-        })
+
+/* ================= SUBMIT FORM ================= */
+// GLOBAL CLICK (MENU CLOSE) 
+// onMounted(() => {
+//     window.addEventListener('click', () => {
+//         sizingoperations.value.forEach(op => {
+//             op.menu = false
+//         })
+//     })
+// })
+
+
+
+const closeMenus = () => {
+    sizingoperations.value.forEach(op => {
+        op.menu = false
     })
+}
+
+onMounted(() => {
+    window.addEventListener('click', closeMenus)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('click', closeMenus)
 })
 
 
+
 //For Create and Edit 
+
+const isEditing = ref(false);
+const editingId = ref(null);
+
 const submitForm = () => {
     if (isEditing.value) {
         updateSizingOperation();
@@ -63,10 +203,33 @@ const submitForm = () => {
     }
 }
 
-//For Edit Function
 
-const isEditing = ref(false);
-const editingId = ref(null);
+
+/* ================= CREATE ================= */
+const createSizingOperation = () => {
+    form.post(route('nenshioperations.store'), {
+        onSuccess: () => {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'スタートしました',
+                showConfirmButton: false,
+                timer: 1500,
+            })
+            form.reset()
+        },
+        onError: () => {
+            Swal.fire({
+                icon: 'error',
+                title: 'エラーが発生しました',
+                text: 'もう一度試してください。',
+            })
+        },
+    })
+}
+
+//For Edit Operation
+
 
 
 const editSizingOperation = async (op) => {
@@ -96,114 +259,12 @@ const editSizingOperation = async (op) => {
 
     await new Promise(resolve => setTimeout(resolve, 300));
 
+    form.small_task_id = op.small_task?.id ?? '';
+    await new Promise(resolve => setTimeout(resolve, 300));
     // rest
     form.machine_number_id = op.machine_number?.id ?? '';
     form.task_id = op.task?.id ?? '';
 };
-
-
-
-const cancelEdit = () => {
-    isEditing.value = false;
-    editingId.value = null;
-    form.reset();
-};
-
-
-const updateSizingOperation = () => {
-    form.put(route('sizingoperations.update', { id: editingId.value }), {
-        onSuccess: () => {
-            Swal.fire({
-                position: 'top-end',
-                icon: 'success',
-                title: '準備課が更新されました',
-                showConfirmButton: false,
-                timer: 1500,
-            })
-            cancelEdit();
-        },
-        onError: () => {
-            Swal.fire({
-                icon: 'error',
-                title: 'エラーが発生しました',
-                text: 'もう一度試してください。',
-            })
-        },
-    })
-};
-/* ================= CREATE ================= */
-const createSizingOperation = () => {
-    form.post(route('sizingoperations.store'), {
-        onSuccess: () => {
-            Swal.fire({
-                position: 'top-end',
-                icon: 'success',
-                title: '準備課スタートしました',
-                showConfirmButton: false,
-                timer: 1500,
-            })
-            form.reset()
-        },
-        onError: () => {
-            Swal.fire({
-                icon: 'error',
-                title: 'エラーが発生しました',
-                text: 'もう一度試してください。',
-            })
-        },
-    })
-}
-
-/* ================= MACHINE FILTER ================= */
-const machinenumbers = ref([])
-const machinetypes = ref([])
-const tasks = ref([])
-
-watch(
-    () => form.machine_type_id,
-    async (newTypeId) => {
-        if (!newTypeId) {
-            machinenumbers.value = []
-            tasks.value = []
-            form.machine_number_id = ''
-            form.task_id = ''
-            return
-        }
-
-        const numbersResponse = await axios.get('/machines/by-type', {
-            params: {
-                plant_id: form.plant_id,
-                machine_type_id: newTypeId,
-            },
-        })
-        machinenumbers.value = numbersResponse.data
-
-        const tasksResponse = await axios.get('/tasks/by-machine-type', {
-            params: { machine_type_id: newTypeId },
-        })
-        tasks.value = tasksResponse.data
-    }
-)
-
-watch(
-    () => form.plant_id,
-    async (newPlantId) => {
-        if (!newPlantId) {
-            machinetypes.value = []
-            machinenumbers.value = []
-            form.machine_type_id = ''
-            form.machine_number_id = ''
-            return
-        }
-
-        const { data } = await axios.get(`/machines/by-plant/${newPlantId}`)
-        machinetypes.value = data.machineTypes
-        machinenumbers.value = data.machineNumbers
-    }
-)
-
-/* ================= TEAM ================= */
-const teamMembers = ref(props.employees.data || [])
 
 
 /* ================= COMPLETE LOG ================= */
@@ -244,6 +305,47 @@ const completeSMO = async (opId) => {
     })
 
 }
+
+
+/* ================= DELETE Sizing Operation ================= */
+const deleteForm = useForm({});
+const deleteSizingOperation = async (opId) => {
+    const result = await Swal.fire({
+        title: 'この作業を削除してもよろしいですか？',
+        text: 'この操作は元に戻せません。',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'はい、削除します。',
+        cancelButtonText: 'キャンセル',
+    })
+
+    if (!result.isConfirmed) return
+
+    deleteForm.delete(route("sizingoperations.destroy", opId), {
+        onSuccess: () => {
+            Swal.fire({
+                icon: "success",
+                title: "削除されました！",
+                showConfirmButton: false,
+                timer: 1500,
+            });
+        },
+        onError: () => {
+            Swal.fire({
+                icon: "error",
+                title: "削除に失敗しました",
+                text: "もう一度お試しください。",
+            });
+        }
+    });
+}
+
+const cancelEdit = () => {
+    isEditing.value = false;
+    editingId.value = null;
+    form.reset();
+};
+
 
 //For add Employees
 
@@ -325,6 +427,7 @@ const stopSizingOperation = async (opId) => {
         })
 }
 
+// Stop SizingLog
 const stopSizingLog = async (logId) => {
     const result = await Swal.fire({
         title: '自分の作業を停止してもよろしいですか？',
@@ -348,28 +451,7 @@ const stopSizingLog = async (logId) => {
 }
 
 
-const resumeSizingLog = async (logId) => {
-    const result = await Swal.fire({
-        title: '自分の作業を再開してもよろしいですか？',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'はい',
-        cancelButtonText: 'キャンセル',
-    })
-    if (!result.isConfirmed) return
-    
-    axios.post(route('sizinglogs.resume', { log: logId }))
-        .then(() => {
-            Swal.fire({
-                icon: 'success',
-                title: '作業を再開しました',
-                timer: 1200,
-                showConfirmButton: false,
-            })
 
-            location.reload()
-        })
-}
 //For Resume Operation
 const editResumeEmployee = async (op) => {
     // console.log("Editing Sizing Operation:", op.sizinglogs);
@@ -393,8 +475,8 @@ const resumeDialog = ref(false)
 const openResumeModal = (op) => {
     editingId.value = op.id
     resumeDialog.value = true
-    // editResumeEmployee(op)
-    form.team_ids = []
+    //editResumeEmployee(op)
+     form.team_ids = []
 }
 
 
@@ -415,65 +497,29 @@ const resumeSizingOperation = async (opId) => {
 }
 
 
+// Resume Sizing Log
 
-/* ================= COMPLETE Sizing LOG ================= */
-
-const completeSizingLog = async (logId) => {
+const resumeSizingLog = async (logId) => {
     const result = await Swal.fire({
-        title: 'この作業を完了してもよろしいですか？',
+        title: '自分の作業を再開してもよろしいですか？',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'はい、完了します。',
+        confirmButtonText: 'はい',
         cancelButtonText: 'キャンセル',
     })
-
     if (!result.isConfirmed) return
-
-    axios.post(route('sizinglogs.complete', logId))
+    
+    axios.post(route('sizinglogs.resume', { log: logId }))
         .then(() => {
             Swal.fire({
                 icon: 'success',
-                title: '完了しました',
+                title: '作業を再開しました',
                 timer: 1200,
                 showConfirmButton: false,
             })
+
             location.reload()
         })
-}
-
-
-
-/* ================= DELETE Sizing Operation ================= */
-const deleteForm = useForm({});
-const deleteSizingOperation = async (opId) => {
-    const result = await Swal.fire({
-        title: 'この作業を削除してもよろしいですか？',
-        text: 'この操作は元に戻せません。',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'はい、削除します。',
-        cancelButtonText: 'キャンセル',
-    })
-
-    if (!result.isConfirmed) return
-
-    deleteForm.delete(route("sizingoperations.destroy", opId), {
-        onSuccess: () => {
-            Swal.fire({
-                icon: "success",
-                title: "削除されました！",
-                showConfirmButton: false,
-                timer: 1500,
-            });
-        },
-        onError: () => {
-            Swal.fire({
-                icon: "error",
-                title: "削除に失敗しました",
-                text: "もう一度お試しください。",
-            });
-        }
-    });
 }
 
 
@@ -510,11 +556,38 @@ const deleteSizingLog = async (logId) => {
 }
 
 
+/* ================= COMPLETE Sizing LOG ================= */
+
+const completeSizingLog = async (logId) => {
+    const result = await Swal.fire({
+        title: 'この作業を完了してもよろしいですか？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'はい、完了します。',
+        cancelButtonText: 'キャンセル',
+    })
+
+    if (!result.isConfirmed) return
+
+    axios.post(route('sizinglogs.complete', logId))
+        .then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '完了しました',
+                timer: 1200,
+                showConfirmButton: false,
+            })
+            location.reload()
+        })
+}
+
 
 </script>
+
+
 <template>
 
-    <Head title="-準備課" />
+    <Head title="-撚糸課" />
 
     <main class="p-4 sm:p-6 mx-auto min-h-screen text-xs sm:text-sm lg:text-base">
 
@@ -525,12 +598,12 @@ const deleteSizingLog = async (logId) => {
                 <Container>
                     <form @submit.prevent="submitForm" class="space-y-4">
                         <h3 class="text-lg font-semibold mb-4 text-center">
-                            準備課
+                            撚糸課
                         </h3>
                         <div>
                             <label class="form-label">担当者</label>
-                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
-                                class="select-uniform !p-0" :disabled="isEditing">
+                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択" class="select-uniform !p-0"
+                                :disabled="isEditing">
                                 <el-option v-for="member in teamMembers" :key="member.id" :label="member.name"
                                     :value="member.id" />
                             </el-select>
@@ -580,6 +653,20 @@ const deleteSizingLog = async (logId) => {
                             </div>
                         </div>
 
+
+
+                        <div>
+
+                            <label class="form-label">小作業</label>
+                            <select v-model="form.small_task_id" class="select-uniform">
+                                <option value="">小作業を選択</option>
+                                <option v-for="s in smalltasks" :key="s.id" :value="s.id">
+                                    {{ s.name }}
+                                </option>
+                            </select>
+                        </div>
+
+
                         <!-- Submit -->
                         <div class="flex flex-col sm:flex-row gap-2">
                             <!-- Submit button -->
@@ -609,6 +696,7 @@ const deleteSizingLog = async (logId) => {
                             <th class="border p-2">機台</th>
                             <th class="border p-2">機号</th>
                             <th class="border p-2">作業</th>
+                            <th class="border p-2">小作業</th>
                             <th class="border p-2">操作</th>
                         </tr>
                     </thead>
@@ -630,17 +718,28 @@ const deleteSizingLog = async (logId) => {
                                 <td class="border p-2">{{ op.machine_type.name }}</td>
                                 <td class="border p-2">{{ op.machine_number.number }}</td>
                                 <td class="border p-2">{{ op.task.name }}</td>
+                                <td class="border p-2">{{ op.small_task?.name ?? '未設定' }}</td>
                                 <td class="border p-2">
-                                    <div class="relative">
-                                        <button @click.stop="completeSMO(op.id)"
-                                            v-if="op.status === 'running' || op.status === 'paused'"
-                                            class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
-                                            完了
+                                    <div class="flex items-center  gap-2">
+
+                                        <!-- 完了 -->
+                                        <button v-if="op.status === 'running' || op.status === 'paused'"
+                                            @click.stop="completeSMO(op.id)"
+                                            class="bg-green-500 text-white p-1 rounded hover:bg-green-600" title="完了">
+                                            <el-icon>
+                                                <CircleCheck />
+                                            </el-icon>
                                         </button>
+
+                                        <!-- 追加 -->
                                         <button v-if="op.status !== 'paused'" @click.stop="openAddEmployeeModal(op)"
-                                            class="m-1 bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
-                                            追加
+                                            class="bg-blue-500 text-white p-1 rounded hover:bg-blue-600" title="担当者を追加">
+                                            <el-icon>
+                                                <Plus />
+                                            </el-icon>
                                         </button>
+
+                                        <!--Add Employee Dialog-->
                                         <el-dialog v-model="addEmployeeDialog" title="担当者を追加" width="400px">
                                             <el-select v-model="selectedEmployeeIds" multiple placeholder="担当者を選択"
                                                 style="width: 100%">
@@ -659,14 +758,22 @@ const deleteSizingLog = async (logId) => {
                                             </template>
                                         </el-dialog>
 
+                                        <!-- 止 -->
                                         <button v-if="op.status === 'running'" @click.stop="stopSizingOperation(op.id)"
-                                            class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
-                                            止
+                                            class="bg-yellow-500 text-white p-1 rounded hover:bg-yellow-600" title="停止">
+                                            <el-icon>
+                                                <VideoPause />
+                                            </el-icon>
                                         </button>
-                                        <button v-if="op.status === 'paused'" @click="openResumeModal(op)"
-                                            class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
-                                            再開
+
+                                        <!-- 再開 -->
+                                        <button v-if="op.status === 'paused'" @click.stop="openResumeModal(op)"
+                                            class="bg-yellow-500 text-white p-1 rounded hover:bg-yellow-600" title="再開">
+                                            <el-icon>
+                                                <VideoPlay />
+                                            </el-icon>
                                         </button>
+                                        <!-- Resume Employee Dialog -->
                                         <el-dialog v-model="resumeDialog" title="担当者" width="400px">
                                             <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
                                                 style="width: 100%">
@@ -684,23 +791,55 @@ const deleteSizingLog = async (logId) => {
                                                 </el-button>
                                             </template>
                                         </el-dialog>
-                                        <button @click="editSizingOperation(op)"
-                                            class="m-1 bg-pink-500 text-white text-xs px-3 py-1 rounded hover:bg-pink-600">
-                                            編集
-                                        </button>
-                                        <button v-if="op.status !== 'completed'" @click="deleteSizingOperation(op.id)"
-                                            class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
-                                            削除
+                                        <!-- 編集 -->
+                                        <button @click.stop="editSizingOperation(op)"
+                                            class="bg-pink-500 text-white p-1 rounded hover:bg-pink-600" title="編集">
+                                            <el-icon>
+                                                <Edit />
+                                            </el-icon>
                                         </button>
 
-                                       
+                                        <!-- 削除 -->
+                                        <button v-if="op.status !== 'completed'"
+                                            @click.stop="deleteSizingOperation(op.id)"
+                                            class="bg-red-500 text-white p-1 rounded hover:bg-red-600" title="削除">
+                                            <el-icon>
+                                                <Delete />
+                                            </el-icon>
+                                        </button>
+
                                     </div>
                                 </td>
+
+
+
+                                <!-- <td>
+                                    <button @click.stop="op.menu = !op.menu" class="px-2 py-1">
+                                        ⋯
+                                    </button>
+
+                                    <div v-if="op.menu" @click.stop
+                                        class="absolute right-0 mt-1 bg-white border rounded shadow-md w-28 z-20">
+                                        <button @click="completeSMO(op.id)"
+                                            class="block w-full px-3 py-2 hover:bg-gray-100">完了</button>
+                                        <button @click="editSizingOperation(op)"
+                                            class="block w-full px-3 py-2 hover:bg-gray-100">編集
+                                        </button>
+                                        <button class="block w-full px-3 py-2 hover:bg-gray-100">
+                                            追加
+                                        </button>
+                                        <button
+                                            class="block w-full px-3 py-2 text-pink-600 hover:bg-gray-100">止</button>
+                                        <button class="block w-full px-3 py-2 text-red-600 hover:bg-gray-100">
+                                            削除
+                                        </button>
+                                    </div>
+                                </td> -->
                             </tr>
 
                             <!-- SUB TABLE -->
                             <tr v-if="op.show" class="bg-blue-50">
-                                <td colspan="6" class="p-0 border">
+                                <td colspan="7" class="p-0 border">
                                     <table class="w-full text-center">
                                         <thead class="bg-blue-200">
                                             <tr>
@@ -720,7 +859,7 @@ const deleteSizingLog = async (logId) => {
                                                 <td class="border text-sm p-1">
                                                     {{ log.end_time ?? log.paused_time ?? '-' }}
                                                 </td>
-                                                
+
                                                 <td class="border text-sm p-1">
                                                     {{ (log.end_time || log.paused_time) ? log.duration_per_employee :
                                                         '-' }}
@@ -729,29 +868,43 @@ const deleteSizingLog = async (logId) => {
 
                                                 <td class="border text-sm p-1">{{ log.employee.name ?? '-' }}</td>
 
-                                                <td class="border text-sm p-1">
-                                                    <button
-                                                        class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600"
-                                                        @click="completeSizingLog(log.id)"
-                                                        v-if="!log.end_time && log.last_start_time">
-                                                        完了
-                                                    </button>
-                                                    <button v-if="op.status === 'running' && !log.paused_time && !log.end_time"
-                                                        @click.stop="stopSizingLog(log.id)"
-                                                        class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
-                                                        止
-                                                    </button>
+                                                <td class="border text-sm  p-1">
+                                                    <div class="flex items-center  gap-2">
+                                                        <button
+                                                            class="bg-green-500 text-white p-1 rounded hover:bg-green-600"
+                                                            title="完了" @click="completeSizingLog(log.id)"
+                                                            v-if="!log.end_time && log.last_start_time">
+                                                            <el-icon>
+                                                                <CircleCheck />
+                                                            </el-icon>
+                                                        </button>
 
-                                                    <button v-if="log.paused_time && op.status === 'running'" @click.stop="resumeSizingLog(log.id)"
-                                                        class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
-                                                        再開
-                                                    </button>
+                                                        <button
+                                                            v-if="op.status === 'running' && !log.paused_time && !log.end_time"
+                                                            @click.stop="stopSizingLog(log.id)"
+                                                            class="bg-yellow-500 text-white p-1 rounded hover:bg-yellow-600"
+                                                            title="停止">
+                                                            <el-icon>
+                                                                <VideoPause />
+                                                            </el-icon>
+                                                        </button>
 
-
-                                                    <button v-if="!log.end_time" @click="deleteSizingLog(log.id)"
-                                                        class="m-1 bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
-                                                        削除
-                                                    </button>
+                                                        <button v-if="log.paused_time && op.status === 'running'"
+                                                            @click.stop="resumeSizingLog(log.id)"
+                                                            class="bg-yellow-500 text-white p-1 rounded hover:bg-yellow-600"
+                                                            title="再開">
+                                                            <el-icon>
+                                                                <VideoPlay />
+                                                            </el-icon>
+                                                        </button>
+                                                        <button v-if="!log.end_time" @click="deleteSizingLog(log.id)"
+                                                            class="bg-red-500 text-white p-1 rounded hover:bg-red-600"
+                                                            title="削除">
+                                                            <el-icon>
+                                                                <Delete />
+                                                            </el-icon>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -767,7 +920,6 @@ const deleteSizingLog = async (logId) => {
         </div>
     </main>
 </template>
-
 
 <style scoped>
 .select-uniform {

@@ -7,7 +7,7 @@ use App\Models\MachineTypePlant;
 
 class MachineNumber extends Model
 {
-    protected $fillable = ['machine_type_plant_id','number'];
+    protected $fillable = ['machine_type_plant_id','number', 'control_type', 'auto_stop_hours'];
 
 
      public function machineTypePlant()

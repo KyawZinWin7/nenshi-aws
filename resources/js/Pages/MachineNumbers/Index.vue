@@ -2,14 +2,27 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import AdminLayout from '../Components/AdminLayout.vue';
+import { pl } from 'element-plus/es/locales.mjs';
+import { watch, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
+
+import { debounce } from 'lodash-es';
 
 
-
-defineProps({
+const props = defineProps({
     machineNumbers: {
         type: Object,
         required: true,
     },
+    plants: {
+        type: Object,
+        required: true,
+    },
+    filters: {
+        type: Object,
+        required: false,
+    },
+
 });
 
 
@@ -36,6 +49,25 @@ const deleteMachineNumber = (machinenumberId) => {
 
 
 
+/* Filter by Plant */
+
+const selectedPlantType = ref(props.filters.plant_id ?? 'all');
+
+watch(
+    () => selectedPlantType.value,
+    debounce((val) => {
+        const query = {};
+
+        if (val !== 'all') {
+            query.plant_id = val;
+        }
+
+        router.get(route('machinenumbers.index'), query, {
+            preserveState: true,
+            replace: true,
+        });
+    }, 300)
+);
 
 </script>
 
@@ -65,7 +97,20 @@ const deleteMachineNumber = (machinenumberId) => {
                             </Link>
                         </div>
                     </div>
+                    
+                    <!--  Machine Type Radio -->
+                    <div class="flex flex-wrap items-center gap-2 mt-3 text-sm font-semibold">
+                        <label class="flex mr-4 items-center">
+                            <input type="radio" value="all" v-model="selectedPlantType" class="mr-2" />
+                            すべて
+                        </label>
 
+                        <label v-for="plant in plants.data" :key="plant.id"
+                            class="flex mr-4 items-center">
+                            <input type="radio" :value="plant.id" v-model="selectedPlantType" class="mr-2" />
+                            {{ plant.name }}
+                        </label>
+                    </div>
 
 
                     <div class="mt-8 flex flex-col">
@@ -95,6 +140,11 @@ const deleteMachineNumber = (machinenumberId) => {
                                                     機械番号
                                                 </th>
 
+                                                 <th scope="col"
+                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                                    自動停止時間
+                                                </th>
+
                                                
 
 
@@ -117,6 +167,11 @@ const deleteMachineNumber = (machinenumberId) => {
                                                 <td
                                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                                     {{ machineNumber.number }}
+                                                </td>
+
+                                                 <td
+                                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                                    {{ machineNumber.auto_stop_hours }}
                                                 </td>
 
                                                 <td

@@ -2,7 +2,7 @@
 import { Head, useForm } from '@inertiajs/vue3'
 import Container from '../../Components/Container.vue'
 import PrimaryBtn from '../../Components/PrimaryBtn.vue'
-import { ref, onMounted, watch,onUnmounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import { router } from '@inertiajs/vue3'
@@ -52,35 +52,15 @@ watch(
 
 
 /* ================= GLOBAL CLICK (MENU CLOSE) ================= */
-// onMounted(() => {
-//     window.addEventListener('click', () => {
-//         sizingoperations.value.forEach(op => {
-//             op.menu = false
-//         })
-//     })
-// })
-
-// onMounted(() => {
-//     window.addEventListener('click', () => {
-//         showFilter.value = false
-//     })
-// })
-
-
 onMounted(() => {
-    const handleClick = () => {
+    window.addEventListener('click', () => {
         sizingoperations.value.forEach(op => {
             op.menu = false
         })
-        showFilter.value = false
-    }
-
-    window.addEventListener('click', handleClick)
-
-    onUnmounted(() => {
-        window.removeEventListener('click', handleClick)
     })
 })
+
+
 
 
 
@@ -150,7 +130,7 @@ watch(
     [search, selectedMachineType, selectedTasks],
     debounce(() => {
         router.get(
-            route('sizingoperations.completelist'),
+            route('nenshioperations.completelist'),
             {
                 search: search.value || null,
                 machine_type_id:
@@ -171,7 +151,11 @@ watch(
 
 
 /* ================= CLICK OUTSIDE ================= */
-
+onMounted(() => {
+    window.addEventListener('click', () => {
+        showFilter.value = false
+    })
+})
 </script>
 
 <template>

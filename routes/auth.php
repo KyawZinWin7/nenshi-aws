@@ -15,6 +15,7 @@ use App\Http\Controllers\SizingLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MachineStatusController;
 use App\Http\Controllers\MachineOperationHourController;
+use App\Http\Controllers\NenshiOperationController;
 
 
 
@@ -113,6 +114,17 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/smalltasks/by-machine-type', [SmallTaskController::class, 'getSmallTasksByMachineType']);
     Route::delete('/{id}', [MainOperationController::class, 'destroy'])->name('mainoperations.destroy');
+
+
+
+    //For Nenshi Operation
+    Route::get('/nenshioperations', [NenshiOperationController::class, 'index'])->name('nenshioperations');
+    Route::post('/nenshioperations', [NenshiOperationController::class, 'store'])->name('nenshioperations.store');
+    Route::get('/nenshicompletelist', [NenshiOperationController::class, 'completelist'])->name('nenshioperations.completelist');
+    Route::get('/nenshiadmincompletelist', [NenshiOperationController::class, 'admincompletelist'])->name('nenshioperations.admincompletelist');
+    
+
+
 
     //----------------Admin Routes----------------
     Route::middleware('admin')->group(function () {

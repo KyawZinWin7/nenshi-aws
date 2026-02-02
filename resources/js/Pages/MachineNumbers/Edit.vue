@@ -8,8 +8,9 @@ const props = defineProps({
   machineTypes: Object,
   plants: Object,
   machinenumber: Object,
-  startNumber: Number,
-  endNumber: Number,
+  // startNumber: Number,
+  // endNumber: Number,
+  autoStopHours: Number,
 })
 
 let machinenumber = usePage().props.machinenumber.data;
@@ -19,8 +20,9 @@ const form = useForm({
 
   machine_type_id: machinenumber.machine_type_plant_id.machine_type_id.id,
   plant_id: machinenumber.machine_type_plant_id.plant_id.id,
-  start_number: props.startNumber,
-  end_number: props.endNumber,
+  start_number: machinenumber.number,
+  // end_number: props.endNumber,
+  auto_stop_hours: machinenumber.auto_stop_hours,
 })
 
 
@@ -110,15 +112,27 @@ const updateMachineNumber = () => {
                     class="mt-1 block w-full border  rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <p v-if="form.errors.start_number" class="text-red-500 text-xs mt-1">{{ form.errors.start_number }}</p>
                 </div>
-                <div class="flex-1">
+                <!-- <div class="flex-1">
                   <label for="end_number" class="block text-sm font-medium text-gray-700">終了番号</label>
                   <input type="number" v-model="form.end_number" id="end_number"
                     class="mt-1 block w-full border  rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     
                      <p v-if="form.errors.end_number" class="text-red-500 text-xs mt-1">{{ form.errors.end_number }}</p>
-                </div>
+                </div> -->
               </div>
               <!-- End Number Range -->
+
+               <!--Start Machine Hour-->
+              <div>
+                <label for="auto_stop_hours" class="block text-sm font-medium text-gray-700">自動停止時間</label>
+                <input type="number" v-model="form.auto_stop_hours" id="auto_stop_hours"
+                  class="mt-1 block w-full border  rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+
+                <p v-if="form.errors.auto_stop_hours" class="text-red-500 text-xs mt-1">{{ form.errors.auto_stop_hours
+                  }}</p>
+              </div>
+
+              <!--End Machine Hour-->
 
               <!-- ✅ Custom overlap error (from Request::after) -->
               <p v-if="form.errors.number" class="text-red-500 text-xs mt-1">{{ form.errors.number }}</p>

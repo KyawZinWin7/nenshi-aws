@@ -28,6 +28,7 @@ class StoreMachineNumberRequest extends FormRequest
             'machine_type_id' => ['required', 'exists:machine_types,id'],
             'start_number' => 'required|integer|min:1',
             'end_number' => 'required|integer|gte:start_number',
+            'auto_stop_hours' => 'nullable|integer|min:1',
         ];
     }
 
@@ -42,6 +43,9 @@ class StoreMachineNumberRequest extends FormRequest
             'start_number.required' => '開始番号を入力してください。',
             'end_number.required' => '終了番号を入力してください。',
             'end_number.gte' => '終了番号は開始番号以上である必要があります。',
+            'auto_stop_hours.integer' => '自動停止時間は整数で入力してください。',
+            'auto_stop_hours.min' => '自動停止時間は1以上で入力してください。',
+
         ];
     }
 

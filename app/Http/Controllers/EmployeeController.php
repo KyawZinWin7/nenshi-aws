@@ -12,29 +12,40 @@ use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 
+
 use App\Models\MainOperation;
 
 class EmployeeController extends Controller
 {
     
-   public function index()
+   public function index(Request $request)
    
    {
-       
-        if (auth()->user()->role === 'superadmin') {
-            // superadmin ဆိုရင် စာရင်းအကုန်ယူ
-            $employees = Employee::with('department')->get();
-            } else {
-            // superadmin မဟုတ်ရင် သူ့ department ပဲယူ
-            $employees = Employee::with('department')
-                ->where('department_id', Auth::user()->department_id)
-                ->get();
+     
+        // if (auth()->user()->role === 'superadmin') {
+        //     // superadmin ဆိုရင် စာရင်းအကုန်ယူ
+        //     $employees = Employee::with('department')->get();
+        //     } else {
+        //     // superadmin မဟုတ်ရင် သူ့ department ပဲယူ
+        //     $employees = Employee::with('department')
+        //         ->where('department_id', Auth::user()->department_id)
+        //         ->get();
+        // }
+
+        $query = Employee::with('department');
+
+        if($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
         }
 
-       
+        $employees = $query->get();
+
+        $departments = DepartmentResource::collection(Department::all());
 
         return inertia('Employees/Index', [
             'employees' => EmployeeResource::collection($employees),
+            'departments' => $departments,
+            'filters' => $request->only(['department_id']),
         ]);
    }
 
