@@ -471,18 +471,22 @@ const editResumeEmployee = async (op) => {
 
 
 };
+
+const resumeEmployeeForm = useForm({
+    resumeteam_ids: [],
+})
 const resumeDialog = ref(false)
 const openResumeModal = (op) => {
     editingId.value = op.id
     resumeDialog.value = true
     //editResumeEmployee(op)
-     form.team_ids = []
+     resumeEmployeeForm.resumeteam_ids = []
 }
 
 
 const resumeSizingOperation = async (opId) => {
     
-    axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: form.team_ids })
+    axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: resumeEmployeeForm.resumeteam_ids })
 
         .then(() => {
             Swal.fire({
@@ -775,7 +779,7 @@ const completeSizingLog = async (logId) => {
                                         </button>
                                         <!-- Resume Employee Dialog -->
                                         <el-dialog v-model="resumeDialog" title="担当者" width="400px">
-                                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
+                                            <el-select v-model="resumeEmployeeForm.resumeteam_ids" multiple placeholder="担当者を選択"
                                                 style="width: 100%">
                                                 <el-option v-for="member in teamMembers" :key="member.id"
                                                     :label="member.name" :value="member.id" />
