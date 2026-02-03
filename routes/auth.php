@@ -28,7 +28,7 @@ Route::post('/sizingoperations', [SizingOperationController::class, 'store'])->n
 Route::post('/{id}/sizingcomplete', [SizingOperationController::class, 'complete'])->name('sizingoperations.complete');
 Route::post('/{id}/sizinguncomplete', [SizingOperationController::class, 'uncomplete'])->name('sizingoperations.uncomplete');
 Route::get('/sizingcompletelist', [SizingOperationController::class, 'completelist'])->name('sizingoperations.completelist');
-Route::get('/sizingadmincompletelist', [SizingOperationController::class, 'admincompletelist'])->name('sizingoperations.admincompletelist');
+
 Route::put('/sizingoperations/{sizingoperations}', [SizingOperationController::class, 'update'])->name('sizingoperations.update');
 Route::delete('/sizingoperations/{id}', [SizingOperationController::class, 'destroy'])->name('sizingoperations.destroy');
 
@@ -121,7 +121,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/nenshioperations', [NenshiOperationController::class, 'index'])->name('nenshioperations');
     Route::post('/nenshioperations', [NenshiOperationController::class, 'store'])->name('nenshioperations.store');
     Route::get('/nenshicompletelist', [NenshiOperationController::class, 'completelist'])->name('nenshioperations.completelist');
-    Route::get('/nenshiadmincompletelist', [NenshiOperationController::class, 'admincompletelist'])->name('nenshioperations.admincompletelist');
+   
     
 
 
@@ -137,6 +137,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('machinenumbers', MachineNumberController::class);
         Route::get('/export', [MainOperationController::class, 'export'])->name('mainoperations.export');
         Route::get('/admincompletelist', [MainOperationController::class, 'admincompletelist'])->name('mainoperations.admincompletelist');
+        Route::get('/nenshiadmincompletelist', [NenshiOperationController::class, 'admincompletelist'])->name('nenshioperations.admincompletelist');
+        Route::get('/sizingadmincompletelist', [SizingOperationController::class, 'admincompletelist'])->name('sizingoperations.admincompletelist');
     });
 
 
