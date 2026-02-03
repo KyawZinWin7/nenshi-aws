@@ -102,7 +102,7 @@ Route::middleware('auth')->group(function () {
     //----------------Logout---------------- and authenticated
 
     Route::post('/logout', [AuthenticateController::class, 'destory'])->name('logout');
-    Route::get('/mainoperations', [MainOperationController::class, 'index'])->name('home');
+    // Route::get('/mainoperations', [MainOperationController::class, 'index'])->name('home');
     Route::post('/mainoperations', [MainOperationController::class, 'store'])->name('mainoperations.store');
     Route::put('/mainoperations/{mainoperation}', [MainOperationController::class, 'update'])->name('mainoperations.update');
     Route::post('/{id}/complete', [MainOperationController::class, 'complete'])->name('mainoperations.complete');

@@ -14,7 +14,7 @@ class AdminMiddleware
 
         // role မရှိတာ သို့မဟုတ် admin မဟုတ်တာဆိုရင်
         if (!$user || !in_array($user->role, ['admin', 'superadmin'])) {
-            return redirect()->route('home')->with('error', 'アクセス権限がありません。ss');
+            return redirect()->route('nenshioperations')->with('error', 'アクセス権限がありません。ss');
         }
 
 
