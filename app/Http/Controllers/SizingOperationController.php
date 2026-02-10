@@ -21,11 +21,10 @@ use App\Models\SizingOperation;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\DB;
-
 
 class SizingOperationController extends Controller
 {
@@ -463,158 +462,6 @@ class SizingOperationController extends Controller
         return back()->with('success', '作業を停止しました');
     }
 
-    // public function resume(Request $request, $id)
-    // {
-
-    //     $op = SizingOperation::with('sizinglogs')->findOrFail($id);
-
-    //     Log::info('RESUME HIT', [
-    //         'op_id' => $op->id,
-    //         'status' => $op->status,
-    //         'department' => $op->department_id,
-    //         'logs' => $op->sizinglogs->map(fn ($l) => [
-    //             'id' => $l->id,
-    //             'paused' => $l->paused_time,
-    //             'end' => $l->end_time,
-    //         ]),
-    //     ]);
-
-    //     $now = Carbon::now('Asia/Tokyo');
-
-    //     // validation
-    //     $request->validate([
-    //         'team_ids' => 'nullable|array',
-    //         'team_ids.*' => 'exists:employees,id',
-    //     ]);
-
-    //     // ===== resume operation =====
-    //     $pausedSeconds = 0;
-    //     if ($op->paused_time) {
-    //         $pausedSeconds = Carbon::parse($op->paused_time)->diffInSeconds($now);
-    //     }
-
-    //     $op->update([
-    //         'paused_seconds' => $op->paused_seconds + $pausedSeconds,
-    //         'paused_time' => null,
-    //         'last_start_time' => $now,
-    //         'status' => 'running',
-    //     ]);
-
-    //     // -------------------------------------------------
-    //     // 2. GET ACTIVE LOGS (not completed)
-    //     // -------------------------------------------------
-    //     $activeLogs = $op->sizingLogs()
-    //         ->whereNull('end_time')
-    //         ->get();
-
-    //     // -------------------------------------------------
-    //     // 3. HANDLE GUEST LOG (employee_id = NULL)
-    //     // -------------------------------------------------
-    //     foreach ($activeLogs as $log) {
-
-    //         if (! is_null($log->employee_id)) {
-    //             continue;
-    //         }
-
-    //         if ($log->paused_time) {
-    //             $paused = Carbon::parse($log->paused_time, 'Asia/Tokyo')
-    //                 ->diffInSeconds($now);
-
-    //             $log->update([
-    //                 'paused_seconds' => $log->paused_seconds + $paused,
-    //                 'paused_time' => null,
-    //                 'last_start_time' => $now,
-    //             ]);
-    //         }
-
-    //         // Guest has no team logic → skip rest
-    //         continue;
-    //     }
-
-    //     // -------------------------------------------------
-    //     // 4. TEAM-BASED LOGIC (LOGIN USERS)
-    //     // -------------------------------------------------
-    //     $teamIds = $request->input('team_ids', []);
-
-    //     // existing employee logs (exclude guest)
-    //     $existingLogs = $activeLogs
-    //         ->whereNotNull('employee_id');
-
-    //     $existingEmployeeIds = $existingLogs
-    //         ->pluck('employee_id')
-    //         ->unique()
-    //         ->toArray();
-
-    //     // -------------------------------------------------
-    //     // 4-1. COMPLETE REMOVED EMPLOYEES
-    //     // -------------------------------------------------
-    //     $removedEmployeeIds = array_diff($existingEmployeeIds, $teamIds);
-
-    //     foreach ($existingLogs as $log) {
-
-    //         if (! in_array($log->employee_id, $removedEmployeeIds)) {
-    //             continue;
-    //         }
-
-    //         $workedSeconds = $log->worked_seconds;
-
-    //         if ($log->last_start_time) {
-    //             $start = Carbon::parse($log->last_start_time, 'Asia/Tokyo');
-    //             $workedSeconds += $start->diffInSeconds($now);
-    //         }
-
-    //         $log->update([
-    //             'end_time' => $now,
-    //             'worked_seconds' => $workedSeconds,
-    //             'last_start_time' => null,
-    //             'paused_time' => null,
-    //         ]);
-    //     }
-
-    //     // -------------------------------------------------
-    //     // 4-2. RESUME REMAINING EMPLOYEES
-    //     // -------------------------------------------------
-    //     foreach ($existingLogs as $log) {
-
-    //         if (in_array($log->employee_id, $removedEmployeeIds)) {
-    //             continue;
-    //         }
-
-    //         if ($log->paused_time) {
-    //             $paused = Carbon::parse($log->paused_time, 'Asia/Tokyo')
-    //                 ->diffInSeconds($now);
-
-    //             $log->update([
-    //                 'paused_seconds' => $log->paused_seconds + $paused,
-    //                 'paused_time' => null,
-    //                 'last_start_time' => $now,
-    //             ]);
-    //         } else {
-    //             // safety: ensure running logs have start time
-    //             $log->update([
-    //                 'last_start_time' => $now,
-    //             ]);
-    //         }
-    //     }
-
-    //     // -------------------------------------------------
-    //     // 4-3. ADD NEW EMPLOYEES
-    //     // -------------------------------------------------
-    //     $newEmployeeIds = array_diff($teamIds, $existingEmployeeIds);
-
-    //     foreach ($newEmployeeIds as $employeeId) {
-    //         $op->sizingLogs()->create([
-    //             'employee_id' => $employeeId,
-    //             'start_time' => $now,
-    //             'last_start_time' => $now,
-    //             'worked_seconds' => 0,
-    //             'paused_seconds' => 0,
-    //         ]);
-    //     }
-
-    //     return back()->with('success', '作業を再開しました');
-    // }
-
     public function resume(Request $request, $operation)
     {
         return DB::transaction(function () use ($request, $operation) {
@@ -623,9 +470,9 @@ class SizingOperationController extends Controller
             $now = now();
 
             // -------------------------------------------------
-            // 0. must be paused
+            // 0. MUST BE PAUSED
             // -------------------------------------------------
-            if (! ($op->paused_time instanceof \Carbon\Carbon)) {
+            if ($op->paused_time === null) {
                 Log::warning('RESUME SKIPPED - not paused', [
                     'op_id' => $op->id,
                     'status' => $op->status,
@@ -640,18 +487,17 @@ class SizingOperationController extends Controller
             // -------------------------------------------------
             // validation
             // -------------------------------------------------
-            $request->validate([
-                'team_ids' => 'required|array',
+            $validated = $request->validate([
+                'team_ids' => 'nullable|array',
                 'team_ids.*' => 'exists:employees,id',
             ]);
 
+            $teamIds = $validated['team_ids'] ?? [];
+
             // -------------------------------------------------
-            // 1. resume operation (NULL-SAFE)
+            // 1. RESUME OPERATION
             // -------------------------------------------------
-            $pausedSeconds = 0;
-            if ($op->paused_time instanceof \Carbon\Carbon) {
-                $pausedSeconds = $op->paused_time->diffInSeconds($now);
-            }
+            $pausedSeconds = $op->paused_time->diffInSeconds($now);
 
             $op->update([
                 'paused_seconds' => ($op->paused_seconds ?? 0) + $pausedSeconds,
@@ -661,14 +507,14 @@ class SizingOperationController extends Controller
             ]);
 
             // -------------------------------------------------
-            // 2. active logs
+            // 2. ACTIVE LOGS
             // -------------------------------------------------
             $activeLogs = $op->sizingLogs()
                 ->whereNull('end_time')
                 ->get();
 
             // -------------------------------------------------
-            // 3. guest logs (employee_id = NULL)
+            // 3. GUEST LOGS (employee_id = NULL)
             // -------------------------------------------------
             foreach ($activeLogs as $log) {
 
@@ -676,7 +522,7 @@ class SizingOperationController extends Controller
                     continue;
                 }
 
-                if ($log->paused_time instanceof \Carbon\Carbon) {
+                if ($log->paused_time !== null) {
                     $paused = $log->paused_time->diffInSeconds($now);
 
                     $log->update([
@@ -688,13 +534,8 @@ class SizingOperationController extends Controller
             }
 
             // -------------------------------------------------
-            // 4. team logic
+            // 4. TEAM LOGIC
             // -------------------------------------------------
-            $teamIds = $request->input('team_ids', []);
-            if (! is_array($teamIds)) {
-                $teamIds = [];
-            }
-
             $existingLogs = $activeLogs->whereNotNull('employee_id');
             $existingEmployeeIds = $existingLogs
                 ->pluck('employee_id')
@@ -702,7 +543,7 @@ class SizingOperationController extends Controller
                 ->toArray();
 
             // -------------------------------------------------
-            // 4-1. removed employees
+            // 4-1. REMOVED EMPLOYEES
             // -------------------------------------------------
             $removedEmployeeIds = array_diff($existingEmployeeIds, $teamIds);
 
@@ -714,7 +555,7 @@ class SizingOperationController extends Controller
 
                 $workedSeconds = $log->worked_seconds ?? 0;
 
-                if ($log->last_start_time instanceof \Carbon\Carbon) {
+                if ($log->last_start_time !== null) {
                     $workedSeconds += $log->last_start_time->diffInSeconds($now);
                 }
 
@@ -727,7 +568,7 @@ class SizingOperationController extends Controller
             }
 
             // -------------------------------------------------
-            // 4-2. resume remaining employees
+            // 4-2. RESUME REMAINING EMPLOYEES
             // -------------------------------------------------
             foreach ($existingLogs as $log) {
 
@@ -735,7 +576,7 @@ class SizingOperationController extends Controller
                     continue;
                 }
 
-                if ($log->paused_time instanceof \Carbon\Carbon) {
+                if ($log->paused_time !== null) {
                     $paused = $log->paused_time->diffInSeconds($now);
 
                     $log->update([
@@ -751,7 +592,7 @@ class SizingOperationController extends Controller
             }
 
             // -------------------------------------------------
-            // 4-3. add new employees
+            // 4-3. ADD NEW EMPLOYEES
             // -------------------------------------------------
             $newEmployeeIds = array_diff($teamIds, $existingEmployeeIds);
 
