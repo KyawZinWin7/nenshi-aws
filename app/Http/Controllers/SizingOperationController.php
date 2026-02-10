@@ -32,8 +32,7 @@ class SizingOperationController extends Controller
         $sizingoperations = SizingOperationResource::collection(
             SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
                 ->where('department_id', 2) // Sizing Department ID
-                ->where('status', 'running')
-                ->orWhere('status', 'paused')
+                ->whereIn('status', ['running', 'paused'])
                 ->orderBy('created_at', 'desc')
                 ->get()
         );
@@ -465,6 +464,12 @@ class SizingOperationController extends Controller
     {
         $op = SizingOperation::findOrFail($id);
 
+        $now = Carbon::now('Asia/Tokyo');
+        
+        Log::info('RESUME HIT', [
+            'op_id' => $id,
+            'team_ids' => $request->team_ids,
+        ]);
         // -------------------------------------------------
         // 0. Validation
         // -------------------------------------------------
@@ -473,16 +478,17 @@ class SizingOperationController extends Controller
             'team_ids.*' => 'exists:employees,id',
         ]);
 
-    
-
-        $now = Carbon::now('Asia/Tokyo');
+        
 
         // -------------------------------------------------
         // 1. RESUME OPERATION
         // -------------------------------------------------
-        $pausedSeconds = Carbon::parse($op->paused_time, 'Asia/Tokyo')
-            ->diffInSeconds($now);
+        $pausedSeconds = 0;
 
+        if ($op->paused_time) {
+            $pausedSeconds = Carbon::parse($op->paused_time, 'Asia/Tokyo')
+                ->diffInSeconds($now);
+        }
         $op->update([
             'paused_seconds' => $op->paused_seconds + $pausedSeconds,
             'paused_time' => null,
