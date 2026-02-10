@@ -667,7 +667,7 @@ const deleteSizingLog = async (logId) => {
                                             class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
                                             止
                                         </button>
-                                        <button v-if="op.status === 'paused'" @click="openResumeModal(op)"
+                                        <button v-if="op.status === 'paused'" @click.stop="openResumeModal(op)"
                                             class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
                                             再開
                                         </button>
