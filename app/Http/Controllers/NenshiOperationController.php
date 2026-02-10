@@ -36,8 +36,7 @@ class NenshiOperationController extends Controller
         $sizingoperations = SizingOperationResource::collection(
             SizingOperation::with(['plant', 'machineType', 'task', 'smallTask', 'employee', 'department', 'machineNumber', 'sizingLogs.employee'])
                 ->where('department_id', 1) // Nenshi Department ID
-                ->where('status', 'running')
-                ->orWhere('status', 'paused')
+                ->where('status', ['running', 'paused'])
                 ->orderBy('created_at', 'desc')
                 ->get()
         );
