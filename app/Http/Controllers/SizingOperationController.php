@@ -465,11 +465,8 @@ class SizingOperationController extends Controller
         $op = SizingOperation::findOrFail($id);
 
         $now = Carbon::now('Asia/Tokyo');
-        
-        Log::info('RESUME HIT', [
-            'op_id' => $id,
-            'team_ids' => $request->team_ids,
-        ]);
+
+       
         // -------------------------------------------------
         // 0. Validation
         // -------------------------------------------------
