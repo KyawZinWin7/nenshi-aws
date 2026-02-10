@@ -473,9 +473,7 @@ class SizingOperationController extends Controller
             'team_ids.*' => 'exists:employees,id',
         ]);
 
-        // if ($op->status !== 'paused' || is_null($op->paused_time)) {
-        //     return back();
-        // }
+    
 
         $now = Carbon::now('Asia/Tokyo');
 
