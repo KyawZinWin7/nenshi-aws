@@ -471,7 +471,7 @@ class SizingOperationController extends Controller
         // 0. Validation
         // -------------------------------------------------
         $request->validate([
-            'team_ids' => 'required|array',
+            'team_ids' => 'nullable|array',
             'team_ids.*' => 'exists:employees,id',
         ]);
 

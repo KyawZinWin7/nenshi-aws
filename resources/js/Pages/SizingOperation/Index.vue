@@ -25,8 +25,8 @@ const form = useForm({
     task_id: '',
 })
 
-
-
+/* ================= TEAM ================= */
+const teamMembers = ref(props.employees.data || [])
 /* ================= LOCAL COPY (IMPORTANT) ================= */
 /* ❌ props ကို မထိ
    ✅ local ref ထုတ်ပြီး show/menu ထည့် */
@@ -202,8 +202,7 @@ watch(
     }
 )
 
-/* ================= TEAM ================= */
-const teamMembers = ref(props.employees.data || [])
+
 
 
 /* ================= COMPLETE LOG ================= */
