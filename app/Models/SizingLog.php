@@ -18,9 +18,12 @@ class SizingLog extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
-    ];
+    'start_time' => 'datetime',
+    'end_time' => 'datetime',
+    'paused_time' => 'datetime',
+    'last_start_time' => 'datetime',
+];
+
 
 
     public function sizingOperation()
