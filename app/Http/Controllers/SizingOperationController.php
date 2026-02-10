@@ -613,12 +613,13 @@ class SizingOperationController extends Controller
     //     return back()->with('success', '作業を再開しました');
     // }
 
-    public function resume(Request $request, $id)
+    public function resume(Request $request, $operation)
     {
         // 반드시 relation name 는 sizingLogs
-        $op = SizingOperation::with('sizingLogs')->findOrFail($id);
+        $op = SizingOperation::with('sizingLogs')->findOrFail($operation);
 
-        $now = Carbon::now('Asia/Tokyo');
+        // Laravel timezone-safe Carbon instance
+        $now = now();
 
         // -------------------------------------------------
         // 0. GUARD: already running + active log exists
@@ -663,7 +664,7 @@ class SizingOperationController extends Controller
         $pausedSeconds = 0;
 
         if ($op->paused_time) {
-            $pausedSeconds = Carbon::parse($op->paused_time, 'Asia/Tokyo')
+            $pausedSeconds = Carbon::parse($op->paused_time)
                 ->diffInSeconds($now);
         }
 
@@ -691,7 +692,7 @@ class SizingOperationController extends Controller
             }
 
             if ($log->paused_time) {
-                $paused = Carbon::parse($log->paused_time, 'Asia/Tokyo')
+                $paused = Carbon::parse($log->paused_time)
                     ->diffInSeconds($now);
 
                 $log->update([
@@ -728,10 +729,8 @@ class SizingOperationController extends Controller
             $workedSeconds = $log->worked_seconds ?? 0;
 
             if ($log->last_start_time) {
-                $workedSeconds += Carbon::parse(
-                    $log->last_start_time,
-                    'Asia/Tokyo'
-                )->diffInSeconds($now);
+                $workedSeconds += Carbon::parse($log->last_start_time)
+                    ->diffInSeconds($now);
             }
 
             $log->update([
@@ -752,7 +751,7 @@ class SizingOperationController extends Controller
             }
 
             if ($log->paused_time) {
-                $paused = Carbon::parse($log->paused_time, 'Asia/Tokyo')
+                $paused = Carbon::parse($log->paused_time)
                     ->diffInSeconds($now);
 
                 $log->update([
