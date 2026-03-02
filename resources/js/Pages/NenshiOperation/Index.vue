@@ -480,12 +480,12 @@ const openResumeModal = (op) => {
     editingId.value = op.id
     resumeDialog.value = true
     //editResumeEmployee(op)
-     resumeEmployeeForm.resumeteam_ids = []
+    resumeEmployeeForm.resumeteam_ids = []
 }
 
 
 const resumeSizingOperation = async (opId) => {
-    
+
     axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: resumeEmployeeForm.resumeteam_ids })
 
         .then(() => {
@@ -512,7 +512,7 @@ const resumeSizingLog = async (logId) => {
         cancelButtonText: 'キャンセル',
     })
     if (!result.isConfirmed) return
-    
+
     axios.post(route('sizinglogs.resume', { log: logId }))
         .then(() => {
             Swal.fire({
@@ -602,7 +602,7 @@ const completeSizingLog = async (logId) => {
                 <Container>
                     <form @submit.prevent="submitForm" class="space-y-4">
                         <h3 class="text-lg font-semibold mb-4 text-center">
-                            撚糸課
+                            撚糸課 Docker
                         </h3>
                         <div>
                             <label class="form-label">担当者</label>
@@ -779,8 +779,8 @@ const completeSizingLog = async (logId) => {
                                         </button>
                                         <!-- Resume Employee Dialog -->
                                         <el-dialog v-model="resumeDialog" title="担当者" width="400px">
-                                            <el-select v-model="resumeEmployeeForm.resumeteam_ids" multiple placeholder="担当者を選択"
-                                                style="width: 100%">
+                                            <el-select v-model="resumeEmployeeForm.resumeteam_ids" multiple
+                                                placeholder="担当者を選択" style="width: 100%">
                                                 <el-option v-for="member in teamMembers" :key="member.id"
                                                     :label="member.name" :value="member.id" />
                                             </el-select>
