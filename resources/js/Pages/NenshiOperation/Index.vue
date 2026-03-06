@@ -602,7 +602,7 @@ const completeSizingLog = async (logId) => {
                 <Container>
                     <form @submit.prevent="submitForm" class="space-y-4">
                         <h3 class="text-lg font-semibold mb-4 text-center">
-                            撚糸課 Docker
+                            撚糸課
                         </h3>
                         <div>
                             <label class="form-label">担当者</label>
