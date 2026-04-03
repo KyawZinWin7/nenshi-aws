@@ -27,9 +27,7 @@ const form = useForm({
 
 /* ================= TEAM ================= */
 const teamMembers = ref(props.employees.data || [])
-/* ================= LOCAL COPY (IMPORTANT) ================= */
-/* ❌ props ကို မထိ
-   ✅ local ref ထုတ်ပြီး show/menu ထည့် */
+
 const sizingoperations = ref([])
 
 watch(
@@ -356,7 +354,7 @@ const resumeSizingLog = async (logId) => {
         cancelButtonText: 'キャンセル',
     })
     if (!result.isConfirmed) return
-    
+
     axios.post(route('sizinglogs.resume', { log: logId }))
         .then(() => {
             Swal.fire({
@@ -402,10 +400,14 @@ const openResumeModal = (op) => {
 
 
 const resumeSizingOperation = async (opId) => {
-    
-    axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: resumeEmployeeForm.resumeteam_ids })
 
-        .then(() => {
+    axios.post(
+        route('sizingoperations.resume', { operation: opId }),
+        { team_ids: resumeEmployeeForm.resumeteam_ids }
+    )
+        .then(res => {
+            console.log(res.data)
+
             Swal.fire({
                 icon: 'success',
                 title: '作業を再開しました',
@@ -414,6 +416,15 @@ const resumeSizingOperation = async (opId) => {
             })
 
             location.reload()
+        })
+        .catch(err => {
+            console.log(err.response)
+
+            Swal.fire({
+                icon: 'error',
+                title: 'エラー',
+                text: 'Resume failed',
+            })
         })
 }
 
@@ -532,8 +543,8 @@ const deleteSizingLog = async (logId) => {
                         </h3>
                         <div>
                             <label class="form-label">担当者</label>
-                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択"
-                                class="select-uniform !p-0" :disabled="isEditing">
+                            <el-select v-model="form.team_ids" multiple placeholder="担当者を選択" class="select-uniform !p-0"
+                                :disabled="isEditing">
                                 <el-option v-for="member in teamMembers" :key="member.id" :label="member.name"
                                     :value="member.id" />
                             </el-select>
@@ -671,8 +682,8 @@ const deleteSizingLog = async (logId) => {
                                             再開
                                         </button>
                                         <el-dialog v-model="resumeDialog" title="担当者" width="400px">
-                                            <el-select v-model="resumeEmployeeForm.resumeteam_ids" multiple placeholder="担当者を選択"
-                                                style="width: 100%">
+                                            <el-select v-model="resumeEmployeeForm.resumeteam_ids" multiple
+                                                placeholder="担当者を選択" style="width: 100%">
                                                 <el-option v-for="member in teamMembers" :key="member.id"
                                                     :label="member.name" :value="member.id" />
                                             </el-select>
@@ -682,7 +693,8 @@ const deleteSizingLog = async (logId) => {
                                                     キャンセル
                                                 </el-button>
 
-                                                <el-button type="primary" @click.stop="resumeSizingOperation(op.id)">
+                                                <el-button type="primary"
+                                                    @click.stop="resumeSizingOperation(editingId)">
                                                     再開
                                                 </el-button>
                                             </template>
@@ -696,7 +708,7 @@ const deleteSizingLog = async (logId) => {
                                             削除
                                         </button>
 
-                                       
+
                                     </div>
                                 </td>
                             </tr>
@@ -723,7 +735,7 @@ const deleteSizingLog = async (logId) => {
                                                 <td class="border text-sm p-1">
                                                     {{ log.end_time ?? log.paused_time ?? '-' }}
                                                 </td>
-                                                
+
                                                 <td class="border text-sm p-1">
                                                     {{ (log.end_time || log.paused_time) ? log.duration_per_employee :
                                                         '-' }}
@@ -739,13 +751,15 @@ const deleteSizingLog = async (logId) => {
                                                         v-if="!log.end_time && log.last_start_time">
                                                         完了
                                                     </button>
-                                                    <button v-if="op.status === 'running' && !log.paused_time && !log.end_time"
+                                                    <button
+                                                        v-if="op.status === 'running' && !log.paused_time && !log.end_time"
                                                         @click.stop="stopSizingLog(log.id)"
                                                         class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
                                                         止
                                                     </button>
 
-                                                    <button v-if="log.paused_time && op.status === 'running'" @click.stop="resumeSizingLog(log.id)"
+                                                    <button v-if="log.paused_time && op.status === 'running'"
+                                                        @click.stop="resumeSizingLog(log.id)"
                                                         class="m-1 bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">
                                                         再開
                                                     </button>

@@ -122,30 +122,6 @@ watch(
     }
 )
 
-//For Small task filter by machine type
-// watch(
-//     () => form.machine_type_id,
-//     async (newTypeId) => {
-//         if (!newTypeId) {
-//             smalltasks.value = [];
-//             if (!isEditing.value) form.small_task_id = "";
-//             return;
-//         }
-
-//         try {
-//             const response = await axios.get(`/smalltasks/by-machine-type`, {
-//                 params: { machine_type_id: newTypeId }
-//             });
-//             smalltasks.value = response.data;
-
-//             if (!isEditing.value) form.small_task_id = "";
-//         } catch (error) {
-//             console.error("Error fetching small tasks:", error);
-//         }
-//     }
-// );
-
-
 
 const sizingoperations = ref([])
 
@@ -160,17 +136,6 @@ watch(
     },
     { immediate: true }
 )
-
-
-/* ================= SUBMIT FORM ================= */
-// GLOBAL CLICK (MENU CLOSE) 
-// onMounted(() => {
-//     window.addEventListener('click', () => {
-//         sizingoperations.value.forEach(op => {
-//             op.menu = false
-//         })
-//     })
-// })
 
 
 
@@ -285,7 +250,7 @@ const completeSMO = async (opId) => {
 
     //Complete sizing operation directly
 
-    completeForm.post(route('sizingoperations.complete', { id: opId }), {
+    completeForm.post(route('nenshioperations.complete', { id: opId }), {
         onSuccess: () => {
             Swal.fire({
                 position: 'top-end',
@@ -321,7 +286,7 @@ const deleteSizingOperation = async (opId) => {
 
     if (!result.isConfirmed) return
 
-    deleteForm.delete(route("sizingoperations.destroy", opId), {
+    deleteForm.delete(route("nenshioperations.destroy", opId), {
         onSuccess: () => {
             Swal.fire({
                 icon: "success",
@@ -374,7 +339,7 @@ const confirmAddEmployees = () => {
     addEmployeeForm.employee_ids = selectedEmployeeIds.value
 
     addEmployeeForm.post(
-        route('sizingoperations.addEmployees', { id: editingId.value }),
+        route('nenshioperations.addEmployees', { id: editingId.value }),
         {
             onSuccess: () => {
                 Swal.fire({
@@ -414,7 +379,7 @@ const stopSizingOperation = async (opId) => {
 
     if (!confirm.isConfirmed) return
 
-    axios.post(route('sizingoperations.stop', { operation: opId }))
+    axios.post(route('nenshioperations.stop', { operation: opId }))
         .then(() => {
             Swal.fire({
                 icon: 'success',
@@ -438,7 +403,7 @@ const stopSizingLog = async (logId) => {
     })
 
     if (!result.isConfirmed) return
-    axios.post(route('sizinglogs.stop', { log: logId }))
+    axios.post(route('nenshilogs.stop', { log: logId }))
         .then(() => {
             Swal.fire({
                 icon: 'success',
@@ -486,7 +451,7 @@ const openResumeModal = (op) => {
 
 const resumeSizingOperation = async (opId) => {
     
-    axios.post(route('sizingoperations.resume', { operation: opId }), { team_ids: resumeEmployeeForm.resumeteam_ids })
+    axios.post(route('nenshioperations.resume', { operation: opId }), { team_ids: resumeEmployeeForm.resumeteam_ids })
 
         .then(() => {
             Swal.fire({
@@ -513,7 +478,7 @@ const resumeSizingLog = async (logId) => {
     })
     if (!result.isConfirmed) return
     
-    axios.post(route('sizinglogs.resume', { log: logId }))
+    axios.post(route('nenshilogs.resume', { log: logId }))
         .then(() => {
             Swal.fire({
                 icon: 'success',
@@ -540,7 +505,7 @@ const deleteSizingLog = async (logId) => {
         cancelButtonText: 'キャンセル',
     })
     if (!result.isConfirmed) return
-    deleteForm.delete(route("sizinglogs.destroy", logId), {
+    deleteForm.delete(route("nenshilogs.destroy", logId), {
         onSuccess: () => {
             Swal.fire({
                 icon: "success",
@@ -573,7 +538,7 @@ const completeSizingLog = async (logId) => {
 
     if (!result.isConfirmed) return
 
-    axios.post(route('sizinglogs.complete', logId))
+    axios.post(route('nenshilogs.complete', logId))
         .then(() => {
             Swal.fire({
                 icon: 'success',

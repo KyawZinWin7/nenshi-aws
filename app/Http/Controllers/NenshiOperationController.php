@@ -26,6 +26,8 @@ use App\Models\SmallTask;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 class NenshiOperationController extends Controller
@@ -91,6 +93,360 @@ class NenshiOperationController extends Controller
         }
 
         return redirect()->back()->with('success', 'Sizing operation started');
+    }
+
+    public function update(UpdateSizingOperationRequest $request, $id)
+    {
+        $operation = SizingOperation::with('sizingLogs')->findOrFail($id);
+
+        $data = $request->validated();
+
+        $operation->update([
+            'plant_id' => $data['plant_id'],
+            'machine_type_id' => $data['machine_type_id'],
+            'machine_number_id' => $data['machine_number_id'],
+            'task_id' => $data['task_id'],
+            'small_task_id' => $data['small_task_id'] ?? null,
+        ]);
+
+        $newTeamIds = collect($request->team_ids ?? []);
+
+        $existingLogs = $operation->sizingLogs;
+        $existingEmployeeIds = $existingLogs->pluck('employee_id');
+
+        // delete logs for removed employees
+        $logsToDelete = $existingLogs->whereNotIn('employee_id', $newTeamIds);
+        foreach ($logsToDelete as $log) {
+            $log->delete();
+        }
+
+        // add logs for new employees
+        $employeesToAdd = $newTeamIds->diff($existingEmployeeIds);
+        foreach ($employeesToAdd as $employeeId) {
+            SizingLog::create([
+                'sizing_operation_id' => $operation->id,
+                'employee_id' => $employeeId,
+                'start_time' => now(),
+                'last_start_time' => now(),
+                'worked_seconds' => 0,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Nenshi operation updated');
+    }
+
+    public function complete($id)
+    {
+        $op = SizingOperation::findOrFail($id);
+        $now = Carbon::now('Asia/Tokyo');
+
+        if ($op->status === 'completed') {
+            return back();
+        }
+
+        $workedSeconds = $op->worked_seconds;
+
+        if ($op->status === 'running' && $op->last_start_time) {
+            $start = Carbon::parse($op->last_start_time, 'Asia/Tokyo');
+            if ($start->lte($now)) {
+                $workedSeconds += $start->diffInSeconds($now);
+            }
+        }
+
+        $endTime = $op->status === 'paused'
+            ? $op->paused_time
+            : $now;
+
+        $op->update([
+            'status' => 'completed',
+            'end_time' => $endTime,
+            'worked_seconds' => $workedSeconds,
+            'last_start_time' => null,
+        ]);
+
+        $logs = SizingLog::where('sizing_operation_id', $op->id)
+            ->whereNull('end_time')
+            ->get();
+
+        foreach ($logs as $log) {
+            $worked = $log->worked_seconds;
+
+            if ($log->last_start_time) {
+                $start = Carbon::parse($log->last_start_time, 'Asia/Tokyo');
+                if ($start->lte($now)) {
+                    $worked += $start->diffInSeconds($now);
+                }
+            }
+
+            $log->update([
+                'worked_seconds' => $worked,
+                'last_start_time' => null,
+                'end_time' => $endTime,
+            ]);
+        }
+
+        return back()->with('success', 'Nenshi operation completed');
+    }
+
+    public function uncomplete($id)
+    {
+        $op = SizingOperation::findOrFail($id);
+        $now = Carbon::now('Asia/Tokyo');
+
+        if ($op->status !== 'completed') {
+            return back();
+        }
+
+        $oldEndTime = $op->end_time;
+
+        $op->update([
+            'status' => 'running',
+            'end_time' => null,
+            'last_start_time' => $now,
+        ]);
+
+        $logs = SizingLog::where('sizing_operation_id', $op->id)
+            ->where('end_time', $oldEndTime)
+            ->get();
+
+        foreach ($logs as $log) {
+            $log->update([
+                'end_time' => null,
+                'last_start_time' => $now,
+            ]);
+        }
+
+        return back()->with('success', 'Nenshi operation uncompleted and running');
+    }
+
+    public function addEmployees(Request $request, $id)
+    {
+        $request->validate([
+            'employee_ids' => ['required', 'array'],
+            'employee_ids.*' => ['exists:employees,id'],
+        ]);
+
+        $operation = SizingOperation::findOrFail($id);
+        $now = now();
+
+        foreach ($request->employee_ids as $employeeID) {
+            $exists = SizingLog::where('sizing_operation_id', $operation->id)
+                ->where('employee_id', $employeeID)
+                ->whereNull('end_time')
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
+            $data = [
+                'sizing_operation_id' => $operation->id,
+                'employee_id' => $employeeID,
+                'worked_seconds' => 0,
+                'paused_seconds' => 0,
+            ];
+
+            if ($operation->status === 'running') {
+                $data['start_time'] = $now;
+                $data['last_start_time'] = $now;
+                $data['paused_at'] = null;
+            } else {
+                $data['start_time'] = $now;
+                $data['last_start_time'] = null;
+                $data['paused_at'] = $now;
+            }
+
+            SizingLog::create($data);
+        }
+
+        return back()->with('success', 'Employees added');
+    }
+
+    public function resume(Request $request, $operation)
+    {
+        return DB::transaction(function () use ($request, $operation) {
+            $op = SizingOperation::with('sizingLogs')->findOrFail($operation);
+            $now = now();
+
+            if ($op->paused_time === null) {
+                Log::warning('RESUME SKIPPED - not paused', [
+                    'op_id' => $op->id,
+                    'status' => $op->status,
+                    'paused_time' => $op->paused_time,
+                ]);
+
+                return response()->json([
+                    'message' => 'Operation is not paused',
+                ], 200);
+            }
+
+            $validated = $request->validate([
+                'team_ids' => 'nullable|array',
+                'team_ids.*' => 'exists:employees,id',
+            ]);
+
+            $teamIds = $validated['team_ids'] ?? [];
+
+            $pausedSeconds = $op->paused_time->diffInSeconds($now);
+
+            $op->update([
+                'paused_seconds' => ($op->paused_seconds ?? 0) + $pausedSeconds,
+                'paused_time' => null,
+                'last_start_time' => $now,
+                'status' => 'running',
+            ]);
+
+            $activeLogs = $op->sizingLogs()
+                ->whereNull('end_time')
+                ->get();
+
+            foreach ($activeLogs as $log) {
+                if ($log->employee_id !== null) {
+                    continue;
+                }
+
+                if ($log->paused_time !== null) {
+                    $paused = $log->paused_time->diffInSeconds($now);
+
+                    $log->update([
+                        'paused_seconds' => ($log->paused_seconds ?? 0) + $paused,
+                        'paused_time' => null,
+                        'last_start_time' => $now,
+                    ]);
+                }
+            }
+
+            $existingLogs = $activeLogs->whereNotNull('employee_id');
+            $existingEmployeeIds = $existingLogs
+                ->pluck('employee_id')
+                ->unique()
+                ->toArray();
+
+            $removedEmployeeIds = array_diff($existingEmployeeIds, $teamIds);
+
+            foreach ($existingLogs as $log) {
+                if (! in_array($log->employee_id, $removedEmployeeIds)) {
+                    continue;
+                }
+
+                $workedSeconds = $log->worked_seconds ?? 0;
+
+                if ($log->last_start_time !== null) {
+                    $workedSeconds += $log->last_start_time->diffInSeconds($now);
+                }
+
+                $log->update([
+                    'end_time' => $now,
+                    'worked_seconds' => $workedSeconds,
+                    'last_start_time' => null,
+                    'paused_time' => null,
+                ]);
+            }
+
+            foreach ($existingLogs as $log) {
+                if (in_array($log->employee_id, $removedEmployeeIds)) {
+                    continue;
+                }
+
+                if ($log->paused_time !== null) {
+                    $paused = $log->paused_time->diffInSeconds($now);
+
+                    $log->update([
+                        'paused_seconds' => ($log->paused_seconds ?? 0) + $paused,
+                        'paused_time' => null,
+                        'last_start_time' => $now,
+                    ]);
+                } else {
+                    $log->update([
+                        'last_start_time' => $now,
+                    ]);
+                }
+            }
+
+            $newEmployeeIds = array_diff($teamIds, $existingEmployeeIds);
+
+            foreach ($newEmployeeIds as $employeeId) {
+                $op->sizingLogs()->create([
+                    'employee_id' => $employeeId,
+                    'start_time' => $now,
+                    'last_start_time' => $now,
+                    'worked_seconds' => 0,
+                    'paused_seconds' => 0,
+                ]);
+            }
+
+            return response()->json([
+                'message' => '作業を再開しました',
+            ], 200);
+        });
+    }
+
+    public function stop($id)
+    {
+        $op = SizingOperation::findOrFail($id);
+
+        // guard
+        if ($op->status !== 'running' || empty($op->last_start_time)) {
+            return back();
+        }
+
+        $now = now();
+        $start = Carbon::parse($op->last_start_time);
+
+        if ($start->greaterThan($now)) {
+            return back()->with('error', '時間エラー');
+        }
+
+        // --- Operation ---
+        $worked = $start->diffInSeconds($now);
+
+        $op->update([
+            'worked_seconds' => $op->worked_seconds + $worked,
+            'last_start_time' => null,
+            'status' => 'paused',
+            'paused_time' => $now,
+
+        ]);
+
+        // --- Logs (running ones only) ---
+        $logs = SizingLog::where('sizing_operation_id', $op->id)
+            ->whereNotNull('last_start_time')
+            ->get();
+
+        foreach ($logs as $log) {
+            $logStart = Carbon::parse($log->last_start_time);
+
+            if ($logStart->greaterThan($now)) {
+                continue; // safety
+            }
+
+            $logWorked = $logStart->diffInSeconds($now);
+
+            $log->update([
+                'worked_seconds' => $log->worked_seconds + $logWorked,
+                'last_start_time' => null,
+                'paused_time' => $now,
+                // 'end_time' => $now,
+
+            ]);
+        }
+
+        return back()->with('success', '作業を停止しました');
+    }
+
+
+    public function destroy($id)
+    {
+        $operation = SizingOperation::findOrFail($id);
+
+        if ($operation->status === 'completed') {
+            return back()->with('error', 'Completed operations cannot be deleted.');
+        }
+
+        SizingLog::where('sizing_operation_id', $operation->id)->delete();
+        $operation->delete();
+
+        return back()->with('success', 'Sizing operation deleted successfully.');
     }
 
 

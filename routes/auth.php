@@ -67,11 +67,6 @@ Route::post(
 
 
 Route::post(
-    '/sizingoperations/{operation}/stop',
-    [SizingOperationController::class, 'stop']
-)->name('sizingoperations.stop');
-
-Route::post(
     '/sizingoperations/{operation}/resume',
     [SizingOperationController::class, 'resume']
 )->name('sizingoperations.resume');
@@ -121,6 +116,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/nenshioperations', [NenshiOperationController::class, 'index'])->name('nenshioperations');
     Route::post('/nenshioperations', [NenshiOperationController::class, 'store'])->name('nenshioperations.store');
     Route::get('/nenshicompletelist', [NenshiOperationController::class, 'completelist'])->name('nenshioperations.completelist');
+   
+    // Nenshi operation actions
+    Route::put('/nenshioperations/{nenshioperation}', [NenshiOperationController::class, 'update'])->name('nenshioperations.update');
+    Route::delete('/nenshioperations/{id}', [NenshiOperationController::class, 'destroy'])->name('nenshioperations.destroy');
+    Route::post('/nenshioperations/{id}/complete', [NenshiOperationController::class, 'complete'])->name('nenshioperations.complete');
+    Route::post('/nenshioperations/{id}/uncomplete', [NenshiOperationController::class, 'uncomplete'])->name('nenshioperations.uncomplete');
+    Route::post('/nenshioperations/{id}/add-employees', [NenshiOperationController::class, 'addEmployees'])->name('nenshioperations.addEmployees');
+    Route::post('/nenshioperations/{operation}/stop', [NenshiOperationController::class, 'stop'])->name('nenshioperations.stop');
+    Route::post('/nenshioperations/{operation}/resume', [NenshiOperationController::class, 'resume'])->name('nenshioperations.resume');
+   
+
+
+    // Nenshi log actions (reuse sizing log controller)
+    Route::delete('/nenshilogs/{id}', [SizingLogController::class, 'destroy'])->name('nenshilogs.destroy');
+    Route::post('/nenshilogs/{log}/stop', [SizingLogController::class, 'stop'])->name('nenshilogs.stop');
+    Route::post('/nenshilogs/{log}/resume', [SizingLogController::class, 'resume'])->name('nenshilogs.resume');
+    Route::post('/nenshi-logs/{log}/complete', [SizingLogController::class, 'complete'])->name('nenshilogs.complete');
    
     
 
