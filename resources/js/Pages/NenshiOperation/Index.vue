@@ -193,6 +193,30 @@ const createSizingOperation = () => {
     })
 }
 
+
+/* ================= UPDATE ================= */
+const updateSizingOperation = () => {
+    form.put(route('nenshioperations.update', { id: editingId.value }), {
+        onSuccess: () => {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: '準備課が更新されました',
+                showConfirmButton: false,
+                timer: 1500,
+            })
+            cancelEdit();
+        },
+        onError: () => {
+            Swal.fire({
+                icon: 'error',
+                title: 'エラーが発生しました',
+                text: 'もう一度試してください。',
+            })
+        },
+    })
+};
+
 //For Edit Operation
 
 
@@ -270,7 +294,7 @@ const completeSMO = async (opId) => {
     })
 
 }
-
+ 
 
 /* ================= DELETE Sizing Operation ================= */
 const deleteForm = useForm({});
